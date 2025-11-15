@@ -8,158 +8,119 @@ import {
     Typography,
     IconButton,
     InputAdornment,
+    Checkbox,
+    FormControlLabel,
 } from "@mui/material";
-import EmailIcon from "@mui/icons-material/Email";
-import LockIcon from "@mui/icons-material/Lock";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import PersonIcon from "@mui/icons-material/Person";
+import LockIcon from "@mui/icons-material/Lock";
+
+import "./css/Login.css";
 
 const Login = () => {
-    const { login } = useAuth();
-    const navigate = useNavigate();
-
-    const [email, setEmail] = useState<string>("");
-    const [password, setPassword] = useState<string>("");
-    const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-
-    const validateForm = () => {
-        if (!email.trim() || !password.trim()) {
-            alert("Please enter email and password");
-            return false;
-        }
-        return true;
-    };
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!validateForm()) return;
-
-        setIsLoading(true);
-
-        // Replace with API call later
-        setTimeout(() => {
-            login("dummy-access-token"); // <-- store token
-            navigate("/dashboard");
-            setIsLoading(false);
-        }, 1000);
+        alert("Submitted");
     };
 
     return (
-        <Box
-            sx={{
-                display: "flex",
-                height: "100vh",
-                background: "#f5f5f5",
-            }}
-        >
-            {/* LEFT SECTION (you can add an image later) */}
-            <Box
-                sx={{
-                    flex: 1,
-                    background: "#1976d2",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    color: "#fff",
-                    fontSize: "32px",
-                    fontWeight: 600,
-                }}
-            >
-                ZF Pro CMS
-            </Box>
+        <Box id="login-page">
+            <Box className="login-container">
+                <Card className="glass-effect login-card">
+                    <CardContent className="login-card-inner">
 
-            {/* RIGHT SECTION */}
-            <Box
-                sx={{
-                    flex: 1,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    p: 3,
-                }}
-            >
-                <Card sx={{ width: "100%", maxWidth: 400, p: 2 }}>
-                    <CardContent>
-                        <Typography
-                            variant="h5"
-                            sx={{ fontWeight: "bold", textAlign: "center", mb: 2 }}
-                        >
-                            Log In To Your Account
-                        </Typography>
-
-                        <form onSubmit={handleSubmit}>
-                            {/* Email Field */}
-                            <TextField
-                                label="Email"
-                                fullWidth
-                                margin="normal"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <EmailIcon fontSize="small" />
-                                        </InputAdornment>
-                                    ),
-                                }}
+                        {/* Logo + Title */}
+                        <Box textAlign="center" mb={5}>
+                            <img
+                                src="https://ik.imagekit.io/ewxcertfq/ZF_proPoints_Logo_xcept_Black_RGB%201.png?updatedAt=1760210363486"
+                                alt="ZF Logo"
+                                className="login-logo"
                             />
+                            <h1 className="title">Admin Portal</h1>
+                            <p className="subtitle">Sign in to access your dashboard</p>
+                        </Box>
 
-                            {/* Password Field */}
-                            <TextField
-                                label="Password"
-                                fullWidth
-                                type={showPassword ? "text" : "password"}
-                                margin="normal"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <LockIcon fontSize="small" />
-                                        </InputAdornment>
-                                    ),
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                edge="end"
-                                                onClick={() => setShowPassword(!showPassword)}
-                                            >
-                                                {showPassword ? (
-                                                    <VisibilityOffIcon fontSize="small" />
-                                                ) : (
-                                                    <VisibilityIcon fontSize="small" />
-                                                )}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
+                        {/* Form */}
+                        <form onSubmit={handleSubmit} className="form">
+                            {/* Username */}
+                            <Box className="input-group">
+                                <label className="input-label">Username</label>
+                                <TextField
+                                    fullWidth
+                                    placeholder="Enter your username"
+                                    InputLabelProps={{ shrink: false }}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <PersonIcon className="input-icon" />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                    className="input-field"
+                                />
+                            </Box>
 
-                            {/* Login Button */}
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                fullWidth
-                                sx={{ mt: 2, py: 1.2, textTransform: "none", fontSize: "16px" }}
-                                disabled={isLoading}
-                            >
-                                {isLoading ? "Logging in..." : "Login"}
+                            {/* Password */}
+                            <Box className="input-group">
+                                <label className="input-label">Password</label>
+                                <TextField
+                                    fullWidth
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="Enter your password"
+                                    InputLabelProps={{ shrink: false }}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <LockIcon className="input-icon" />
+                                            </InputAdornment>
+                                        ),
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                >
+                                                    {showPassword ? (
+                                                        <VisibilityOffIcon />
+                                                    ) : (
+                                                        <VisibilityIcon />
+                                                    )}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                    className="input-field"
+                                />
+                            </Box>
+
+                            {/* Remember + Forgot */}
+                            <Box className="remember-forgot">
+                                <FormControlLabel
+                                    control={<Checkbox size="small" />}
+                                    label={<span className="remember-label">Remember me</span>}
+                                />
+
+                                <a href="#" className="forgot-link">
+                                    Forgot password?
+                                </a>
+                            </Box>
+
+                            {/* Button */}
+                            <Button type="submit" fullWidth className="btn-primary">
+                                Sign in
                             </Button>
                         </form>
 
-                        <Typography
-                            variant="body2"
-                            sx={{ textAlign: "center", mt: 2, color: "#666" }}
-                        >
-                            By clicking, you agree to our{" "}
-                            <a href="#" style={{ color: "#1976d2" }}>
-                                Terms of Service & Privacy Policy
-                            </a>
-                        </Typography>
+                        {/* Footer */}
+                        <Box mt={5} textAlign="center">
+                            <p className="footer-text">
+                                © 2023 ZF Loyalty Program. All rights reserved.
+                                <br />
+                                Evolve Brands Pvt. Ltd., Gurgaon
+                            </p>
+                        </Box>
                     </CardContent>
                 </Card>
             </Box>

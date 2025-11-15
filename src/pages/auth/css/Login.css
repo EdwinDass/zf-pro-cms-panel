@@ -1,0 +1,147 @@
+/* Full page */
+#login-page {
+    min-height: 100vh;
+    position: relative;
+    font-family: "Inter", sans-serif;
+}
+
+/* Overlay */
+#login-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.28);
+    z-index: 0;
+}
+
+/* Background image */
+#login-page::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("https://lh6.googleusercontent.com/proxy/QD8LktXhdjNbyAjc9Q6f0inQo16JzIarIrmQvm0HMhKLjaumfK_-N_vk1gc3kednHbi6EjCdHASI664A8ZsryrV6LRpdMByw5cJSlw");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(6px);
+    transform: scale(1.03);
+    z-index: 0;
+}
+
+/* Center container */
+.login-container {
+    max-width: 380px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 5;
+}
+
+
+/* Glass card */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.95);
+    /* backdrop-filter: blur(10px); */
+    border-radius: 18px !important;
+}
+
+.login-card {
+    width: 95%;
+}
+
+
+/* Logo */
+.login-logo {
+    height: 65px;
+    margin-bottom: 10px;
+}
+
+/* Titles */
+.title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+/* Form spacing */
+.form {
+    margin-top: 10px;
+}
+
+.input-group {
+    margin-bottom: 22px;
+}
+
+.input-label {
+    display: block;
+    margin-bottom: 6px;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Input field */
+.input-field .MuiOutlinedInput-root {
+    border-radius: 10px;
+    background: white;
+}
+
+.input-field input {
+    padding: 12px 12px;
+}
+
+.input-icon {
+    color: #9ca3af;
+}
+
+/* Remember + Forgot */
+.remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.remember-label {
+    color: #6b7280;
+}
+
+.forgot-link {
+    font-size: 14px;
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.forgot-link:hover {
+    color: #1d4ed8;
+}
+
+/* Button */
+.btn-primary {
+    background: linear-gradient(to right, #2563eb, #1d4ed8) !important;
+    padding: 12px !important;
+    border-radius: 10px !important;
+    color: white !important;
+    font-size: 16px;
+    text-transform: none !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(to right, #1d4ed8, #1e40af) !important;
+}
+
+/* Footer */
+.footer-text {
+    font-size: 12px;
+    color: #9ca3af;
+}
