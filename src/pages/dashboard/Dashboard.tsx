@@ -2,6 +2,11 @@ import React from "react";
 import { Box, Typography, Card, CardContent, Button } from "@mui/material";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import StatsRowOne from "./dashboard-screens/StatsRowOne";
+import StatsRowTwo from "./dashboard-screens/StatsRowTwo";
+import StatsRowThree from "./dashboard-screens/StatsRowThree";
+import StatsRowFour from "./dashboard-screens/StatsRowFour";
+import StatsRowFive from "./dashboard-screens/StatsRowFive";
 import TopBar from "../../layouts/top-bar";
 
 const Dashboard = () => {
@@ -14,19 +19,14 @@ const Dashboard = () => {
     };
 
     return (
-        <Box>
+        <div className="ml-6 mr-6 mt-6 h-screen">
             <TopBar />
-            <Card sx={{ maxWidth: 400 }}>
-                <CardContent>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                        Welcome to ZF Pro CMS
-                    </Typography>
-                    <Typography sx={{ mt: 1, color: "text.secondary" }}>
-                        Start managing your content and view system activity here.
-                    </Typography>
-                </CardContent>
-            </Card>
-        </Box>
+            <StatsRowOne />
+            <StatsRowTwo />
+            <StatsRowThree />
+            <StatsRowFour />
+            <StatsRowFive />
+        </div>
     );
 };
 
