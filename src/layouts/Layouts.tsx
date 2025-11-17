@@ -1,6 +1,7 @@
 // Layout.tsx
 import React from 'react';
 import "./layout.css"
+import TopBar from './top-bar';
 // import "tailwindcss"
 interface LayoutProps {
     children: React.ReactNode;
@@ -20,7 +21,7 @@ export const Layout: React.FC<LayoutProps> = ({
             <div id="notification" className="notification"></div>
 
             {/*<!-- Dashboard Page --> */}
-            <div className='flex'>
+            <div className='flex w-full'>
                 <div id="dashboard-page" className="page active">
                     <div className="flex h-screen">
                         {/*<!-- Sidebar --> */}
@@ -140,11 +141,10 @@ export const Layout: React.FC<LayoutProps> = ({
                         </div>
                     </div>
                 </div>
-                <div>
+                <div className='w-full'>
                     {children}
                 </div>
             </div>
-
         </div>
     );
 };
