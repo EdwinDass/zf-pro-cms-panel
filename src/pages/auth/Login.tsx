@@ -10,26 +10,26 @@ import {
     Checkbox,
     FormControlLabel,
 } from "@mui/material";
-
+ 
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
-
+ 
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-
+ 
 import "./css/Login.css";
-
+ 
 const Login = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
-
+ 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-
+ 
     const validateForm = () => {
         if (!username.trim() || !password.trim()) {
             alert("Please enter username and password");
@@ -37,14 +37,14 @@ const Login = () => {
         }
         return true;
     };
-
+ 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
+ 
         if (!validateForm()) return;
-
+ 
         setIsLoading(true);
-
+ 
         // Simulating API
         setTimeout(() => {
             login("dummy-access-token");     // store token
@@ -52,13 +52,13 @@ const Login = () => {
             setIsLoading(false);
         }, 1000);
     };
-
+ 
     return (
         <Box id="login-page">
             <Box className="login-container">
                 <Card className="glass-effect login-card">
                     <CardContent className="login-card-inner">
-
+ 
                         {/* Logo + Title */}
                         <Box textAlign="center" mb={5}>
                             <img
@@ -69,7 +69,7 @@ const Login = () => {
                             <h1 className="title">Admin Portal</h1>
                             <p className="subtitle">Sign in to access your dashboard</p>
                         </Box>
-
+ 
                         {/* Form */}
                         <form onSubmit={handleSubmit} className="form">
                             {/* Username */}
@@ -90,7 +90,7 @@ const Login = () => {
                                     className="input-field"
                                 />
                             </Box>
-
+ 
                             {/* Password */}
                             <Box className="input-group">
                                 <label className="input-label">Password</label>
@@ -123,19 +123,19 @@ const Login = () => {
                                     className="input-field"
                                 />
                             </Box>
-
+ 
                             {/* Remember + Forgot */}
                             <Box className="remember-forgot">
                                 <FormControlLabel
                                     control={<Checkbox size="small" />}
                                     label={<span className="remember-label">Remember me</span>}
                                 />
-
+ 
                                 <a href="#" className="forgot-link">
                                     Forgot password?
                                 </a>
                             </Box>
-
+ 
                             {/* Button */}
                             <Button
                                 type="submit"
@@ -146,7 +146,7 @@ const Login = () => {
                                 {isLoading ? "Signing in..." : "Sign in"}
                             </Button>
                         </form>
-
+ 
                         {/* Footer */}
                         <Box mt={5} textAlign="center">
                             <p className="footer-text">
@@ -161,5 +161,5 @@ const Login = () => {
         </Box>
     );
 };
-
+ 
 export default Login;
