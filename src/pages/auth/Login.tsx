@@ -5,25 +5,52 @@ import {
     CardContent,
     TextField,
     Button,
-    Typography,
     IconButton,
     InputAdornment,
     Checkbox,
     FormControlLabel,
 } from "@mui/material";
+
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
 
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 import "./css/Login.css";
 
 const Login = () => {
+    const { login } = useAuth();
+    const navigate = useNavigate();
+
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const validateForm = () => {
+        if (!username.trim() || !password.trim()) {
+            alert("Please enter username and password");
+            return false;
+        }
+        return true;
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        alert("Submitted");
+
+        if (!validateForm()) return;
+
+        setIsLoading(true);
+
+        // Simulating API
+        setTimeout(() => {
+            login("dummy-access-token");     // store token
+            navigate("/dashboard");          // redirect
+            setIsLoading(false);
+        }, 1000);
     };
 
     return (
@@ -51,7 +78,8 @@ const Login = () => {
                                 <TextField
                                     fullWidth
                                     placeholder="Enter your username"
-                                    InputLabelProps={{ shrink: false }}
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
@@ -70,7 +98,8 @@ const Login = () => {
                                     fullWidth
                                     type={showPassword ? "text" : "password"}
                                     placeholder="Enter your password"
-                                    InputLabelProps={{ shrink: false }}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
@@ -108,8 +137,13 @@ const Login = () => {
                             </Box>
 
                             {/* Button */}
-                            <Button type="submit" fullWidth className="btn-primary">
-                                Sign in
+                            <Button
+                                type="submit"
+                                fullWidth
+                                className="btn-primary"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? "Signing in..." : "Sign in"}
                             </Button>
                         </form>
 

@@ -14,7 +14,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
         return <div>Loading...</div>;
     }
 
-    return !isAuthenticated ? <Layout>{element}</Layout> : <Navigate to="/" replace />;
+    return isAuthenticated ? <Layout>{element}</Layout> : <Navigate to="/" replace />;
 };
 
 export default PrivateRoute;
