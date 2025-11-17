@@ -19,7 +19,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="ml-6 mr-6 mt-6 h-screen">
+        <div className="ml-6 mr-6 mt-6 h-screen overflow-y-auto pb-10">
             <TopBar />
             <StatsRowOne />
             <StatsRowTwo />
