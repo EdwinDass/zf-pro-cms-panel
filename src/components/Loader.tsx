@@ -19,7 +19,7 @@ const Loader: React.FC = () => {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    backgroundColor: "rgba(0, 0, 0, 0.1)",
+                    // backgroundColor: "rgba(0, 0, 0, 0.1)",
                     zIndex: 9999,
                 }}
             >
