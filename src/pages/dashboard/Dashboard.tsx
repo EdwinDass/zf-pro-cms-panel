@@ -2,6 +2,7 @@ import React from "react";
 import { Box, Typography, Card, CardContent, Button } from "@mui/material";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import TopBar from "../../layouts/top-bar";
 
 const Dashboard = () => {
     const { logout } = useAuth();
@@ -13,27 +14,8 @@ const Dashboard = () => {
     };
 
     return (
-        <Box sx={{ p: 3 }}>
-            <Box sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 3
-            }}>
-                <Typography variant="h4" sx={{ fontWeight: "bold" }}>
-                    Dashboard
-                </Typography>
-
-                <Button
-                    variant="contained"
-                    color="error"
-                    onClick={handleLogout}
-                    sx={{ textTransform: "none" }}
-                >
-                    Logout
-                </Button>
-            </Box>
-
+        <Box>
+            <TopBar />
             <Card sx={{ maxWidth: 400 }}>
                 <CardContent>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
