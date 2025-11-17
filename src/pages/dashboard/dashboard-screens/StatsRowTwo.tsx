@@ -1,19 +1,85 @@
 // src/components/CardsContainer/CardsContainer.tsx
 
-import React from "react";
+import React, { useState } from "react";
 import Card from "./Card";
 import CardVariantTwo from "./CardVariantTwo";
+import { getTotalScans, getKycStatus, getMemberCount } from "../../../services/ApiService";
 
 import { FaQrcode, FaUserCheck, FaUserShield } from "react-icons/fa";
+import { stat } from "fs";
 
 const StatsRowTwo: React.FC = () => {
+    const [totalScans, setTotalScans] = useState("0");
+    const [kycStatus, setKycStatus] = useState({ approved: "0", pending: "0", percentage: "0" });
+    const [blockedMembers, setBlockedMembers] = useState("0");
+    const [activeMembers, setActiveMembers] = useState("0");
+    React.useEffect(() => {
+        fetchTotalScans();
+        fetchKycStatus();
+        fetchBlockedMembers();
+        fetchActiveMembers();
+    }, []);
+
+    const fetchTotalScans = async () => {
+        try {
+            const response = await getTotalScans({});
+            setTotalScans(response?.data?.data?.totalScans?.toString() || "0");
+        } catch (error) {
+            console.error("Total scans error:", error);
+        }
+    };
+
+    const fetchKycStatus = async () => {
+        try {
+            const response = await getKycStatus({});
+
+            const approved = Number(response?.data?.data?.approved) || 0;
+            const pending = Number(response?.data?.data?.pending) || 0;
+            const total = approved + pending || 1;
+
+            const percentage = ((approved / total) * 100).toFixed(2);
+
+            setKycStatus({
+                approved: approved.toString(),
+                pending: pending.toString(),
+                percentage: percentage
+            });
+
+            console.log(
+                "KYC Status Response:",
+                approved.toString(),
+                pending.toString()
+            );
+        } catch (error) {
+            console.error("KYC status error:", error);
+        }
+    };
+
+    const fetchBlockedMembers = async () => {
+        try {
+            const response = await getMemberCount({ role: 1, status: "none" });
+            setBlockedMembers(response?.data?.count?.toString() || "0");
+        } catch (error) {
+            console.error("Blocked members error:", error);
+        }
+    };
+
+    const fetchActiveMembers = async () => {
+        try {
+            const response = await getMemberCount({ role: 1, status: "none" });
+            setActiveMembers(response?.data?.count?.toString() || "0");
+        } catch (error) {
+            console.error("Active members error:", error);
+        }
+    };
+
     return (
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
 
             {/* 🔹 Normal Card */}
             <Card
                 title="Total Scans"
-                value="24,369"
+                value={totalScans}
                 percentage="+15.2%"
                 percentageColor="text-green-600"
                 icon={<FaQrcode />}
@@ -26,14 +92,14 @@ const StatsRowTwo: React.FC = () => {
                 icon={<FaUserCheck />}
                 iconColor="text-teal-500"
 
-                leftValue="9,362"
+                leftValue={kycStatus.approved}
                 leftLabel="Approved"
 
-                rightValue="3,056"
+                rightValue={kycStatus.pending}
                 rightLabel="Pending"
 
-                progress={75}
-                footerText="75% of members have completed KYC"
+                progress={Number(kycStatus.percentage)}
+                footerText={`${kycStatus.percentage}% of members have completed KYC`}
             />
 
             {/* 🔹 User Status — CardVariantTwo */}
@@ -42,14 +108,25 @@ const StatsRowTwo: React.FC = () => {
                 icon={<FaUserShield />}
                 iconColor="text-amber-500"
 
-                leftValue="10,089"
+                leftValue={activeMembers}
                 leftLabel="Active"
 
-                rightValue="2,297"
+                rightValue={blockedMembers}
                 rightLabel="Blocked"
 
-                progress={81}
-                footerText="81% of users are active"
+                progress={
+                    Math.max(
+                        0,
+                        100 - ((Number(blockedMembers) || 0) /
+                            ((Number(activeMembers) || 0) + (Number(blockedMembers) || 0) || 1) * 100)
+                    )
+                }
+                footerText={`${Math.max(
+                    0,
+                    100 - ((Number(blockedMembers) || 0) /
+                        ((Number(activeMembers) || 0) + (Number(blockedMembers) || 0) || 1) * 100)
+                ).toFixed(2)}% of users are active`}
+
             />
 
         </div>

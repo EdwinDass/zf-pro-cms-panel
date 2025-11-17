@@ -1,38 +1,112 @@
 // src/components/StatsRowThree/StatsRowThree.tsx
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import LineGraph from "../dashboard-screens/line-graph";
 import BarGraph from "../dashboard-screens/bar-graph";
+import { getUserRegistrations, getPointsGraph } from "../../../services/ApiService";
 
 const StatsRowThree: React.FC = () => {
-  // Dropdown states
+  // Dropdown state
   const [lineRange, setLineRange] = useState("7");
-  const [barRange, setBarRange] = useState("6");
+  const [barRange, setBarRange] = useState("7");
 
-  // ---------------------------------------------
-  // LINE GRAPH DATA (you can change based on range)
-  // ---------------------------------------------
-  const lineLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const lineValues = [58, 78, 40, 42, 46, 45, 62];
+  // ---------------- LINE GRAPH STATE ----------------
+  const [lineLabels, setLineLabels] = useState<string[]>([]);
+  const [lineValues, setLineValues] = useState<number[]>([]);
+  const [lineLoading, setLineLoading] = useState(true);
 
-  // ---------------------------------------------
-  // BAR GRAPH DATA (you can later change based on range)
-  // ---------------------------------------------
-  const barLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
-  const barA = [120, 200, 150, 80, 70, 110];
-  const barB = [90, 160, 110, 60, 40, 95];
+  // ---------------- BAR GRAPH STATE ----------------
+  const [barLabels, setBarLabels] = useState<string[]>([]);
+  const [barA, setBarA] = useState<number[]>([]);
+  const [barB, setBarB] = useState<number[]>([]);
+  const [barLoading, setBarLoading] = useState(true);
+
+  // ----------------------------------------------------
+  // Range Mapping for both graphs (same structure)
+  // ----------------------------------------------------
+  const buildRequestParams = (rangeValue: string) => {
+    if (rangeValue === "7") return { range: "last7" };
+    if (rangeValue === "30") return { range: "last30" };
+    if (rangeValue === "90") return { range: "3months" };
+
+    if (rangeValue.startsWith("FY_")) {
+      const fy = rangeValue.replace("FY_", "").replace("_", "-");
+      return {
+        range: "fy",
+        financialYear: fy
+      };
+    }
+
+    return { range: "last7" };
+  };
+
+  // ----------------------------------------------------
+  // Fetch LINE graph data
+  // ----------------------------------------------------
+  const fetchLineGraphData = async () => {
+    try {
+      setLineLoading(true);
+
+      const params = buildRequestParams(lineRange);
+      const response = await getUserRegistrations(params);
+
+      setLineLabels(response?.data?.data?.labels || []);
+      setLineValues(response?.data?.data?.values || []);
+
+    } catch (error) {
+      console.error("Line Graph API Error:", error);
+      setLineLabels([]);
+      setLineValues([]);
+    } finally {
+      setLineLoading(false);
+    }
+  };
+
+  // ----------------------------------------------------
+  // Fetch BAR graph data
+  // ----------------------------------------------------
+  const fetchBarGraphData = async () => {
+    try {
+      setBarLoading(true);
+
+      const params = buildRequestParams(barRange);
+      const response = await getPointsGraph(params);
+
+      setBarLabels(response?.data?.data?.labels || []);
+      setBarA(response?.data?.data?.scannedPoints || []);
+      setBarB(response?.data?.data?.redeemedPoints || []);
+
+    } catch (error) {
+      console.error("Bar Graph API Error:", error);
+      setBarLabels([]);
+      setBarA([]);
+      setBarB([]);
+    } finally {
+      setBarLoading(false);
+    }
+  };
+
+  // Trigger load for Line graph
+  useEffect(() => {
+    fetchLineGraphData();
+  }, [lineRange]);
+
+  // Trigger load for Bar graph
+  useEffect(() => {
+    fetchBarGraphData();
+  }, [barRange]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
       {/* LEFT — Line Chart */}
       <div className="bg-white shadow-md rounded-xl p-6 border border-gray-100">
+
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">
             Member Growth
           </h2>
 
-          {/* Line graph dropdown */}
           <select
             value={lineRange}
             onChange={(e) => setLineRange(e.target.value)}
@@ -41,21 +115,25 @@ const StatsRowThree: React.FC = () => {
             <option value="7">Last 7 days</option>
             <option value="30">Last 30 days</option>
             <option value="90">Last 3 months</option>
-            <option value="365">Last 1 year</option>
+            <option value="FY_2025_2026">2025-2026</option>
           </select>
         </div>
 
-        <LineGraph labels={lineLabels} values={lineValues} />
+        {lineLoading ? (
+          <p className="text-gray-500">Loading chart...</p>
+        ) : (
+          <LineGraph labels={lineLabels} values={lineValues} />
+        )}
       </div>
 
       {/* RIGHT — Bar Chart */}
       <div className="bg-white shadow-md rounded-xl p-6 border border-gray-100">
+
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">
             Points Transactions
           </h2>
 
-          {/* Bar graph dropdown */}
           <select
             value={barRange}
             onChange={(e) => setBarRange(e.target.value)}
@@ -64,11 +142,15 @@ const StatsRowThree: React.FC = () => {
             <option value="7">Last 7 days</option>
             <option value="30">Last 30 days</option>
             <option value="90">Last 3 months</option>
-            <option value="365">Last 1 year</option>
+            <option value="FY_2025_2026">2025-2026</option>
           </select>
         </div>
 
-        <BarGraph labels={barLabels} datasetA={barA} datasetB={barB} />
+        {barLoading ? (
+          <p className="text-gray-500">Loading chart...</p>
+        ) : (
+          <BarGraph labels={barLabels} datasetA={barA} datasetB={barB} />
+        )}
       </div>
 
     </div>
