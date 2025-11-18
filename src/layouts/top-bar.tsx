@@ -1,4 +1,12 @@
-const TopBar = () => {
+import React from "react";
+
+interface Props {
+    logout?: () => void;
+}
+
+const TopBar: React.FC<Props> = ({
+    logout = () => { }
+}) => {
     return (<div className="px-6 py-4 flex items-center justify-between">
         <div>
             <h1 className="text-2xl font-bold text-primary">Dashboard</h1>
@@ -21,7 +29,7 @@ const TopBar = () => {
                     <i className="fas fa-cog"></i>
                 </button>
             </div>
-            <button id="logout-btn"
+            <button id="logout-btn" onClick={logout}
                 className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition">
                 <i className="fas fa-sign-out-alt mr-2"></i> Logout
             </button>
