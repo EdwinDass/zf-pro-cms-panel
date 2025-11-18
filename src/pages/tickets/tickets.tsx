@@ -1,23 +1,32 @@
 import React, { useState } from "react";
 import AccessLogsScreen from "../role-management/access-logs/AccessLogsPage";
 import TopBar from "../../layouts/top-bar";
-import QrGeneration from "./qr-generation/qr-generation";
+import AllTickets from "./all-tickets/all-tickets";
 
-const Qr = () => {
-    // DEFAULT TAB SHOULD BE QR GENERATION
+const Tickets = () => {
     const [activeTab, setActiveTab] = useState("qr-generation");
 
     const tabs = [
-        { id: "qr-generation", label: "QR Generation" },
+        { id: "all-tickets", label: "All Tickets" },
+        { id: "open", label: "Open" },
+        { id: "closed", label: "Closed" },
+        { id: "in-progress", label: "In Progress" },
+        { id: "resolved", label: "Resolved" },
         // { id: "audit-logs", label: "Audit Logs" },
     ];
-
     return (
         <div className="h-screen overflow-y-auto bg-gray-100 pb-10">
             <div className="bg-white">
-                <TopBar />
+                <TopBar
+                    title="Tickets Management"
+                    description="Manage customer support tickets and inquiries"
+                    actionButton={
+                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                            Create Ticket
+                        </button>
+                    }
+                />
             </div>
-
             {/* TABS SECTION */}
             <div>
                 <div
@@ -55,11 +64,11 @@ const Qr = () => {
 
             {/* CONTENT SECTION */}
             <div className="mt-8 px-6">
-                {activeTab === "qr-generation" && <QrGeneration />}
+                {activeTab === "all-tickets" && <AllTickets />}
                 {/* {activeTab === "audit-logs" && <AccessLogsScreen />} */}
             </div>
         </div>
     );
 };
 
-export default Qr;
+export default Tickets;
