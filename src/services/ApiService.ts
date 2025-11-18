@@ -156,8 +156,62 @@ export const getTopPerformers = async (count: number) => {
         .then((response) => response);
 };
 
+export const getAllSkus = async () => {
+    return api
+        .get("sku/skus")
+        .then((response) => response);
+};
 
+export const getSubcategoriesBySku = async (skuId: number) => {
+    return api
+        .get(`sku/skus/${skuId}/subcategories`)
+        .then((response) => response);
+};
 
+export const getCategories = async () => {
+    return api.get("sku/categories").then((res) => res);
+};
 
+export const getSubcategoriesByCategory = async (categoryId: number) => {
+    return api.get(`sku/categories/${categoryId}/subcategories`).then((res) => res);
+};
+
+export const getSkusBySubcategory = async (subCategoryId: number) => {
+    return api.get(`sku/subcategories/${subCategoryId}/skus`).then((res) => res);
+};
+
+export const getSkusByCategoryAndSubcategory = async (
+    categoryId: number,
+    subCategoryId: number
+) => {
+    return api
+        .get(`sku/categories/${categoryId}/subcategories/${subCategoryId}/skus`)
+        .then((res) => res);
+};
+
+export const generateQRCodes = async (quantity: number, skuCode: string) => {
+    return api.post("qr/qrs", {
+        quantity,
+        skuCode,
+    });
+};
+
+export const getQRHistory = async () => {
+    return api
+        .get("qr/qrs/history")
+        .then((response) => response);
+};
+
+export const getQRFile = async (batchId: number) => {
+    return api
+        .get(`qr/qrs/file`, { params: { batchId } })
+        .then((response) => response);
+};
+
+export const getTotalGenerated = async () => {
+    return api
+        .get("masters/inventory/total-count")
+        .then((response) => response);
+};
 
 

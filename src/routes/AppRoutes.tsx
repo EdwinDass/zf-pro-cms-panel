@@ -6,6 +6,7 @@ import NotFound from "../pages/NotFound";
 import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 import UserRoleManagement from "../pages/role-management/UserRoleManagement";
+import Qr from "../pages/qr-management/Qr-management";
 
 const AppRoutes = () => {
     return (
@@ -13,6 +14,7 @@ const AppRoutes = () => {
             <Route path="/" element={<PublicRoute element={<Login />} />} />
             <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
             <Route path="/role-management" element={<PrivateRoute element={<UserRoleManagement />} />} />
+            <Route path="/qr" element={<PrivateRoute element={<Qr />} />} />
             {/* Add more protected routes here */}
             <Route path="*" element={<NotFound />} />
         </Routes>
