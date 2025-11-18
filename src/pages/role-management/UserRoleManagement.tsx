@@ -14,9 +14,17 @@ const UserRoleManagement = () => {
     ];
 
     return (
-        <div className="w-full min-h-screen bg-gray-100">
+        <div className="h-screen overflow-y-auto bg-gray-100 pb-10">
             <div className="bg-white">
-                <TopBar />
+                <TopBar
+                    title="User Role Management"
+                    description="Manage users, roles and settings"
+                    actionButton={
+                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                            Create User
+                        </button>
+                    }
+                />
             </div>
 
             {/* TABS SECTION */}

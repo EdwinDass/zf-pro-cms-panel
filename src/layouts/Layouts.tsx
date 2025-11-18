@@ -1,12 +1,19 @@
-// Layout.tsx
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import "./layout.css"
 import TopBar from './top-bar';
-// import "tailwindcss"
+
 interface LayoutProps {
     children: React.ReactNode;
     sidebarProps?: any;
     topBarProps?: any;
+}
+
+interface NavItem {
+    id: string;
+    label: string;
+    icon: string;
+    path: string;
 }
 
 export const Layout: React.FC<LayoutProps> = ({
@@ -14,6 +21,35 @@ export const Layout: React.FC<LayoutProps> = ({
     sidebarProps,
     topBarProps,
 }) => {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const navItems: NavItem[] = [
+        { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-tachometer-alt', path: '/dashboard' },
+        { id: 'masters-config', label: 'Masters & Config', icon: 'fas fa-cogs', path: '/masters-config' },
+        { id: 'schemes-campaigns', label: 'Schemes & Campaigns', icon: 'fas fa-bullhorn', path: '/schemes-campaigns' },
+        { id: 'qr-management', label: 'QR Management', icon: 'fas fa-qrcode', path: '/qr' },
+        { id: 'communication', label: 'Communication', icon: 'fas fa-broadcast-tower', path: '/communication' },
+        { id: 'finance-compliance', label: 'Finance & Compliance', icon: 'fas fa-coins', path: '/finance-compliance' },
+        { id: 'fraud-detection', label: 'Fraud Detection', icon: 'fas fa-shield-alt', path: '/fraud-detection' },
+        { id: 'mis-analytics', label: 'MIS & Analytics', icon: 'fas fa-chart-line', path: '/mis-analytics' },
+        { id: 'role-management', label: 'Role Management', icon: 'fas fa-user-shield', path: '/role-management' },
+        { id: 'integrations', label: 'Integrations', icon: 'fas fa-plug', path: '/integrations' },
+        { id: 'process', label: 'Process', icon: 'fas fa-cogs', path: '/process' },
+        { id: 'tickets', label: 'Tickets', icon: 'fas fa-ticket-alt', path: '/tickets' },
+        { id: 'members', label: 'Members', icon: 'fas fa-users', path: '/members' },
+        { id: 'configuration', label: 'Configuration', icon: 'fas fa-sliders-h', path: '/configuration' },
+    ];
+
+    // Navigation handler
+    const handleNavigation = (path: string) => {
+        navigate(path);
+    };
+
+    // Check if current route is active
+    const isActive = (path: string) => {
+        return location.pathname === path;
+    };
 
     return (
         <div className="min-h-screen light-theme body-temp">
@@ -32,96 +68,16 @@ export const Layout: React.FC<LayoutProps> = ({
                             </div>
                             <div className="flex-1 overflow-y-auto py-4">
                                 <nav className="px-2 space-y-1">
-                                    <a href="#" data-page="dashboard"
-                                        className="sidebar-item active flex items-center px-4 py-3 text-sm font-medium rounded-lg">
-                                        <i className="fas fa-tachometer-alt mr-3"></i>
-                                        Dashboard
-                                    </a>
-
-                                    {/*<!-- Masters & Configuration Section --> */}
-                                    <a href="#" data-page="masters-config"
-                                        className="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-lg text-secondary">
-                                        <i className="fas fa-cogs mr-3"></i>
-                                        Masters & Config
-                                    </a>
-
-                                    {/*<!-- Schemes & Campaigns Section --> */}
-                                    <a href="#" data-page="schemes-campaigns"
-                                        className="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-lg text-secondary">
-                                        <i className="fas fa-bullhorn mr-3"></i>
-                                        Schemes & Campaigns
-                                    </a>
-
-                                    {/*<!-- Advanced QR Management Section --> */}
-                                    <a href="#" data-page="qr-management"
-                                        className="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-lg text-secondary">
-                                        <i className="fas fa-qrcode mr-3"></i>
-                                        QR Management
-                                    </a>
-
-                                    {/*<!-- Communication Console Section --> */}
-                                    <a href="#" data-page="communication"
-                                        className="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-lg text-secondary">
-                                        <i className="fas fa-broadcast-tower mr-3"></i>
-                                        Communication
-                                    </a>
-
-                                    {/*<!-- Finance & Compliance Section --> */}
-                                    <a href="#" data-page="finance-compliance"
-                                        className="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-lg text-secondary">
-                                        <i className="fas fa-coins mr-3"></i>
-                                        Finance & Compliance
-                                    </a>
-
-                                    {/*<!-- Fraud Detection Section --> */}
-                                    <a href="#" data-page="fraud-detection"
-                                        className="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-lg text-secondary">
-                                        <i className="fas fa-shield-alt mr-3"></i>
-                                        Fraud Detection
-                                    </a>
-
-                                    {/*<!-- MIS & Analytics Section --> */}
-                                    <a href="#" data-page="mis-analytics"
-                                        className="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-lg text-secondary">
-                                        <i className="fas fa-chart-line mr-3"></i>
-                                        MIS & Analytics
-                                    </a>
-
-                                    {/*<!-- Role Management Section --> */}
-                                    <a href="#" data-page="role-management"
-                                        className="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-lg text-secondary">
-                                        <i className="fas fa-user-shield mr-3"></i>
-                                        Role Management
-                                    </a>
-
-                                    {/*<!-- Integration Monitoring Section --> */}
-                                    <a href="#" data-page="integrations"
-                                        className="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-lg text-secondary">
-                                        <i className="fas fa-plug mr-3"></i>
-                                        Integrations
-                                    </a>
-
-                                    {/*<!-- Existing Sections --> */}
-                                    <a href="#" data-page="process"
-                                        className="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-lg text-secondary">
-                                        <i className="fas fa-cogs mr-3"></i>
-                                        Process
-                                    </a>
-                                    <a href="#" data-page="tickets"
-                                        className="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-lg text-secondary">
-                                        <i className="fas fa-ticket-alt mr-3"></i>
-                                        Tickets
-                                    </a>
-                                    <a href="#" data-page="members"
-                                        className="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-lg text-secondary">
-                                        <i className="fas fa-users mr-3"></i>
-                                        Members
-                                    </a>
-                                    <a href="#" data-page="configuration"
-                                        className="sidebar-item flex items-center px-4 py-3 text-sm font-medium rounded-lg text-secondary">
-                                        <i className="fas fa-sliders-h mr-3"></i>
-                                        Configuration
-                                    </a>
+                                    {navItems.map((item) => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => handleNavigation(item.path)}
+                                            className={`sidebar-item ${isActive(item.path) ? 'active' : ''} flex items-center px-4 py-3 text-sm font-medium rounded-lg text-secondary w-full text-left`}
+                                        >
+                                            <i className={`${item.icon} mr-3`}></i>
+                                            {item.label}
+                                        </button>
+                                    ))}
                                 </nav>
                             </div>
                             <div className="p-4 border-t border-custom">
