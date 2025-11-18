@@ -5,18 +5,22 @@ import { LoadingProvider } from "./context/LoadingContext";
 import { AuthProvider } from "./context/AuthContext";
 import AppRoutes from "./routes/AppRoutes";
 import Loader from "./components/Loader";
+import { Provider } from "react-redux";
+import store from './redux/store';
 
 const App = () => {
   return (
-    <LoadingProvider>
-      <AuthProvider>
-        <Loader />
-        <Router>
-          <AppRoutes />
-          <ToastContainer position="top-center" autoClose={3000} />
-        </Router>
-      </AuthProvider>
-    </LoadingProvider>
+    <Provider store={store}>
+      <LoadingProvider>
+        <AuthProvider>
+          <Loader />
+          <Router>
+            <AppRoutes />
+            <ToastContainer position="top-center" autoClose={3000} />
+          </Router>
+        </AuthProvider>
+      </LoadingProvider>
+    </Provider>
   );
 };
 

@@ -9,56 +9,97 @@ import {
     InputAdornment,
     Checkbox,
     FormControlLabel,
+    Snackbar,
 } from "@mui/material";
- 
+
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
- 
+
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
- 
+import CloseIcon from "@mui/icons-material/Close";
+
 import "./css/Login.css";
- 
+import { userLogin } from "../../services/ApiService";
+import { LoginPayload } from "../../types";
+import { saveTokens } from "../../services/tokenStorage";
+import { useDispatch } from 'react-redux';
+import { existingLogin } from "../../redux/slices/userDataSlice";
+import { setTokens } from "../../redux/slices/authTokenSlice";
+
 const Login = () => {
-    const { login } = useAuth();
     const navigate = useNavigate();
- 
+
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState({
+        loginButton: false,
+    })
     const [showPassword, setShowPassword] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
- 
-    const validateForm = () => {
-        if (!username.trim() || !password.trim()) {
-            alert("Please enter username and password");
-            return false;
+    const [snackbarState, setSnackbarState] = React.useState({
+        open: false,
+        message: "",
+    });
+    const [loginPayload, setLoginPayload] = useState<LoginPayload>({
+        email: "",
+        password: ""
+    })
+
+    const dispatch = useDispatch()
+
+    const closeSnackBar = () => {
+        openSnackbar(``, false);
+    };
+
+    const openSnackbar = (message: string, open: boolean) => {
+        setSnackbarState((prev) => ({ ...prev, open, message }));
+    };
+
+    const handleSubmit = async () => {
+        try {
+            setLoading((prev) => ({ ...prev, loginButton: true }));
+            const res = await userLogin(loginPayload);
+            if (res?.code == 200) {
+                const tokens = {
+                    accessToken: res?.token?.accessToken,
+                    refreshToken: res?.token?.refreshToken
+                }
+                dispatch(setTokens(tokens));
+                dispatch(existingLogin());
+                navigate("/dashboard")
+            } else {
+                openSnackbar(res?.message || "Unexpected error", true)
+            }
+            console.log(res, "vsdvdsvvfbEGFV");
+        } catch (e) {
+            console.log("vffvwr", e)
+            openSnackbar("Failed to login, please try again", true)
+        } finally {
+            setLoading((prev) => ({ ...prev, loginButton: false }));
         }
-        return true;
     };
- 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
- 
-        if (!validateForm()) return;
- 
-        setIsLoading(true);
- 
-        // Simulating API
-        setTimeout(() => {
-            login("dummy-access-token");     // store token
-            navigate("/dashboard");          // redirect
-            setIsLoading(false);
-        }, 1000);
-    };
- 
+
+    const action = (
+        <React.Fragment>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={closeSnackBar}
+            >
+                <CloseIcon fontSize="small" color="warning" />
+            </IconButton>
+        </React.Fragment>
+    );
+
     return (
         <Box id="login-page">
             <Box className="login-container">
                 <Card className="glass-effect login-card">
                     <CardContent className="login-card-inner">
- 
+
                         {/* Logo + Title */}
                         <Box textAlign="center" mb={5}>
                             <img
@@ -69,17 +110,17 @@ const Login = () => {
                             <h1 className="title">Admin Portal</h1>
                             <p className="subtitle">Sign in to access your dashboard</p>
                         </Box>
- 
+
                         {/* Form */}
-                        <form onSubmit={handleSubmit} className="form">
+                        <form className="form">
                             {/* Username */}
                             <Box className="input-group">
                                 <label className="input-label">Username</label>
                                 <TextField
                                     fullWidth
                                     placeholder="Enter your username"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
+                                    value={loginPayload?.email}
+                                    onChange={(e) => setLoginPayload((prev) => ({ ...prev, email: e?.target?.value || "" }))}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
@@ -90,7 +131,7 @@ const Login = () => {
                                     className="input-field"
                                 />
                             </Box>
- 
+
                             {/* Password */}
                             <Box className="input-group">
                                 <label className="input-label">Password</label>
@@ -98,8 +139,8 @@ const Login = () => {
                                     fullWidth
                                     type={showPassword ? "text" : "password"}
                                     placeholder="Enter your password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    value={loginPayload?.password}
+                                    onChange={(e) => setLoginPayload((prev) => ({ ...prev, password: e?.target?.value || "" }))}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
@@ -123,30 +164,31 @@ const Login = () => {
                                     className="input-field"
                                 />
                             </Box>
- 
+
                             {/* Remember + Forgot */}
                             <Box className="remember-forgot">
                                 <FormControlLabel
                                     control={<Checkbox size="small" />}
                                     label={<span className="remember-label">Remember me</span>}
                                 />
- 
+
                                 <a href="#" className="forgot-link">
                                     Forgot password?
                                 </a>
                             </Box>
- 
+
                             {/* Button */}
                             <Button
                                 type="submit"
                                 fullWidth
                                 className="btn-primary"
-                                disabled={isLoading}
+                                disabled={loading.loginButton}
+                                onClick={handleSubmit}
                             >
-                                {isLoading ? "Signing in..." : "Sign in"}
+                                {loading.loginButton ? "Signing in..." : "Sign in"}
                             </Button>
                         </form>
- 
+
                         {/* Footer */}
                         <Box mt={5} textAlign="center">
                             <p className="footer-text">
@@ -158,8 +200,16 @@ const Login = () => {
                     </CardContent>
                 </Card>
             </Box>
+            <Snackbar
+                anchorOrigin={{ horizontal: "center", vertical: "bottom" }}
+                onClose={closeSnackBar}
+                open={snackbarState.open}
+                message={snackbarState.message}
+                action={action}
+                autoHideDuration={3000}
+            />
         </Box>
     );
 };
- 
+
 export default Login;

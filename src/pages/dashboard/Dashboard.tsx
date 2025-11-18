@@ -8,24 +8,29 @@ import StatsRowThree from "./dashboard-screens/StatsRowThree";
 import StatsRowFour from "./dashboard-screens/StatsRowFour";
 import StatsRowFive from "./dashboard-screens/StatsRowFive";
 import TopBar from "../../layouts/top-bar";
+import { useDispatch } from "react-redux";
+import { RootState } from "../../redux/store";
+import { clearTokens } from "../../redux/slices/authTokenSlice";
 
 const Dashboard = () => {
-    const { logout } = useAuth();
     const navigate = useNavigate();
+    const dispatch = useDispatch()
 
     const handleLogout = () => {
-        logout();
         navigate("/");
+        dispatch(clearTokens())
     };
 
     return (
-        <div className="ml-6 mr-6 mt-6 h-screen overflow-y-auto pb-10">
-            <TopBar />
-            <StatsRowOne />
-            <StatsRowTwo />
-            <StatsRowThree />
-            <StatsRowFour />
-            <StatsRowFive />
+        <div className="h-screen overflow-y-auto pb-10">
+            <TopBar logout={handleLogout}/>
+            <div className="m-5">
+                <StatsRowOne />
+                <StatsRowTwo />
+                <StatsRowThree />
+                <StatsRowFour />
+                <StatsRowFive />
+            </div>
         </div>
     );
 };

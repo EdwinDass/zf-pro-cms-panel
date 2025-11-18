@@ -3,6 +3,10 @@ body {
     transition: background-color 0.3s ease;
 }
 
+.body-temp{
+    overflow: hidden;
+}
+
 /* Light theme styles */
 .light-theme {
     /* background: linear-gradient(135deg, #f8f9f7 0%, #eef2ef 100%); */

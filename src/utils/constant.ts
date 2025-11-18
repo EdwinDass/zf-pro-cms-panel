@@ -1,0 +1,1 @@
+const API_LINK = 'http://zf-pro-alb-uat-1166462272.ap-south-1.elb.amazonaws.com/api/'

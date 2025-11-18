@@ -1,9 +1,18 @@
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import LoadingService from './LoadingService';
+import axios, { AxiosInstance } from "axios";
+import { handleAuthError } from "../utils/authHandler";
+import { Persistance } from "./storage.service";
+import store, { RootState } from "../redux/store";
+import { LoginPayload } from "../types";
 import { API_LINK } from '../values/constants';
 
-const api = axios.create({
+export const api: AxiosInstance = axios.create({
+    baseURL: API_LINK,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+const api2: AxiosInstance = axios.create({
     baseURL: API_LINK,
     headers: {
         'Content-Type': 'application/json',
@@ -11,49 +20,78 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(
-    (config) => {
-        //const token = sessionStorage.getItem('accessToken') || '';
-        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsIm1vYmlsZSI6IjgwODgxODM3NDciLCJlbWFpbCI6ImxvaGl0aC5nbUBzY2ZwZS50ZWNoIiwidXNlckNvZGUiOiJaRlAwMTAwMDAyIiwiaWF0IjoxNzYzMzc1ODY0LCJleHAiOjE3NjM0NjIyNjR9.cIC_kkHvZQIXDykPCB4deR9GpSTE8PVAsQNxmmNTc_c';
-        const loaderFlag = config.headers['loaderFlag'] === false ? false : true;
-        config.headers.Authorization = token ? `Bearer ${token}` : '';
-        if (loaderFlag) {
-            LoadingService.setLoading(true);
+    async (config) => {
+        const state: RootState = store.getState();
+        const accessToken = state.authToken.accessToken;
+        const tempToken = state.authToken.tempToken;
+        const tokenToUse = accessToken || tempToken;
+
+        // console.log('API Request:', {
+        //     url: config.url,
+        //     method: config.method,
+        //     tokenUsed: tokenToUse ? (accessToken ? 'accessToken' : 'tempToken') : 'none',
+        //     tokenValue: tokenToUse,
+        // });
+
+        if (tokenToUse /* && config.headers?.set */) {
+            config.headers.set('Authorization', `Bearer ${tokenToUse}`);
         }
+
+        let userId = '';
+        try {
+            const storedUser = await Persistance.retrieveData('userData');
+            userId = storedUser?.userId?.toString() || '';
+        } catch (err) {
+            // console.warn('Error fetching userId from persistence:', err);
+        }
+
+        // if (config.headers?.set) {
+        //     config.headers.set('source', 'zf-web-cms');
+        //     config.headers.set('userid', userId);
+        //     config.headers.set('app-version', '');
+        //     config.headers.set('build-version', '');
+        //     config.headers.set('latitude', '');
+        //     config.headers.set('longitude', '');
+        // }
+
+        // console.log('Headers Sent:', {
+        //     Authorization: tokenToUse ? `Bearer ${tokenToUse}` : '',
+        //     source: 'honeywell-genetron',
+        //     userid: userId,
+        //     'app-version': VersionNumber.appVersion || '',
+        //     'build-version': String(VersionNumber.buildVersion || ''),
+        //     latitude: '',
+        //     longitude: '',
+        // });
+
         return config;
     },
-    (error) => {
-        LoadingService.setLoading(false);
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );
 
 api.interceptors.response.use(
-    (response) => {
-        LoadingService.setLoading(false);
-        return response;
-    },
-    (error) => {
-        LoadingService.setLoading(false);
-        if (error.response) {
-            const { status, data } = error.response;
-            if (status === 401) {
-                console.error('Unauthorized: Token might be expired');
-                toast.error('Session expired. Please log in again.');
-            } else if (status >= 500) {
-                const message = 'Server error. Please try again later.';
-                console.error('Server Error:', message);
-                toast.error(message);
-            } else {
-                const message = 'Something went wrong.';
-                toast.error(message);
-            }
-        } else {
-            console.error('Network Error:', error.message);
-            toast.error('Network error. Please check your connection.');
-        }
-        return Promise.reject(error);
-    }
+    (response) => response,
+    (error) => handleAuthError(error, api)
 );
+
+export const userLogin = async (payload: LoginPayload) => {
+    const res = await api.post("auth/signin", payload);
+    return res?.data;
+}
+
+export const refreshAuthToken = async (token: string) => {
+    const body = {
+        token,
+        type: "zf-loyalty-mobile",
+    };
+    try {
+        const response = await api2.post('auth/refresh-token', body);
+        return response.data;
+    } catch (error: any) {
+        throw error;
+    }
+};
+
 
 // Generic: Get member count by passing any query params
 export const getMemberCount = async (params: any) => {

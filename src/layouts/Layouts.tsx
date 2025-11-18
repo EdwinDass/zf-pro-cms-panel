@@ -16,7 +16,7 @@ export const Layout: React.FC<LayoutProps> = ({
 }) => {
 
     return (
-        <div className="min-h-screen light-theme">
+        <div className="min-h-screen light-theme body-temp">
             {/*<!-- Notification --> */}
             <div id="notification" className="notification"></div>
 
