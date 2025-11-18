@@ -4,17 +4,16 @@ import TopBar from "../../layouts/top-bar";
 import QrGeneration from "./qr-generation/qr-generation";
 
 const Qr = () => {
-    const [activeTab, setActiveTab] = useState("staff");
-
+    // DEFAULT TAB SHOULD BE QR GENERATION
+    const [activeTab, setActiveTab] = useState("qr-generation");
 
     const tabs = [
         { id: "qr-generation", label: "QR Generation" },
-        // { id: "parent-child-mapping", label: "Parent-Child Mapping" },
         { id: "audit-logs", label: "Audit Logs" },
     ];
 
     return (
-        <div className="w-full min-h-screen bg-gray-100">
+        <div className="h-screen overflow-y-auto bg-gray-100 pb-10">
             <div className="bg-white">
                 <TopBar />
             </div>
@@ -57,8 +56,7 @@ const Qr = () => {
             {/* CONTENT SECTION */}
             <div className="mt-8 px-6">
                 {activeTab === "qr-generation" && <QrGeneration />}
-                {/* {activeTab === "roles" && <RolesScreen />} */}
-                {activeTab === "logs" && <AccessLogsScreen />}
+                {activeTab === "audit-logs" && <AccessLogsScreen />}
             </div>
         </div>
     );
