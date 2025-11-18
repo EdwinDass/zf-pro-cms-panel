@@ -7,6 +7,7 @@ import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 import UserRoleManagement from "../pages/role-management/UserRoleManagement";
 import Qr from "../pages/qr-management/Qr-management";
+import Tickets from "../pages/tickets/tickets";
 
 const AppRoutes = () => {
     return (
@@ -15,6 +16,7 @@ const AppRoutes = () => {
             <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
             <Route path="/role-management" element={<PrivateRoute element={<UserRoleManagement />} />} />
             <Route path="/qr" element={<PrivateRoute element={<Qr />} />} />
+            <Route path="/tickets" element={<PrivateRoute element={<Tickets />} />} />
             {/* Add more protected routes here */}
             <Route path="*" element={<NotFound />} />
         </Routes>
