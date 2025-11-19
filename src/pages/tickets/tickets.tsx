@@ -4,7 +4,7 @@ import TopBar from "../../layouts/top-bar";
 import AllTickets from "./all-tickets/all-tickets";
 
 const Tickets = () => {
-    const [activeTab, setActiveTab] = useState("qr-generation");
+    const [activeTab, setActiveTab] = useState("all-tickets");
 
     const tabs = [
         { id: "all-tickets", label: "All Tickets" },

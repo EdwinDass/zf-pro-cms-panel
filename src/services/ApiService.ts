@@ -214,4 +214,39 @@ export const getTotalGenerated = async () => {
         .then((response) => response);
 };
 
+export const getTicketCountByStatus = async (status?: string) => {
+    const url = status
+        ? `masters/tickets/count/status/${status}`
+        : `masters/tickets/count/status`;
+
+    return api
+        .get(url)
+        .then((response) => response);
+};
+
+export const getTickets = async (params: { [key: string]: any }) => {
+    return api
+        .get("user/tickets", { params })
+        .then((response) => response);
+};
+
+export const getTicketCategories = async () => {
+    return api
+        .get("masters/tickets/categories")
+        .then((response) => response);
+};
+
+export const getTicketStatus = async () => {
+    return api
+        .get("masters/tickets/statuses")
+        .then((response) => response);
+};
+
+export const getRoles = async () => {
+    return api
+        .get("user/roles")
+        .then((response) => response);
+};
+
+
 
