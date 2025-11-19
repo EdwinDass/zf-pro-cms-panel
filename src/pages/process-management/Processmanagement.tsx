@@ -1,38 +1,26 @@
 import React, { useState } from "react";
-import StaffScreen from "./staff/StaffPage";
-import RolesScreen from "./roles/RolesPage";
-import AccessLogsScreen from "./access-logs/AccessLogsPage";
 import TopBar from "../../layouts/top-bar";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import ShieldIcon from "@mui/icons-material/Shield";
+import ScanRequests from "./scan-requests/ScanRequests";
+import RedemptionRequests from "./redemption-requests/RedemptionRequests";
+import ManualEntry from "./manual-entry/ManualEntry";
 
-const UserRoleManagement = () => {
-    const [activeTab, setActiveTab] = useState("staff");
+const ProcessManagement = () => {
+    const [activeTab, setActiveTab] = useState("ScanRequests");
 
     const tabs = [
-        { id: "staff", label: "Staff" },
-        { id: "roles", label: "Roles" },
-        { id: "logs", label: "Access Logs" },
+        { id: "ScanRequests", label: "Scan/Transaction Requests" },
+        { id: "RedemptionRequests", label: "Redemption Requests" },
+        { id: "ManualEntry", label: "Manual Entry" },
     ];
 
     return (
         <div className="h-screen overflow-y-auto bg-gray-100 pb-10">
             <div className="bg-white">
                 <TopBar
-                    title="Role Management"
-                    description="Manage user roles, permissions and access control"
-                    actionButton={
-                        <div className="flex items-center gap-3">
-                            <button className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg">
-                                <PersonAddIcon fontSize="small" />
-                                Add User
-                            </button>
-                            <button className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg">
-                                <ShieldIcon fontSize="small" />
-                                Create Role
-                            </button>
-                        </div>
-                    }
+                    title="Process Management"
+                    description="Approve/reject scan/transactions and redemption requests"
                 />
             </div>
             {/* TABS SECTION */}
@@ -72,12 +60,12 @@ const UserRoleManagement = () => {
 
             {/* CONTENT SECTION */}
             <div className="mt-6 px-8">
-                {activeTab === "staff" && <StaffScreen />}
-                {activeTab === "roles" && <RolesScreen />}
-                {activeTab === "logs" && <AccessLogsScreen />}
+                {activeTab === "ScanRequests" && <ScanRequests />}
+                {activeTab === "RedemptionRequests" && <RedemptionRequests />}
+                {activeTab === "ManualEntry" && <ManualEntry />}
             </div>
         </div>
     );
 };
 
-export default UserRoleManagement;
+export default ProcessManagement;
