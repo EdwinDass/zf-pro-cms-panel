@@ -10,9 +10,9 @@ const ProcessManagement = () => {
     const [activeTab, setActiveTab] = useState("ScanRequests");
 
     const tabs = [
-        { id: "ScanRequests", label: "Scan/Transaction Requests" },
-        { id: "RedemptionRequests", label: "Redemption Requests" },
-        { id: "ManualEntry", label: "Manual Entry" },
+        { id: "ScanRequests", label: "Process Redemption" },
+        // { id: "RedemptionRequests", label: "Redemption Requests" },
+        // { id: "ManualEntry", label: "Manual Entry" },
     ];
 
     return (
@@ -61,8 +61,8 @@ const ProcessManagement = () => {
             {/* CONTENT SECTION */}
             <div className="mt-6 px-8">
                 {activeTab === "ScanRequests" && <ScanRequests />}
-                {activeTab === "RedemptionRequests" && <RedemptionRequests />}
-                {activeTab === "ManualEntry" && <ManualEntry />}
+                {/* {activeTab === "RedemptionRequests" && <RedemptionRequests />} */}
+                {/* {activeTab === "ManualEntry" && <ManualEntry />} */}
             </div>
         </div>
     );

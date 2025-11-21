@@ -10,6 +10,8 @@ import Qr from "../pages/qr-management/Qr-management";
 import Tickets from "../pages/tickets/tickets";
 import ProcessManagement from "../pages/process-management/Processmanagement";
 import Integrations from "../pages/integrations/Integrations";
+import MisAnalytics from "../pages/mis-analytics/MsiAnalytics";
+import Reports from "../pages/mis-analytics/reports/Reports";
 
 const AppRoutes = () => {
     return (
@@ -22,6 +24,8 @@ const AppRoutes = () => {
             <Route path="/tickets" element={<PrivateRoute element={<Tickets />} />} />
             <Route path="/process-management" element={<PrivateRoute element={<ProcessManagement />} />} />
             <Route path="/integrations" element={<PrivateRoute element={<Integrations />} />} />
+            <Route path="/mis-analytics" element={<PrivateRoute element={<MisAnalytics />} />} />
+            <Route path="/reports" element={<PrivateRoute element={<Reports />} />} />
         </Routes>
     );
 };
