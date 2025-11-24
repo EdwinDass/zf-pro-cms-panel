@@ -1,78 +1,73 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import CustomTable, { Column } from "../../../components/CustomTable";
 import ConfirmRedemption from "../confirm-redemption/ConfirmRedemption";
 import ExcelUpload from "../excel-upload/ExcelUpload";
 import * as XLSX from "xlsx";
 import { toast } from "react-toastify";
+import { getRedemptionHistory, updateRedemptionStatus } from "../../../services/ApiService";
 
 interface ScanRequest {
     id: string;
+    slno: number;
+    redemptionRef: string;
     userName: string;
-    initials: string;
-    color: string;
-    amount: string;
-    status: string;
+    userRole: string;
+    redeemedPoints: string;
+    createdAt: string;
+    redemptionMode: string;
+    redemptionStatus: string;
 }
 
 const ScanRequests: React.FC = () => {
+    const [data, setData] = useState<ScanRequest[]>([]);
     const [selectedRows, setSelectedRows] = useState<ScanRequest[]>([]);
     const [showConfirmPopup, setShowConfirmPopup] = useState(false);
     const [currentAction, setCurrentAction] = useState<"approve" | "reject">("approve");
     const [showExcelUpload, setShowExcelUpload] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const menuRef = useRef<HTMLDivElement>(null);
 
-    const data: ScanRequest[] = [
-        {
-            id: "#REQ-2847",
-            userName: "John Doe",
-            initials: "JD",
-            color: "bg-blue-500",
-            amount: "₹2,500",
-            status: "Pending"
-        },
-        {
-            id: "#REQ-2848",
-            userName: "Alice Smith",
-            initials: "AS",
-            color: "bg-green-500",
-            amount: "₹5,200",
-            status: "Pending"
-        },
-        {
-            id: "#REQ-2849",
-            userName: "Robert Johnson",
-            initials: "RJ",
-            color: "bg-purple-500",
-            amount: "₹1,800",
-            status: "Pending"
-        },
-        {
-            id: "#REQ-2850",
-            userName: "Emma Wilson",
-            initials: "EW",
-            color: "bg-yellow-500",
-            amount: "₹3,750",
-            status: "Pending"
-        },
-        {
-            id: "#REQ-2851",
-            userName: "Michael Brown",
-            initials: "MB",
-            color: "bg-red-500",
-            amount: "₹4,100",
-            status: "Pending"
-        },
-        {
-            id: "#REQ-2852",
-            userName: "Sarah Davis",
-            initials: "SD",
-            color: "bg-indigo-500",
-            amount: "₹2,900",
-            status: "Pending"
-        },
-    ];
+    // Pagination
+    const [skip, setSkip] = useState(0);
+    const limit = 10;
+    const [totalCount, setTotalCount] = useState(0);
+
+    const fetchRedemptionHistory = async () => {
+        try {
+            setLoading(true);
+            const payload: any = {
+                status: ["Pending"],
+                skip,
+                limit
+            };
+            console.log("📤 API PAYLOAD SENT:", payload);
+            const res = await getRedemptionHistory(payload);
+            console.log("📥 API RESPONSE RECEIVED:", res);
+            const formatted: ScanRequest[] = res.data.reportList.map((item: any) => ({
+                id: item.redemptionRef,
+                slno: item.slno,
+                redemptionRef: item.redemptionRef,
+                userName: item.userName,
+                userRole: item.userRole,
+                redeemedPoints: item.redeemedPoints,
+                createdAt: item.createdAt,
+                redemptionMode: item.redemptionMode,
+                redemptionStatus: item.redemptionStatus,
+            }));
+            setData(formatted);
+            setTotalCount(res.data.totalCount);
+            setLoading(false);
+        } catch (error) {
+            setLoading(false);
+            toast.error("Something went wrong");
+        }
+    };
+
+    useEffect(() => {
+        fetchRedemptionHistory();
+    }, [skip]);
 
     const handleApprove = () => {
         if (selectedRows.length === 0) {
@@ -100,48 +95,61 @@ const ScanRequests: React.FC = () => {
         XLSX.writeFile(wb, "process_redemption.xlsx");
     };
 
+    const handleConfirm = async (comments: { [key: string]: string }) => {
+        try {
+            const apiPayload = {
+                payload: selectedRows.map(item => ({
+                    redemptionRef: item.redemptionRef,
+                    status: currentAction === "approve" ? "Approve" : "Reject",
+                    comment: currentAction === "reject" ? (comments[item.redemptionRef] || "") : ""
+                }))
+            };
 
-    const handleConfirm = (comments: { [key: string]: string }) => {
-        console.log("Action:", currentAction);
-        console.log("Selected:", selectedRows);
-        console.log("Comments:", comments);
+            console.log("📤 APPROVE/REJECT API PAYLOAD:", apiPayload);
 
-        toast.success(`${selectedRows.length} request(s) ${currentAction === "approve" ? "approved" : "rejected"
-            } successfully!`);
+            const res = await updateRedemptionStatus(apiPayload);
 
-        setShowConfirmPopup(false);
-        setSelectedRows([]);
+            console.log("📥 APPROVE/REJECT RESPONSE:", res);
+
+            toast.success(
+                `${selectedRows.length} request(s) ${currentAction === "approve" ? "approved" : "rejected"
+                } successfully!`
+            );
+
+            setShowConfirmPopup(false);
+            setSelectedRows([]);
+            fetchRedemptionHistory();
+
+        } catch (error: any) {
+            console.error("❗ API ERROR:", error);
+            toast.error(error?.response?.data?.message || "Failed to process request");
+        }
     };
 
+
     const downloadExcelFormat = () => {
-        const ws = XLSX.utils.json_to_sheet([], { header: ["redemption_ref", "status", "comments"] });
+        const ws = XLSX.utils.json_to_sheet([], {
+            header: ["redemptionRef", "status", "comments"]
+        });
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Format");
         XLSX.writeFile(wb, "redemption_format.xlsx");
     };
 
     const columns: Column[] = [
-        { key: "id", label: "Redemption Ref" },
-        {
-            key: "user",
-            label: "User Name",
-            render: (row: ScanRequest) => (
-                <div className="flex items-center">
-                    <div
-                        className={`w-10 h-10 rounded-full ${row.color} flex justify-center items-center text-white font-semibold`}
-                    >
-                        {row.initials}
-                    </div>
-                    <div className="ml-3 font-medium text-gray-900">{row.userName}</div>
-                </div>
-            ),
-        },
-        { key: "amount", label: "Amount" },
-        { key: "status", label: "Status" },
+        { key: "slno", label: "SL No" },
+        { key: "redemptionRef", label: "Redemption Ref" },
+        { key: "userName", label: "User Name" },
+        { key: "userRole", label: "Role" },
+        { key: "redeemedPoints", label: "Points" },
+        { key: "createdAt", label: "Created At" },
+        { key: "redemptionMode", label: "Mode" },
+        { key: "redemptionStatus", label: "Status" },
     ];
 
     return (
         <div>
+
             {/* Action Buttons + Menu */}
             <div className="bg-white rounded-xl shadow p-6 border border-gray-100 mt-6">
                 <div className="flex justify-between items-center mb-6">
@@ -181,14 +189,12 @@ const ScanRequests: React.FC = () => {
                             <span>Export</span>
                         </button>
 
-
-
                         {/* 3 DOTS MENU */}
                         <div className="relative" ref={menuRef}>
                             <button
                                 type="button"
                                 onClick={() => setMenuOpen(!menuOpen)}
-                                aria-label="More options"  // Accessible name
+                                aria-label="More options"
                                 className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50"
                             >
                                 <i className="fas fa-ellipsis-v"></i>
@@ -217,7 +223,6 @@ const ScanRequests: React.FC = () => {
                                     </button>
                                 </div>
                             )}
-
                         </div>
                     </div>
                 </div>
@@ -225,7 +230,7 @@ const ScanRequests: React.FC = () => {
                 <CustomTable
                     columns={columns}
                     data={data}
-                    pageSize={4}
+                    pageSize={limit}
                     selectable
                     selectedRows={selectedRows}
                     onSelectionChange={setSelectedRows}

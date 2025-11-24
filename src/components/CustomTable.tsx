@@ -73,11 +73,31 @@ const CustomTable: React.FC<TableComponentProps> = ({
         }
     };
 
+    // Generate page numbers with ellipsis for better mobile display
+    const getPageNumbers = () => {
+        const pageNumbers = [];
+        const maxVisible = 3; // Show max 3 page numbers on mobile
+
+        if (totalPages <= 5) {
+            for (let i = 1; i <= totalPages; i++) {
+                pageNumbers.push(i);
+            }
+        } else {
+            if (page <= 3) {
+                pageNumbers.push(1, 2, 3, '...', totalPages);
+            } else if (page >= totalPages - 2) {
+                pageNumbers.push(1, '...', totalPages - 2, totalPages - 1, totalPages);
+            } else {
+                pageNumbers.push(1, '...', page, '...', totalPages);
+            }
+        }
+        return pageNumbers;
+    };
+
     return (
         <div className="bg-white rounded-xl shadow border border-gray-100 transition-transform transform hover:scale-[1.01] hover:shadow-lg">
-
-            {/* TABLE */}
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead>
                         <tr>
@@ -96,7 +116,7 @@ const CustomTable: React.FC<TableComponentProps> = ({
                             {columns.map(col => (
                                 <th
                                     key={col.key}
-                                    className={`px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase whitespace-nowrap ${col.className}`}
+                                    className={`px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase whitespace-nowrap ${col.className || ''}`}
                                 >
                                     {col.label}
                                 </th>
@@ -113,17 +133,14 @@ const CustomTable: React.FC<TableComponentProps> = ({
                             return (
                                 <tr
                                     key={index}
-                                    className={`hover:bg-gray-50 ${isSelected ? "bg-blue-50" : ""
-                                        }`}
+                                    className={`hover:bg-gray-50 transition-colors ${isSelected ? "bg-blue-50" : ""}`}
                                 >
                                     {selectable && (
                                         <td className="px-6 py-4 w-12">
                                             <input
                                                 type="checkbox"
                                                 checked={isSelected}
-                                                onChange={() =>
-                                                    handleRowSelect(item)
-                                                }
+                                                onChange={() => handleRowSelect(item)}
                                                 aria-label="Select row"
                                                 className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                                             />
@@ -135,9 +152,7 @@ const CustomTable: React.FC<TableComponentProps> = ({
                                             key={col.key}
                                             className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap"
                                         >
-                                            {col.render
-                                                ? col.render(item)
-                                                : item[col.key]}
+                                            {col.render ? col.render(item) : item[col.key]}
                                         </td>
                                     ))}
                                 </tr>
@@ -147,10 +162,7 @@ const CustomTable: React.FC<TableComponentProps> = ({
                         {paginatedData.length === 0 && (
                             <tr>
                                 <td
-                                    colSpan={
-                                        columns.length +
-                                        (selectable ? 1 : 0)
-                                    }
+                                    colSpan={columns.length + (selectable ? 1 : 0)}
                                     className="text-center py-6 text-gray-500"
                                 >
                                     No data found
@@ -161,40 +173,112 @@ const CustomTable: React.FC<TableComponentProps> = ({
                 </table>
             </div>
 
-            {/* PAGINATION */}
-            <div className="flex justify-between items-center px-6 py-4 border-t border-gray-200">
-                <div className="text-sm text-gray-600">
-                    Showing {startIndex + 1} to{" "}
-                    {Math.min(startIndex + pageSize, data.length)} of{" "}
-                    {data.length} entries
+            {/* Mobile Card View */}
+            <div className="md:hidden">
+                {paginatedData.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                        No data found
+                    </div>
+                ) : (
+                    <div className="divide-y divide-gray-200">
+                        {paginatedData.map((item, index) => {
+                            const isSelected = selectedRows.some(
+                                selected => selected.id === item.id
+                            );
+
+                            return (
+                                <div
+                                    key={index}
+                                    className={`p-4 ${isSelected ? "bg-blue-50" : "hover:bg-gray-50"} transition-colors`}
+                                >
+                                    {selectable && (
+                                        <div className="flex items-center mb-3">
+                                            <input
+                                                type="checkbox"
+                                                checked={isSelected}
+                                                onChange={() => handleRowSelect(item)}
+                                                aria-label="Select row"
+                                                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                            />
+                                            <span className="ml-2 text-sm font-medium text-gray-700">
+                                                Select
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-2">
+                                        {columns.map(col => (
+                                            <div key={col.key} className="flex justify-between items-start">
+                                                <span className="text-xs font-medium text-gray-500 uppercase flex-shrink-0 mr-2">
+                                                    {col.label}:
+                                                </span>
+                                                <span className="text-sm text-gray-700 text-right flex-1">
+                                                    {col.render ? col.render(item) : item[col.key]}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+
+            {/* Pagination */}
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 px-4 sm:px-6 py-4 border-t border-gray-200">
+                {/* Results Info */}
+                <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
+                    Showing {startIndex + 1} to {Math.min(startIndex + pageSize, data.length)} of {data.length} entries
                 </div>
 
-                <div className="flex space-x-2">
+                {/* Pagination Controls */}
+                <div className="flex items-center space-x-1 sm:space-x-2">
                     <button
-                        className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
+                        className="px-2 sm:px-3 py-1 border border-gray-300 rounded-md text-xs sm:text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         onClick={() => goToPage(page - 1)}
+                        disabled={page === 1}
                     >
-                        Previous
+                        <span className="hidden sm:inline">Previous</span>
+                        <span className="sm:hidden">
+                            <i className="fas fa-chevron-left"></i>
+                        </span>
                     </button>
 
-                    {[...Array(totalPages)].map((_, idx) => (
-                        <button
-                            key={idx}
-                            className={`px-3 py-1 rounded-md text-sm ${page === idx + 1
-                                    ? "bg-blue-600 text-white"
-                                    : "border border-gray-300 hover:bg-gray-50"
-                                }`}
-                            onClick={() => goToPage(idx + 1)}
-                        >
-                            {idx + 1}
-                        </button>
-                    ))}
+                    {/* Page Numbers */}
+                    <div className="flex space-x-1">
+                        {getPageNumbers().map((pageNum, idx) => (
+                            pageNum === '...' ? (
+                                <span
+                                    key={`ellipsis-${idx}`}
+                                    className="px-2 sm:px-3 py-1 text-xs sm:text-sm text-gray-500"
+                                >
+                                    ...
+                                </span>
+                            ) : (
+                                <button
+                                    key={idx}
+                                    className={`px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm transition-colors ${page === pageNum
+                                            ? "bg-blue-600 text-white"
+                                            : "border border-gray-300 hover:bg-gray-50"
+                                        }`}
+                                    onClick={() => goToPage(pageNum as number)}
+                                >
+                                    {pageNum}
+                                </button>
+                            )
+                        ))}
+                    </div>
 
                     <button
-                        className="px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
+                        className="px-2 sm:px-3 py-1 border border-gray-300 rounded-md text-xs sm:text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         onClick={() => goToPage(page + 1)}
+                        disabled={page === totalPages}
                     >
-                        Next
+                        <span className="hidden sm:inline">Next</span>
+                        <span className="sm:hidden">
+                            <i className="fas fa-chevron-right"></i>
+                        </span>
                     </button>
                 </div>
             </div>

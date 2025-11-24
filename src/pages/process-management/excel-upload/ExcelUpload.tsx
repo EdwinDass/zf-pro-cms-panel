@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
+import { updateRedemptionStatus } from "../../../services/ApiService";
 
 interface ExcelUploadProps {
     isOpen: boolean;
@@ -14,7 +15,8 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
 
     if (!isOpen) return null;
 
-    const REQUIRED_HEADERS = ["redemption_ref", "status", "comments"];
+    // API field names exactly
+    const REQUIRED_HEADERS = ["redemptionref", "status", "comments"];
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -38,10 +40,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
                     return;
                 }
 
-                /** 🔥 NEW VALIDATION LOGIC:
-                 * - Excel can have ANY number of columns
-                 * - But MUST include all REQUIRED_HEADERS
-                 */
+                // normalize headers to lowercase
                 const headers = Object.keys(json[0]).map((h) => h.toLowerCase());
 
                 const isValid = REQUIRED_HEADERS.every((required) =>
@@ -49,25 +48,16 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
                 );
 
                 if (!isValid) {
-                    toast.error("Invalid Excel format. Please use the downloaded template.");
+                    toast.error("Invalid Excel format. Required: redemptionRef, status, comments");
                     setIsProcessing(false);
                     return;
                 }
 
-                /** 🔥 NEW PROCESSING LOGIC:
-                 * - Use ONLY required fields
-                 * - Ignore extra fields
-                 * - If approved/rejected and comments exist, include them
-                 */
-                const processed = json.map((row, index) => ({
-                    id: `#EXCEL-${index + 1}`,
-                    redemption_ref: row.redemption_ref,
+                // ✔ EXACT API FIELD NAMES
+                const processed = json.map((row) => ({
+                    redemptionRef: row.redemptionRef,
                     status: row.status || "pending",
-                    comments:
-                        String(row.status).toLowerCase() === "rejected" ||
-                            String(row.status).toLowerCase() === "approved"
-                            ? row.comments || ""
-                            : "",
+                    comments: row.comments || ""
                 }));
 
                 setExcelData(processed);
@@ -88,10 +78,30 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
         onClose();
     };
 
-    const handleSubmit = () => {
-        console.log("Excel Data:", excelData);
-        toast.success(`${excelData.length} records processed successfully`);
-        handleClose();
+    const handleSubmit = async () => {
+        try {
+            const apiPayload = {
+                payload: excelData.map(item => ({
+                    redemptionRef: item.redemptionRef,
+                    status: item.status,
+                    comment: item.comments || ""
+                }))
+            };
+
+            console.log("📤 EXCEL API PAYLOAD SENT:", apiPayload);
+
+            const res = await updateRedemptionStatus(apiPayload);
+
+            console.log("📥 EXCEL API RESPONSE RECEIVED:", res);
+
+            toast.success(`✔ Successfully updated ${excelData.length} records`);
+
+            handleClose();
+
+        } catch (error: any) {
+            console.error("❗ EXCEL UPLOAD API ERROR:", error);
+            toast.error(error?.response?.data?.message || "Failed to process upload");
+        }
     };
 
     return (
@@ -101,12 +111,12 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
                 <div className="px-6 py-4 border-b bg-blue-50">
                     <h2 className="text-xl font-bold text-blue-700">Upload Excel File</h2>
                     <p className="text-sm text-gray-600 mt-1">
-                        Only Excel files with these headers are accepted:
-                        <b>redemption_ref, status, comments</b>
+                        Excel must contain headers: <b>redemptionRef, status, comments</b>
                     </p>
                 </div>
 
                 <div className="flex-1 overflow-auto p-6">
+
                     {excelData.length === 0 && (
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-blue-500 transition">
                             <div className="mb-4">
@@ -123,17 +133,6 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
                                     className="hidden"
                                 />
                             </label>
-                            <p className="text-sm text-gray-500 mt-4">
-                                Only Excel formats accepted
-                            </p>
-                            {fileName && (
-                                <p className="text-sm text-blue-600 mt-2 font-medium">
-                                    Selected: {fileName}
-                                </p>
-                            )}
-                            {isProcessing && (
-                                <p className="text-sm text-orange-600 mt-2">Processing...</p>
-                            )}
                         </div>
                     )}
 
@@ -158,7 +157,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
                                     {excelData.map((row, index) => (
                                         <tr key={index} className="hover:bg-gray-50">
                                             <td className="px-4 py-3 text-sm text-gray-700 font-medium">
-                                                {row.redemption_ref}
+                                                {row.redemptionRef}
                                             </td>
                                             <td className="px-4 py-3 text-sm">
                                                 <span
@@ -172,16 +171,11 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
                                                     {row.status}
                                                 </span>
                                             </td>
-
                                             <td className="px-4 py-3 text-sm text-gray-600">
-                                                {row.status.toLowerCase() === "rejected" ? (
-                                                    row.comments || (
-                                                        <span className="text-gray-400 italic">
-                                                            No comment
-                                                        </span>
-                                                    )
-                                                ) : (
-                                                    <span className="text-gray-400">—</span>
+                                                {row.comments || (
+                                                    <span className="text-gray-400 italic">
+                                                        No comment
+                                                    </span>
                                                 )}
                                             </td>
                                         </tr>
@@ -190,6 +184,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
                             </table>
                         </div>
                     )}
+
                 </div>
 
                 <div className="px-6 py-4 bg-gray-50 border-t flex justify-end space-x-3">
@@ -208,6 +203,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
                         </button>
                     )}
                 </div>
+
             </div>
         </div>
     );

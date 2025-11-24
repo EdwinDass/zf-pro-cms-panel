@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import TopBar from "../../layouts/top-bar";
 
 import Reports from "./reports/Reports";
+import { logoutUser } from "../../redux/slices/userDataSlice";
+import { clearTokens } from "../../redux/slices/authTokenSlice";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 // ⬆️ THIS IS THE FIX
 
 const ExecutiveDashboard = () => <div>Executive Dashboard Content</div>;
@@ -11,6 +15,15 @@ const CampaignAnalytics = () => <div>Campaign Analytics Content</div>;
 
 const MisAnalytics = () => {
     const [activeTab, setActiveTab] = useState("ExecutiveDashboard");
+
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const logout = () => {
+        dispatch(logoutUser());
+        dispatch(clearTokens());
+        navigate("/");
+    };
 
     const tabs = [
         { id: "ExecutiveDashboard", label: "Executive Dashboard" },
@@ -26,6 +39,7 @@ const MisAnalytics = () => {
                 <TopBar
                     title="MIS Analytics"
                     description="Advanced analytics and insights dashboard"
+                    logout={logout}
                 />
             </div>
 

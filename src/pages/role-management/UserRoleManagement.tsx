@@ -5,9 +5,21 @@ import AccessLogsScreen from "./access-logs/AccessLogsPage";
 import TopBar from "../../layouts/top-bar";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import ShieldIcon from "@mui/icons-material/Shield";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logoutUser } from "../../redux/slices/userDataSlice";
+import { clearTokens } from "../../redux/slices/authTokenSlice";
 
 const UserRoleManagement = () => {
     const [activeTab, setActiveTab] = useState("staff");
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const logout = () => {
+        dispatch(logoutUser());
+        dispatch(clearTokens());
+        navigate("/");
+    };
 
     const tabs = [
         { id: "staff", label: "Staff" },
@@ -33,6 +45,7 @@ const UserRoleManagement = () => {
                             </button>
                         </div>
                     }
+                    logout={logout}
                 />
             </div>
             {/* TABS SECTION */}
