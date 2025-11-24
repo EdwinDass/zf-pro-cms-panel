@@ -249,4 +249,15 @@ export const getRoles = async () => {
 };
 
 
+export const getRedemptionHistory = async (payload: any) => {
+    return api
+        .post("redeem/redemptions/history", payload)
+        .then((res) => res.data);
+};
 
+export const updateRedemptionStatus = async (payload: any) => {
+    return api
+        .patch("redeem/redemptions", payload)
+        .then((response) => response)
+        .catch((error) => { throw error });
+};

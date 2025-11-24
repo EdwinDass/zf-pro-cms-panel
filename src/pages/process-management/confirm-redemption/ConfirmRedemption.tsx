@@ -19,8 +19,8 @@ const ConfirmRedemption: React.FC<ConfirmRedemptionProps> = ({
 
     if (!isOpen) return null;
 
-    const handleCommentChange = (id: string, value: string) => {
-        setComments(prev => ({ ...prev, [id]: value }));
+    const handleCommentChange = (redemptionRef: string, value: string) => {
+        setComments(prev => ({ ...prev, [redemptionRef]: value }));
     };
 
     const handleSubmit = () => {
@@ -54,8 +54,8 @@ const ConfirmRedemption: React.FC<ConfirmRedemptionProps> = ({
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Redemption Ref</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">User</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Amount</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">User Name</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Points</th>
 
                                     {action === "reject" && (
                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">
@@ -67,27 +67,26 @@ const ConfirmRedemption: React.FC<ConfirmRedemptionProps> = ({
 
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {selectedData.map((item) => (
-                                    <tr key={item.id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3 text-sm text-gray-700">{item.id}</td>
-
-                                        <td className="px-4 py-3 text-sm">
-                                            <div className="flex items-center">
-                                                <div className={`w-8 h-8 rounded-full ${item.color} flex justify-center items-center text-white text-xs font-semibold`}>
-                                                    {item.initials}
-                                                </div>
-                                                <span className="ml-2 text-gray-900">{item.userName}</span>
-                                            </div>
+                                    <tr key={item.redemptionRef} className="hover:bg-gray-50">
+                                        <td className="px-4 py-3 text-sm text-gray-700">
+                                            {item.redemptionRef}
                                         </td>
 
-                                        <td className="px-4 py-3 text-sm text-gray-700">{item.amount}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-900">
+                                            {item.userName}
+                                        </td>
+
+                                        <td className="px-4 py-3 text-sm text-gray-700">
+                                            {item.redeemedPoints}
+                                        </td>
 
                                         {action === "reject" && (
                                             <td className="px-4 py-3">
                                                 <input
                                                     type="text"
                                                     placeholder="Add reason..."
-                                                    value={comments[item.id] || ""}
-                                                    onChange={(e) => handleCommentChange(item.id, e.target.value)}
+                                                    value={comments[item.redemptionRef] || ""}
+                                                    onChange={(e) => handleCommentChange(item.redemptionRef, e.target.value)}
                                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 />
                                             </td>
@@ -114,11 +113,10 @@ const ConfirmRedemption: React.FC<ConfirmRedemptionProps> = ({
 
                         <button
                             onClick={handleSubmit}
-                            className={`px-6 py-2 text-white rounded-lg font-medium transition ${
-                                action === "approve"
-                                    ? "bg-green-600 hover:bg-green-700"
-                                    : "bg-red-600 hover:bg-red-700"
-                            }`}
+                            className={`px-6 py-2 text-white rounded-lg font-medium transition ${action === "approve"
+                                ? "bg-green-600 hover:bg-green-700"
+                                : "bg-red-600 hover:bg-red-700"
+                                }`}
                         >
                             Confirm {action === "approve" ? "Approval" : "Rejection"}
                         </button>

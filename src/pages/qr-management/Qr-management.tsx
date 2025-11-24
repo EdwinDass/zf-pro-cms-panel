@@ -2,10 +2,22 @@ import React, { useState } from "react";
 import AccessLogsScreen from "../role-management/access-logs/AccessLogsPage";
 import TopBar from "../../layouts/top-bar";
 import QrGeneration from "./qr-generation/qr-generation";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logoutUser } from "../../redux/slices/userDataSlice";
+import { clearTokens } from "../../redux/slices/authTokenSlice";
 
 const Qr = () => {
     // DEFAULT TAB SHOULD BE QR GENERATION
     const [activeTab, setActiveTab] = useState("qr-generation");
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const logout = () => {
+        dispatch(logoutUser());
+        dispatch(clearTokens());
+        navigate("/");
+    };
 
     const tabs = [
         { id: "qr-generation", label: "QR Generation" },
@@ -15,7 +27,9 @@ const Qr = () => {
     return (
         <div className="h-screen overflow-y-auto bg-gray-100 pb-10">
             <div className="bg-white">
-                <TopBar />
+                <TopBar
+                    logout={logout}
+                />
             </div>
 
             {/* TABS SECTION */}

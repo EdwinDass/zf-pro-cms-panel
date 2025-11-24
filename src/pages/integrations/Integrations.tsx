@@ -1,8 +1,22 @@
 import React from "react";
 import AddIcon from "@mui/icons-material/Add";
 import TopBar from "../../layouts/top-bar";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logoutUser } from "../../redux/slices/userDataSlice";
+import { clearTokens } from "../../redux/slices/authTokenSlice";
+
 
 const Integrations = () => {
+
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const logout = () => {
+        dispatch(logoutUser());
+        dispatch(clearTokens());
+        navigate("/");
+    };
     return (
         <div className="min-h-screen bg-gray-50">
             <TopBar
@@ -14,6 +28,7 @@ const Integrations = () => {
                         Add Integration
                     </button>
                 }
+                logout={logout}
             />
             <div className="flex flex-col items-center justify-center h-[75vh] text-center px-4">
                 <h1 className="text-4xl font-bold text-gray-900 mb-3">

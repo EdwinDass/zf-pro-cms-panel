@@ -2,9 +2,21 @@ import React, { useState } from "react";
 import AccessLogsScreen from "../role-management/access-logs/AccessLogsPage";
 import TopBar from "../../layouts/top-bar";
 import AllTickets from "./all-tickets/all-tickets";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logoutUser } from "../../redux/slices/userDataSlice";
+import { clearTokens } from "../../redux/slices/authTokenSlice";
 
 const Tickets = () => {
     const [activeTab, setActiveTab] = useState("all-tickets");
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const logout = () => {
+        dispatch(logoutUser());
+        dispatch(clearTokens());
+        navigate("/");
+    };
 
     const tabs = [
         { id: "all-tickets", label: "All Tickets" },
@@ -25,6 +37,7 @@ const Tickets = () => {
                             Create Ticket
                         </button>
                     }
+                    logout={logout}
                 />
             </div>
             {/* TABS SECTION */}

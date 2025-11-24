@@ -11,19 +11,20 @@ import TopBar from "../../layouts/top-bar";
 import { useDispatch } from "react-redux";
 import { RootState } from "../../redux/store";
 import { clearTokens } from "../../redux/slices/authTokenSlice";
+import { logoutUser } from "../../redux/slices/userDataSlice";
 
 const Dashboard = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch()
-
-    const handleLogout = () => {
+    const logout = () => {
+        dispatch(logoutUser());
+        dispatch(clearTokens());
         navigate("/");
-        dispatch(clearTokens())
     };
 
     return (
         <div className="h-screen overflow-y-auto pb-10">
-            <TopBar logout={handleLogout}/>
+            <TopBar logout={logout} />
             <div className="m-5">
                 <StatsRowOne />
                 <StatsRowTwo />

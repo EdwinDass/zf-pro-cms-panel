@@ -6,112 +6,74 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CustomTable, { Column } from "../../../../components/CustomTable";
 
-const RedemptionReport = () => {
+const QRTransactionReport = () => {
     const [stakeholder, setStakeholder] = useState("All");
     const [sku, setSku] = useState("All");
     const [geo, setGeo] = useState("All");
     const [dateRange, setDateRange] = useState("");
 
-    // Updated Columns
     const columns: Column[] = [
-        { key: "redemptionId", label: "Redemption ID" },
-        { key: "userFullName", label: "User Full Name" },
-        { key: "userUniqueCode", label: "User Unique Code" },
-        { key: "redeemedPoints", label: "Redeemed Points" },
-        {
-            key: "status",
-            label: "Status",
-            render: (row: any) => (
-                <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${row.statusColor}`}
-                >
-                    {row.status}
-                </span>
-            )
-        },
-        { key: "mobileNumber", label: "User Mobile Number" },
-        { key: "userType", label: "User Type" },
-        { key: "dateOfJoining", label: "Date of Joining" },
-        { key: "totalEarnedPoints", label: "Total Earned Points" },
-        { key: "requestDate", label: "Redemption Request Date" },
-        { key: "processedDate", label: "Redemption Processed Date" },
-        { key: "details", label: "Redemption Details" }
+        { key: "transactionId", label: "Transaction ID" },
+        { key: "transactionDate", label: "Transaction Date" },
+        { key: "amount", label: "Amount" },
+        { key: "paymentStatus", label: "Payment Status" },
+        { key: "qrCodeId", label: "QR Code ID" },
+        { key: "purpose", label: "Purpose" },
+        { key: "qrContent", label: "QR Content" },
+        { key: "userId", label: "User ID" },
+        { key: "userName", label: "User Name" },
+        { key: "email", label: "Email" },
+        { key: "phone", label: "Phone" },
+        { key: "latitude", label: "Latitude" },
+        { key: "longitude", label: "Longitude" },
+        { key: "address", label: "Address" },
+        { key: "city", label: "City" },
+        { key: "country", label: "Country" }
     ];
 
-    // Dummy Data
     const sampleData = [
         {
-            redemptionId: "RDM12345",
-            userFullName: "John Doe",
-            userUniqueCode: "USR001",
-            redeemedPoints: 150,
-            status: "Approved",
-            statusColor: "bg-green-100 text-green-600",
-            mobileNumber: "9876543210",
-            userType: "Mechanic",
-            dateOfJoining: "2022-05-10",
-            totalEarnedPoints: 3200,
-            requestDate: "2023-10-01 10:30",
-            processedDate: "2023-10-02 14:10",
-            details: "Redeemed for shopping voucher"
-        },
-        {
-            redemptionId: "RDM12346",
-            userFullName: "Amit Sharma",
-            userUniqueCode: "USR002",
-            redeemedPoints: 200,
-            status: "Pending",
-            statusColor: "bg-yellow-100 text-yellow-600",
-            mobileNumber: "9123456780",
-            userType: "Workshop",
-            dateOfJoining: "2021-03-12",
-            totalEarnedPoints: 5100,
-            requestDate: "2023-10-05 09:20",
-            processedDate: "-",
-            details: "Awaiting approval"
-        },
-        {
-            redemptionId: "RDM12347",
-            userFullName: "Rahul Verma",
-            userUniqueCode: "USR003",
-            redeemedPoints: 100,
-            status: "Rejected",
-            statusColor: "bg-red-100 text-red-600",
-            mobileNumber: "9988776655",
-            userType: "Mechanic",
-            dateOfJoining: "2020-11-22",
-            totalEarnedPoints: 2800,
-            requestDate: "2023-10-08 15:45",
-            processedDate: "2023-10-09 16:30",
-            details: "Insufficient points"
+            transactionId: "TXN1001",
+            transactionDate: "2025-11-20 12:30",
+            amount: 249.5,
+            paymentStatus: "Success",
+            qrCodeId: "QR12345",
+            purpose: "Payment",
+            qrContent: "https://example.com/pay/QR12345",
+            userId: "USR001",
+            userName: "John Doe",
+            email: "john@example.com",
+            phone: "9876543210",
+            latitude: "28.644800",
+            longitude: "77.216721",
+            address: "Some Street",
+            city: "New Delhi",
+            country: "India"
         }
     ];
 
     return (
-        <div className="bg-white rounded-xl shadow p-6 border border-gray-200 -ml-4">
+        <div className="bg-white rounded-xl shadow p-6 border border-gray-200 w-full overflow-x-hidden">
 
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between">
-
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-xl font-bold">Redemption Report</h2>
-                    <p className="text-gray-500 text-sm">View all redemption activity details</p>
+                    <h2 className="text-xl font-bold">QR Transaction Report</h2>
+                    <p className="text-gray-500 text-sm">QR transactions overview</p>
                 </div>
 
-                {/* Export Buttons */}
-                <div className="flex gap-3 mt-4 md:mt-0">
-
-                    <button className="px-3 py-1.5 bg-blue-600 text-white rounded-md flex items-center text-sm">
+                <div className="flex flex-wrap gap-3">
+                    <button className="px-3 py-1.5 bg-blue-600 text-white rounded-md flex items-center text-sm whitespace-nowrap">
                         <DownloadIcon fontSize="small" className="mr-2" />
                         Export CSV
                     </button>
 
-                    <button className="px-3 py-1.5 bg-red-600 text-white rounded-md flex items-center text-sm">
+                    <button className="px-3 py-1.5 bg-red-600 text-white rounded-md flex items-center text-sm whitespace-nowrap">
                         <PictureAsPdfIcon fontSize="small" className="mr-2" />
                         Export PDF
                     </button>
 
-                    <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md flex items-center text-sm">
+                    <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md flex items-center text-sm whitespace-nowrap">
                         <AccessTimeIcon fontSize="small" className="mr-2" />
                         Schedule
                     </button>
@@ -121,7 +83,7 @@ const RedemptionReport = () => {
             {/* Filters */}
             <div className="mt-6">
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg">
 
                     {/* Stakeholder */}
                     <div>
@@ -130,6 +92,7 @@ const RedemptionReport = () => {
                         </label>
                         <select
                             id="stakeholder"
+                            aria-label="Stakeholder Filter"
                             className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
                             value={stakeholder}
                             onChange={(e) => setStakeholder(e.target.value)}
@@ -147,6 +110,7 @@ const RedemptionReport = () => {
                         </label>
                         <select
                             id="sku"
+                            aria-label="SKU Filter"
                             className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
                             value={sku}
                             onChange={(e) => setSku(e.target.value)}
@@ -164,6 +128,7 @@ const RedemptionReport = () => {
                         </label>
                         <select
                             id="geo"
+                            aria-label="Geography Filter"
                             className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
                             value={geo}
                             onChange={(e) => setGeo(e.target.value)}
@@ -181,16 +146,18 @@ const RedemptionReport = () => {
                         </label>
                         <input
                             id="dateRange"
+                            aria-label="Date Range Filter"
                             type="date"
                             className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
                             value={dateRange}
                             onChange={(e) => setDateRange(e.target.value)}
                         />
                     </div>
+
                 </div>
 
                 <div className="flex justify-end mt-3">
-                    <button className="px-5 py-2 bg-blue-600 text-white rounded-md flex items-center text-sm">
+                    <button className="px-5 py-2 bg-blue-600 text-white rounded-md flex items-center text-sm whitespace-nowrap">
                         <FilterListIcon fontSize="small" className="mr-2" />
                         Apply Filters
                     </button>
@@ -198,11 +165,12 @@ const RedemptionReport = () => {
             </div>
 
             {/* Table */}
-            <div className="mt-6">
+            <div className="mt-6 overflow-x-auto">
                 <CustomTable data={sampleData} columns={columns} pageSize={5} />
             </div>
+
         </div>
     );
 };
 
-export default RedemptionReport;
+export default QRTransactionReport;

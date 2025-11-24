@@ -5,9 +5,21 @@ import ShieldIcon from "@mui/icons-material/Shield";
 import ScanRequests from "./scan-requests/ScanRequests";
 import RedemptionRequests from "./redemption-requests/RedemptionRequests";
 import ManualEntry from "./manual-entry/ManualEntry";
+import { logoutUser } from "../../redux/slices/userDataSlice";
+import { clearTokens } from "../../redux/slices/authTokenSlice";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 const ProcessManagement = () => {
     const [activeTab, setActiveTab] = useState("ScanRequests");
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const logout = () => {
+        dispatch(logoutUser());
+        dispatch(clearTokens());
+        navigate("/");
+    };
 
     const tabs = [
         { id: "ScanRequests", label: "Process Redemption" },
@@ -21,6 +33,7 @@ const ProcessManagement = () => {
                 <TopBar
                     title="Process Management"
                     description="Approve/reject scan/transactions and redemption requests"
+                    logout={logout}
                 />
             </div>
             {/* TABS SECTION */}

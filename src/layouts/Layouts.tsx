@@ -1,7 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import "./layout.css"
-import TopBar from './top-bar';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -23,6 +21,30 @@ export const Layout: React.FC<LayoutProps> = ({
 }) => {
     const navigate = useNavigate();
     const location = useLocation();
+    const [expanded, setExpanded] = useState(() => {
+        const savedExpanded = sessionStorage.getItem('sidebarExpanded');
+        return savedExpanded !== null ? JSON.parse(savedExpanded) : false;
+    });
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkIfMobile = () => {
+            setIsMobile(window.innerWidth <= 992);
+        };
+        checkIfMobile();
+        window.addEventListener('resize', checkIfMobile);
+        return () => window.removeEventListener('resize', checkIfMobile);
+    }, []);
+
+    useEffect(() => {
+        if (isMobile) {
+            setExpanded(false);
+        }
+    }, [isMobile]);
+
+    useEffect(() => {
+        sessionStorage.setItem('sidebarExpanded', JSON.stringify(expanded));
+    }, [expanded]);
 
     const navItems: NavItem[] = [
         { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-tachometer-alt', path: '/dashboard' },
@@ -41,64 +63,148 @@ export const Layout: React.FC<LayoutProps> = ({
         { id: 'configuration', label: 'Configuration', icon: 'fas fa-sliders-h', path: '/configuration' },
     ];
 
-    // Navigation handler
     const handleNavigation = (path: string) => {
         navigate(path);
+        if (isMobile) {
+            setExpanded(false);
+        }
     };
 
-    // Check if current route is active
     const isActive = (path: string) => {
         return location.pathname === path;
     };
 
     return (
-        <div className="min-h-screen light-theme body-temp">
-            {/*<!-- Notification --> */}
-            <div id="notification" className="notification"></div>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            {/* Overlay for mobile */}
+            {isMobile && expanded && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                    onClick={() => setExpanded(false)}
+                    aria-label="Close sidebar overlay"
+                />
+            )}
 
-            {/*<!-- Dashboard Page --> */}
-            <div className='flex w-full'>
-                <div id="dashboard-page" className="page active">
-                    <div className="flex h-screen">
-                        {/*<!-- Sidebar --> */}
-                        <div className="sidebar w-64 flex flex-col">
-                            <div className="p-6 border-b border-custom">
-                                <img src="https://ik.imagekit.io/ewxcertfq/ZF_proPoints_Logo_xcept_Black_RGB%201.png?updatedAt=1760210363486"
-                                    alt="ZF Logo" className="h-10 sidebar-logo" />
-                            </div>
-                            <div className="flex-1 overflow-y-auto py-4">
-                                <nav className="px-2 space-y-1">
-                                    {navItems.map((item) => (
-                                        <button
-                                            key={item.id}
-                                            onClick={() => handleNavigation(item.path)}
-                                            className={`sidebar-item ${isActive(item.path) ? 'active' : ''} flex items-center px-4 py-3 text-sm font-medium rounded-lg text-secondary w-full text-left`}
-                                        >
-                                            <i className={`${item.icon} mr-3`}></i>
-                                            {item.label}
-                                        </button>
-                                    ))}
-                                </nav>
-                            </div>
-                            <div className="p-4 border-t border-custom">
-                                <div className="flex items-center">
-                                    <div className="flex-shrink-0">
-                                        <div
-                                            className="h-10 w-10 rounded-full bg-blue-100 dark:bg-opacity-20 flex items-center justify-center">
-                                            <span className="text-blue-800 dark:text-blue-400 font-medium">A</span>
-                                        </div>
+            {/* Mobile Hamburger Button */}
+            {isMobile && !expanded && (
+                <button
+                    onClick={() => setExpanded(true)}
+                    className="fixed top-4 left-4 z-50 bg-blue-600 text-white p-3 rounded-lg shadow-lg hover:bg-blue-700 transition-all"
+                    aria-label="Open sidebar"
+                    title="Open sidebar"
+                >
+                    <i className="fas fa-bars text-xl"></i>
+                </button>
+            )}
+
+            <div className="flex min-h-screen">
+                {/* Sidebar */}
+                <div
+                    className={`
+                        fixed top-0 h-screen bg-white shadow-xl z-50 transition-all duration-300 ease-in-out flex flex-col
+                        ${isMobile
+                            ? expanded
+                                ? 'left-0 w-4/5 max-w-xs'
+                                : '-left-full w-0'
+                            : expanded
+                                ? 'left-0 w-64'
+                                : 'left-0 w-16'
+                        }
+                    `}
+                >
+                    {/* Logo Section */}
+                    <div className="p-6 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+                        {expanded && (
+                            <img
+                                src="https://ik.imagekit.io/ewxcertfq/ZF_proPoints_Logo_xcept_Black_RGB%201.png?updatedAt=1760210363486"
+                                alt="ZF Logo"
+                                className="h-10"
+                            />
+                        )}
+
+                        {/* Desktop Collapse Button */}
+                        {!isMobile && (
+                            <button
+                                onClick={() => setExpanded(!expanded)}
+                                className="text-gray-600 hover:text-gray-900 transition-colors ml-auto"
+                                aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
+                                title={expanded ? "Collapse sidebar" : "Expand sidebar"}
+                            >
+                                <i className={`fas ${expanded ? 'fa-times' : 'fa-bars'} text-xl`}></i>
+                            </button>
+                        )}
+
+                        {/* Mobile Close Button */}
+                        {isMobile && (
+                            <button
+                                onClick={() => setExpanded(false)}
+                                className="text-gray-600 hover:text-gray-900 transition-colors ml-auto"
+                                aria-label="Close sidebar"
+                                title="Close sidebar"
+                            >
+                                <i className="fas fa-times text-xl"></i>
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Navigation */}
+                    <div className="flex-1 overflow-y-auto py-4">
+                        <nav className="px-2 space-y-1">
+                            {navItems.map((item) => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => handleNavigation(item.path)}
+                                    aria-label={item.label}
+                                    title={item.label}
+                                    className={`
+                                        flex items-center w-full text-left rounded-lg transition-all duration-200
+                                        ${expanded ? 'px-4 py-3' : 'px-3 py-3 justify-center'}
+                                        ${isActive(item.path)
+                                            ? 'bg-blue-50 text-blue-600 font-medium'
+                                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:translate-x-1'
+                                        }
+                                    `}
+                                >
+                                    <i className={`${item.icon} ${expanded ? 'mr-3' : ''} text-lg`}></i>
+                                    {expanded && <span className="text-sm whitespace-nowrap">{item.label}</span>}
+                                </button>
+                            ))}
+                        </nav>
+                    </div>
+
+                    {/* User Profile */}
+                    {expanded && (
+                        <div className="p-4 border-t border-gray-200 flex-shrink-0">
+                            <div className="flex items-center">
+                                <div className="flex-shrink-0">
+                                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <span className="text-blue-600 font-medium">A</span>
                                     </div>
-                                    <div className="ml-3">
-                                        <p className="text-sm font-medium text-primary">Admin User</p>
-                                        <p className="text-xs text-tertiary">admin@zf.com</p>
-                                    </div>
+                                </div>
+                                <div className="ml-3 overflow-hidden">
+                                    <p className="text-sm font-medium text-gray-900 truncate">Admin User</p>
+                                    <p className="text-xs text-gray-500 truncate">admin@zf.com</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
-                <div className='w-full'>
-                    {children}
+
+                {/* Main Content */}
+                <div
+                    className={`
+                        flex-1 transition-all duration-300 ease-in-out
+                        ${isMobile
+                            ? 'ml-0'
+                            : expanded
+                                ? 'ml-64'
+                                : 'ml-16'
+                        }
+                    `}
+                >
+                    <div className="w-full min-h-screen">
+                        {children}
+                    </div>
                 </div>
             </div>
         </div>
