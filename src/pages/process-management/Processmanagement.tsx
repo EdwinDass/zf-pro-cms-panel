@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import TopBar from "../../layouts/top-bar";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import ShieldIcon from "@mui/icons-material/Shield";
-import ScanRequests from "./scan-requests/ScanRequests";
+import ProcessRedemption from "./process-redemption/ProcessRedemption";
 import RedemptionRequests from "./redemption-requests/RedemptionRequests";
 import ManualEntry from "./manual-entry/ManualEntry";
 import { logoutUser } from "../../redux/slices/userDataSlice";
@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
 const ProcessManagement = () => {
-    const [activeTab, setActiveTab] = useState("ScanRequests");
+    const [activeTab, setActiveTab] = useState("ProcessRedemption");
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -22,7 +22,7 @@ const ProcessManagement = () => {
     };
 
     const tabs = [
-        { id: "ScanRequests", label: "Process Redemption" },
+        { id: "ProcessRedemption", label: "Process Redemption" },
         // { id: "RedemptionRequests", label: "Redemption Requests" },
         // { id: "ManualEntry", label: "Manual Entry" },
     ];
@@ -73,7 +73,7 @@ const ProcessManagement = () => {
 
             {/* CONTENT SECTION */}
             <div className="mt-6 px-8">
-                {activeTab === "ScanRequests" && <ScanRequests />}
+                {activeTab === "ProcessRedemption" && <ProcessRedemption />}
                 {/* {activeTab === "RedemptionRequests" && <RedemptionRequests />} */}
                 {/* {activeTab === "ManualEntry" && <ManualEntry />} */}
             </div>

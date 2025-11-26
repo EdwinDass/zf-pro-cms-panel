@@ -1,55 +1,128 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import FilterListIcon from "@mui/icons-material/FilterList";
 import DownloadIcon from "@mui/icons-material/Download";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CustomTable, { Column } from "../../../../components/CustomTable";
+import { getAdminreferralReport } from "../../../../services/ApiService";
+import ExporterButton from "../../../../components/ExportButton";
 
 const ReferralsReport = () => {
-    const [stakeholder, setStakeholder] = useState("All");
-    const [sku, setSku] = useState("All");
-    const [geo, setGeo] = useState("All");
-    const [dateRange, setDateRange] = useState("");
+    const [fromDate, setFromDate] = useState("");
+    const [toDate, setToDate] = useState("");
+
+    const [referralCode, setReferralCode] = useState("");
+    const [receiverMobileNumber, setReceiverMobileNumber] = useState("");
+
+    const [tableData, setTableData] = useState([]);
+    const [totalRows, setTotalRows] = useState(0);
+    const [page, setPage] = useState(1);
+    const pageSize = 10;
 
     const columns: Column[] = [
         { key: "senderUniqueCode", label: "Sender Unique Code" },
-        { key: "senderMobile", label: "Sender Mobile Number" },
+        { key: "senderMobileNumber", label: "Sender Mobile Number" },
         { key: "senderName", label: "Sender Name" },
         { key: "receiverUniqueCode", label: "Receiver Unique Code" },
-        { key: "receiverMobile", label: "Receiver Mobile Number" },
+        { key: "receiverMobileNumber", label: "Receiver Mobile Number" },
         { key: "receiverName", label: "Receiver Name" },
         { key: "referralCode", label: "Referral Code" },
-        { key: "pointsSender", label: "Points Earned by Sender" },
-        { key: "pointsReceiver", label: "Points Earned by Receiver" },
+        { key: "pointsEarnedBySender", label: "Points Earned by Sender" },
+        { key: "pointsEarnedByReceiver", label: "Points Earned by Receiver" },
         { key: "dateOfReferral", label: "Date of Referral" }
     ];
 
-    const sampleData = [
-        {
-            senderUniqueCode: "UC100",
-            senderMobile: "9876543210",
-            senderName: "John Doe",
-            receiverUniqueCode: "UC200",
-            receiverMobile: "9123456780",
-            receiverName: "Amit Sharma",
-            referralCode: "REF2025",
-            pointsSender: 50,
-            pointsReceiver: 30,
-            dateOfReferral: "2025-11-15"
+    const fetchReport = async () => {
+        try {
+            const payload: any = {
+                limit: pageSize,
+                skip: (page - 1) * pageSize
+            };
+
+            if (fromDate) payload.fromDate = fromDate;
+            if (toDate) payload.toDate = toDate;
+            if (referralCode) payload.referralCode = referralCode;
+            if (receiverMobileNumber) payload.receiverMobileNumber = receiverMobileNumber;
+
+            const res = await getAdminreferralReport(payload);
+
+            const mapped = res.data.data.reportList.map((item: any) => ({
+                senderUniqueCode: item.senderUniqueCode ?? "",
+                senderMobileNumber: item.senderMobileNumber ?? "",
+                senderName: item.senderName ?? "",
+                receiverUniqueCode: item.receiverUniqueCode ?? "",
+                receiverMobileNumber: item.receiverMobileNumber ?? "",
+                receiverName: item.receiverName ?? "",
+                referralCode: item.referralCode ?? "",
+                pointsEarnedBySender: item.pointsEarnedBySender ?? 0,
+                pointsEarnedByReceiver: item.pointsEarnedByReceiver ?? 0,
+                dateOfReferral: item.dateOfReferral ?? "",
+            }));
+
+            setTableData(mapped);
+            setTotalRows(res.data.data.totalCount);
+
+        } catch (err) {
+            console.error("API ERROR:", err);
         }
-    ];
+    };
+
+    useEffect(() => {
+        fetchReport();
+    }, [page]);
+
+    const onPageChange = (newPage: number) => {
+        setPage(newPage);
+    };
+
+    // EXPORT FUNCTION
+    const fileExporter = async () => {
+        try {
+            const payload: any = {
+                skip: 0,
+                limit: totalRows,
+            };
+
+            if (fromDate) payload.fromDate = fromDate;
+            if (toDate) payload.toDate = toDate;
+            if (referralCode) payload.referralCode = referralCode;
+            if (receiverMobileNumber) payload.receiverMobileNumber = receiverMobileNumber;
+
+            const res = await getAdminreferralReport(payload);
+
+            const mapped = res.data.data.reportList.map((item: any) => ({
+                senderUniqueCode: item.senderUniqueCode ?? "",
+                senderMobileNumber: item.senderMobileNumber ?? "",
+                senderName: item.senderName ?? "",
+                receiverUniqueCode: item.receiverUniqueCode ?? "",
+                receiverMobileNumber: item.receiverMobileNumber ?? "",
+                receiverName: item.receiverName ?? "",
+                referralCode: item.referralCode ?? "",
+                pointsEarnedBySender: item.pointsEarnedBySender ?? 0,
+                pointsEarnedByReceiver: item.pointsEarnedByReceiver ?? 0,
+                dateOfReferral: item.dateOfReferral ?? "",
+            }));
+
+            return mapped;
+
+        } catch (err) {
+            console.error("EXPORT ERROR:", err);
+            return [];
+        }
+    };
 
     return (
         <div className="bg-white rounded-xl shadow p-6 border border-gray-200 w-full overflow-x-hidden">
 
-            {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-xl font-bold">Referrals Report</h2>
                     <p className="text-gray-500 text-sm">Referral activity overview</p>
                 </div>
 
+                {/* ORIGINAL BUTTONS COMMENTED OUT */}
+                {/*
                 <div className="flex flex-wrap gap-3">
                     <button className="px-3 py-1.5 bg-blue-600 text-white rounded-md flex items-center text-sm whitespace-nowrap">
                         <DownloadIcon fontSize="small" className="mr-2" />
@@ -66,90 +139,95 @@ const ReferralsReport = () => {
                         Schedule
                     </button>
                 </div>
+                */}
+
+                {/* NEW EXPORT BUTTON */}
+                <ExporterButton
+                    exporter={fileExporter}
+                    reportName="Referrals Report"
+                />
             </div>
 
-            {/* Filters */}
+            {/* FILTERS */}
             <div className="mt-6">
+                <div className="flex bg-gray-50 p-4 rounded-lg items-center gap-2">
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg">
-
-                    <div>
-                        <label htmlFor="stakeholder" className="text-sm font-medium text-gray-600">
-                            Stakeholder
-                        </label>
-                        <select
-                            id="stakeholder"
-                            aria-label="Stakeholder Filter"
-                            className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
-                            value={stakeholder}
-                            onChange={(e) => setStakeholder(e.target.value)}
-                        >
-                            <option>All</option>
-                            <option>Mechanic</option>
-                            <option>Workshop</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label htmlFor="sku" className="text-sm font-medium text-gray-600">
-                            SKU
-                        </label>
-                        <select
-                            id="sku"
-                            aria-label="SKU Filter"
-                            className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
-                            value={sku}
-                            onChange={(e) => setSku(e.target.value)}
-                        >
-                            <option>All</option>
-                            <option>SKU001</option>
-                            <option>SKU002</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label htmlFor="geo" className="text-sm font-medium text-gray-600">
-                            Geography
-                        </label>
-                        <select
-                            id="geo"
-                            aria-label="Geography Filter"
-                            className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
-                            value={geo}
-                            onChange={(e) => setGeo(e.target.value)}
-                        >
-                            <option>All</option>
-                            <option>Delhi</option>
-                            <option>Mumbai</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label htmlFor="dateRange" className="text-sm font-medium text-gray-600">
-                            Date Range
+                    <div className="w-[220px]">
+                        <label htmlFor="fromDate" className="text-sm font-medium text-gray-600">
+                            From Date
                         </label>
                         <input
-                            id="dateRange"
-                            aria-label="Date Range Filter"
+                            id="fromDate"
                             type="date"
+                            title="Select start date"
+                            aria-label="From Date"
+                            placeholder="From Date"
                             className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
-                            value={dateRange}
-                            onChange={(e) => setDateRange(e.target.value)}
+                            value={fromDate}
+                            onChange={(e) => setFromDate(e.target.value)}
                         />
                     </div>
+
+                    <div className="w-[220px]">
+                        <label htmlFor="toDate" className="text-sm font-medium text-gray-600">
+                            To Date
+                        </label>
+                        <input
+                            id="toDate"
+                            type="date"
+                            title="Select end date"
+                            aria-label="To Date"
+                            placeholder="To Date"
+                            className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
+                            value={toDate}
+                            onChange={(e) => setToDate(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="w-[220px]">
+                        <label className="text-sm font-medium text-gray-600">Referral Code</label>
+                        <input
+                            type="text"
+                            placeholder="Enter referral code"
+                            className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
+                            value={referralCode}
+                            onChange={(e) => setReferralCode(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="w-[220px]">
+                        <label className="text-sm font-medium text-gray-600">Receiver Mobile</label>
+                        <input
+                            type="text"
+                            placeholder="Enter mobile"
+                            className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
+                            value={receiverMobileNumber}
+                            onChange={(e) => setReceiverMobileNumber(e.target.value)}
+                        />
+                    </div>
+
                 </div>
 
                 <div className="flex justify-end mt-3">
-                    <button className="px-5 py-2 bg-blue-600 text-white rounded-md flex items-center text-sm whitespace-nowrap">
+                    <button
+                        className="px-5 py-2 bg-blue-600 text-white rounded-md flex items-center text-sm whitespace-nowrap"
+                        onClick={() => setPage(1)}
+                    >
                         <FilterListIcon fontSize="small" className="mr-2" />
                         Apply Filters
                     </button>
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="mt-6 overflow-x-auto">
-                <CustomTable data={sampleData} columns={columns} pageSize={5} />
+            <div className="mt-6">
+                <CustomTable
+                    data={tableData}
+                    columns={columns}
+                    pageSize={pageSize}
+                    totalRows={totalRows}
+                    currentPage={page}
+                    onPageChange={onPageChange}
+                />
             </div>
         </div>
     );

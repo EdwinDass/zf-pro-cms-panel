@@ -48,19 +48,19 @@ export const Layout: React.FC<LayoutProps> = ({
 
     const navItems: NavItem[] = [
         { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-tachometer-alt', path: '/dashboard' },
-        { id: 'masters-config', label: 'Masters & Config', icon: 'fas fa-cogs', path: '/masters-config' },
-        { id: 'schemes-campaigns', label: 'Schemes & Campaigns', icon: 'fas fa-bullhorn', path: '/schemes-campaigns' },
+        // { id: 'masters-config', label: 'Masters & Config', icon: 'fas fa-cogs', path: '/masters-config' },
+        // { id: 'schemes-campaigns', label: 'Schemes & Campaigns', icon: 'fas fa-bullhorn', path: '/schemes-campaigns' },
         { id: 'qr-management', label: 'QR Management', icon: 'fas fa-qrcode', path: '/qr' },
-        { id: 'communication', label: 'Communication', icon: 'fas fa-broadcast-tower', path: '/communication' },
-        { id: 'finance-compliance', label: 'Finance & Compliance', icon: 'fas fa-coins', path: '/finance-compliance' },
-        { id: 'fraud-detection', label: 'Fraud Detection', icon: 'fas fa-shield-alt', path: '/fraud-detection' },
+        // { id: 'communication', label: 'Communication', icon: 'fas fa-broadcast-tower', path: '/communication' },
+        // { id: 'finance-compliance', label: 'Finance & Compliance', icon: 'fas fa-coins', path: '/finance-compliance' },
+        // { id: 'fraud-detection', label: 'Fraud Detection', icon: 'fas fa-shield-alt', path: '/fraud-detection' },
         { id: 'mis-analytics', label: 'MIS & Analytics', icon: 'fas fa-chart-line', path: '/mis-analytics' },
         { id: 'role-management', label: 'Role Management', icon: 'fas fa-user-shield', path: '/role-management' },
-        { id: 'integrations', label: 'Integrations', icon: 'fas fa-plug', path: '/integrations' },
-        { id: 'process', label: 'Process', icon: 'fas fa-cogs', path: '/process-management' },
+        // { id: 'integrations', label: 'Integrations', icon: 'fas fa-plug', path: '/integrations' },
+        { id: 'process', label: 'Process redemption', icon: 'fas fa-cogs', path: '/process-management' },
         { id: 'tickets', label: 'Tickets', icon: 'fas fa-ticket-alt', path: '/tickets' },
-        { id: 'members', label: 'Members', icon: 'fas fa-users', path: '/members' },
-        { id: 'configuration', label: 'Configuration', icon: 'fas fa-sliders-h', path: '/configuration' },
+        { id: 'members', label: 'Members and KYC', icon: 'fas fa-users', path: '/members' },
+        // { id: 'configuration', label: 'Configuration', icon: 'fas fa-sliders-h', path: '/configuration' },
     ];
 
     const handleNavigation = (path: string) => {
