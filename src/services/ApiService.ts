@@ -261,3 +261,19 @@ export const updateRedemptionStatus = async (payload: any) => {
         .then((response) => response)
         .catch((error) => { throw error });
 };
+
+export const getApplicationLoginReport = (data: any) => {
+    return api.post('report/application-login', data);
+};
+
+export const getregisteredUsersReport = (data: any) => {
+    return api.post('report/registered-users', data);
+};
+
+export const getQrTransactionReport = (data: any) => {
+    return api.post('report/qr-transaction', data);
+};
+
+export const getAdminreferralReport = (data: any) => {
+    return api.post('report/admin-referal-history', data);
+};

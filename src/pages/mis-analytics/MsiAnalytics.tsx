@@ -6,7 +6,6 @@ import { logoutUser } from "../../redux/slices/userDataSlice";
 import { clearTokens } from "../../redux/slices/authTokenSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-// ⬆️ THIS IS THE FIX
 
 const ExecutiveDashboard = () => <div>Executive Dashboard Content</div>;
 const PerformanceMetrics = () => <div>Performance Metrics Content</div>;
@@ -14,7 +13,7 @@ const MemberAnalytics = () => <div>Member Analytics Content</div>;
 const CampaignAnalytics = () => <div>Campaign Analytics Content</div>;
 
 const MisAnalytics = () => {
-    const [activeTab, setActiveTab] = useState("ExecutiveDashboard");
+    const [activeTab, setActiveTab] = useState("Reports");
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -26,10 +25,10 @@ const MisAnalytics = () => {
     };
 
     const tabs = [
-        { id: "ExecutiveDashboard", label: "Executive Dashboard" },
-        { id: "PerformanceMetrics", label: "Performance Metrics" },
-        { id: "MemberAnalytics", label: "Member Analytics" },
-        { id: "CampaignAnalytics", label: "Campaign Analytics" },
+        // { id: "ExecutiveDashboard", label: "Executive Dashboard" },
+        // { id: "PerformanceMetrics", label: "Performance Metrics" },
+        // { id: "MemberAnalytics", label: "Member Analytics" },
+        // { id: "CampaignAnalytics", label: "Campaign Analytics" },
         { id: "Reports", label: "Reports" },
     ];
 
@@ -69,7 +68,6 @@ const MisAnalytics = () => {
                 {activeTab === "MemberAnalytics" && <MemberAnalytics />}
                 {activeTab === "CampaignAnalytics" && <CampaignAnalytics />}
                 {activeTab === "Reports" && <Reports />}
-                {/*  ⬆️ NOW THIS LOADS THE REAL REPORTS PAGE */}
             </div>
         </div>
     );

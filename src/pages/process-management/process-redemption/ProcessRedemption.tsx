@@ -6,11 +6,12 @@ import * as XLSX from "xlsx";
 import { toast } from "react-toastify";
 import { getRedemptionHistory, updateRedemptionStatus } from "../../../services/ApiService";
 
-interface ScanRequest {
+interface ProcessRedemption {
     id: string;
     slno: number;
     redemptionRef: string;
     userName: string;
+    userMobile: string;
     userRole: string;
     redeemedPoints: string;
     createdAt: string;
@@ -18,9 +19,9 @@ interface ScanRequest {
     redemptionStatus: string;
 }
 
-const ScanRequests: React.FC = () => {
-    const [data, setData] = useState<ScanRequest[]>([]);
-    const [selectedRows, setSelectedRows] = useState<ScanRequest[]>([]);
+const ProcessRedemption: React.FC = () => {
+    const [data, setData] = useState<ProcessRedemption[]>([]);
+    const [selectedRows, setSelectedRows] = useState<ProcessRedemption[]>([]);
     const [showConfirmPopup, setShowConfirmPopup] = useState(false);
     const [currentAction, setCurrentAction] = useState<"approve" | "reject">("approve");
     const [showExcelUpload, setShowExcelUpload] = useState(false);
@@ -45,11 +46,12 @@ const ScanRequests: React.FC = () => {
             console.log("📤 API PAYLOAD SENT:", payload);
             const res = await getRedemptionHistory(payload);
             console.log("📥 API RESPONSE RECEIVED:", res);
-            const formatted: ScanRequest[] = res.data.reportList.map((item: any) => ({
+            const formatted: ProcessRedemption[] = res.data.reportList.map((item: any) => ({
                 id: item.redemptionRef,
                 slno: item.slno,
                 redemptionRef: item.redemptionRef,
                 userName: item.userName,
+                userMobile: item.userMobile,
                 userRole: item.userRole,
                 redeemedPoints: item.redeemedPoints,
                 createdAt: item.createdAt,
@@ -91,7 +93,7 @@ const ScanRequests: React.FC = () => {
     const exportData = () => {
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Scan Requests");
+        XLSX.utils.book_append_sheet(wb, ws, "Process Redemption");
         XLSX.writeFile(wb, "process_redemption.xlsx");
     };
 
@@ -140,6 +142,7 @@ const ScanRequests: React.FC = () => {
         { key: "slno", label: "SL No" },
         { key: "redemptionRef", label: "Redemption Ref" },
         { key: "userName", label: "User Name" },
+        { key: "usermobile", label: "User Mobile" },
         { key: "userRole", label: "Role" },
         { key: "redeemedPoints", label: "Points" },
         { key: "createdAt", label: "Created At" },
@@ -253,4 +256,4 @@ const ScanRequests: React.FC = () => {
     );
 };
 
-export default ScanRequests;
+export default ProcessRedemption;
