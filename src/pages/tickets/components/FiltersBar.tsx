@@ -77,7 +77,7 @@
 //         ))}
 //       </select>
 
-//       {/* Roles Dropdown */}
+//       {/* Role Dropdown */}
 //       <select
 //         value={role}
 //         onChange={(e) => {
@@ -112,12 +112,12 @@
 //       </select>
 
 //       {/* Apply Button */}
-//       <button
+//       {/* <button
 //         onClick={onApply}
 //         className="px-5 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
 //       >
 //         <span>🔍</span> Apply Filters
-//       </button>
+//       </button> */}
 
 //     </div>
 //   );
@@ -175,7 +175,7 @@ const FiltersBar: FC<FiltersBarProps> = ({
 
   return (
     <div className="w-full bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 shadow-sm mb-6">
-      
+
       {/* Search Input */}
       <input
         type="text"
@@ -188,22 +188,24 @@ const FiltersBar: FC<FiltersBarProps> = ({
         className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition"
       />
 
-      {/* Status Dropdown */}
-      <select
-        value={status}
-        onChange={(e) => {
-          setStatus(e.target.value);
-          emitFilterChange({ status: e.target.value });
-        }}
-        className="px-3 py-2 border border-gray-300 rounded-lg cursor-pointer"
-      >
-        <option value="all">All Status</option>
-        {statusOptions.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+      {/* Status Dropdown — Only show if options exist */}
+      {statusOptions.length > 0 && (
+        <select
+          value={status}
+          onChange={(e) => {
+            setStatus(e.target.value);
+            emitFilterChange({ status: e.target.value });
+          }}
+          className="px-3 py-2 border border-gray-300 rounded-lg cursor-pointer"
+        >
+          <option value="all">All Status</option>
+          {statusOptions.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      )}
 
       {/* Role Dropdown */}
       <select
@@ -238,14 +240,6 @@ const FiltersBar: FC<FiltersBarProps> = ({
           </option>
         ))}
       </select>
-
-      {/* Apply Button */}
-      <button
-        onClick={onApply}
-        className="px-5 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-      >
-        <span>🔍</span> Apply Filters
-      </button>
 
     </div>
   );
