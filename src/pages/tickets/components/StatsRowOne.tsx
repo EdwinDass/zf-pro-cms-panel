@@ -36,7 +36,7 @@ const StatsRowOne: React.FC = () => {
 
     const fetchClosedTicketCount = async () => {
         try {
-            const response = await getTicketCountByStatus("Closed");
+            const response = await getTicketCountByStatus("Resolved");
             setClosedTicketsCount(response?.data?.data?.count?.toString() || "0");
         } catch (error) {
             console.error("Closed tickets error:", error);

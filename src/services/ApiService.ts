@@ -281,3 +281,32 @@ export const getAdminreferralReport = (data: any) => {
 export const userLogout = () => {
     return api.get('auth/user-logout');
 };
+
+export const resolveTicket = async (ticketId: number, comments: string) => {
+    const payload = [
+        {
+            ticketId,
+            resolvedComments: comments
+        }
+    ];
+
+    return api.post("/user/resolve-ticket", payload);
+    // existing axios instance "api" with baseURL + token interceptor
+};
+
+export const assignTicket = async (ticketId: number, roleId: number) => {
+    const payload = [
+        {
+            roleId,
+            ticketId
+        }
+    ];
+
+    return api.post("/user/assign-ticket", payload);
+};
+
+export const getTicketImage = async (ticketId: number) => {
+  return api.get(`/user/tickets/image?ticketId=${ticketId}`);
+};
+
+

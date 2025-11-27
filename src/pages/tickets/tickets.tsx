@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import AccessLogsScreen from "../role-management/access-logs/AccessLogsPage";
 import TopBar from "../../layouts/top-bar";
-import AllTickets from "./all-tickets/all-tickets";
+import AllTickets from "./all-tickets";
+import PendingTickets from "./PendingTickets";
+import ResolvedTickets from "./ResolvedTickets";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../redux/slices/userDataSlice";
@@ -26,11 +28,8 @@ const Tickets = () => {
 
     const tabs = [
         { id: "all-tickets", label: "All Tickets" },
-        { id: "open", label: "Open" },
-        { id: "closed", label: "Closed" },
-        { id: "in-progress", label: "In Progress" },
+        { id: "pending", label: "Pending" },
         { id: "resolved", label: "Resolved" },
-        // { id: "audit-logs", label: "Audit Logs" },
     ];
     return (
         <div className="h-screen overflow-y-auto bg-gray-100 pb-10">
@@ -84,7 +83,8 @@ const Tickets = () => {
             {/* CONTENT SECTION */}
             <div className="mt-8 px-6">
                 {activeTab === "all-tickets" && <AllTickets />}
-                {/* {activeTab === "audit-logs" && <AccessLogsScreen />} */}
+                {activeTab === "pending" && <PendingTickets />}
+                {activeTab === "resolved" && <ResolvedTickets />}
             </div>
         </div>
     );
