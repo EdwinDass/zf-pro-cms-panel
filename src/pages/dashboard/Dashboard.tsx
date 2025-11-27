@@ -12,11 +12,19 @@ import { useDispatch } from "react-redux";
 import { RootState } from "../../redux/store";
 import { clearTokens } from "../../redux/slices/authTokenSlice";
 import { logoutUser } from "../../redux/slices/userDataSlice";
+import { userLogout } from "../../services/ApiService";
 
 const Dashboard = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch()
-    const logout = () => {
+
+    const logout = async () => {
+        try {
+            await userLogout();
+        } catch (err) {
+            console.error("Logout API failed:", err);
+        }
+
         dispatch(logoutUser());
         dispatch(clearTokens());
         navigate("/");

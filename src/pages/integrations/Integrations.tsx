@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logoutUser } from "../../redux/slices/userDataSlice";
 import { clearTokens } from "../../redux/slices/authTokenSlice";
+import { userLogout } from "../../services/ApiService";
 
 
 const Integrations = () => {
@@ -12,11 +13,17 @@ const Integrations = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const logout = () => {
+    const logout = async () => {
+        try {
+            await userLogout();
+        } catch (err) {
+            console.error("Logout API failed:", err);
+        }
         dispatch(logoutUser());
         dispatch(clearTokens());
         navigate("/");
     };
+
     return (
         <div className="min-h-screen bg-gray-50">
             <TopBar

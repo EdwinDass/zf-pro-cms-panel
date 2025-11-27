@@ -6,6 +6,7 @@ import { logoutUser } from "../../redux/slices/userDataSlice";
 import { clearTokens } from "../../redux/slices/authTokenSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { userLogout } from "../../services/ApiService";
 
 const ExecutiveDashboard = () => <div>Executive Dashboard Content</div>;
 const PerformanceMetrics = () => <div>Performance Metrics Content</div>;
@@ -18,7 +19,12 @@ const MisAnalytics = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const logout = () => {
+    const logout = async () => {
+        try {
+            await userLogout();
+        } catch (err) {
+            console.error("Logout API failed:", err);
+        }
         dispatch(logoutUser());
         dispatch(clearTokens());
         navigate("/");

@@ -9,13 +9,19 @@ import { logoutUser } from "../../redux/slices/userDataSlice";
 import { clearTokens } from "../../redux/slices/authTokenSlice";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { userLogout } from "../../services/ApiService";
 
 const ProcessManagement = () => {
     const [activeTab, setActiveTab] = useState("ProcessRedemption");
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const logout = () => {
+    const logout = async () => {
+        try {
+            await userLogout();
+        } catch (err) {
+            console.error("Logout API failed:", err);
+        }
         dispatch(logoutUser());
         dispatch(clearTokens());
         navigate("/");
@@ -32,7 +38,7 @@ const ProcessManagement = () => {
             <div className="bg-white">
                 <TopBar
                     title="Process Management"
-                    description="Approve/reject scan/transactions and redemption requests"
+                    description="Approve/Reject redemption requests"
                     logout={logout}
                 />
             </div>

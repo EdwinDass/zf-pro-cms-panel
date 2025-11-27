@@ -9,13 +9,19 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../redux/slices/userDataSlice";
 import { clearTokens } from "../../redux/slices/authTokenSlice";
+import { userLogout } from "../../services/ApiService";
 
 const UserRoleManagement = () => {
     const [activeTab, setActiveTab] = useState("staff");
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const logout = () => {
+    const logout = async () => {
+        try {
+            await userLogout();
+        } catch (err) {
+            console.error("Logout API failed:", err);
+        }
         dispatch(logoutUser());
         dispatch(clearTokens());
         navigate("/");

@@ -277,3 +277,7 @@ export const getQrTransactionReport = (data: any) => {
 export const getAdminreferralReport = (data: any) => {
     return api.post('report/admin-referal-history', data);
 };
+
+export const userLogout = () => {
+    return api.get('auth/user-logout');
+};
