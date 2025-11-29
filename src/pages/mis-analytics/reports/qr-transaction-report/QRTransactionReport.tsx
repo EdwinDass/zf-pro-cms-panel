@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 
-import FilterListIcon from "@mui/icons-material/FilterList";
 import CustomTable, { Column } from "../../../../components/CustomTable";
 import { getQrTransactionReport } from "../../../../services/ApiService";
 import ExporterButton from "../../../../components/ExportButton";
@@ -8,14 +7,17 @@ import ExporterButton from "../../../../components/ExportButton";
 const QRTransactionReport = () => {
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
-
     const [userName, setUserName] = useState("");
     const [userMobile, setUserMobile] = useState("");
-
     const [tableData, setTableData] = useState([]);
     const [totalRows, setTotalRows] = useState(0);
     const [page, setPage] = useState(1);
     const pageSize = 10;
+
+    const formatCell = (value: any) => {
+        if (value === null || value === undefined || value === "") return "-";
+        return value;
+    };
 
     const columns: Column[] = [
         { key: "transactionId", label: "Transaction ID" },
@@ -43,26 +45,26 @@ const QRTransactionReport = () => {
 
             if (fromDate) payload.fromDate = fromDate;
             if (toDate) payload.toDate = toDate;
-            if (userName) payload.userName = userName;
-            if (userMobile) payload.userMobile = userMobile;
+            if (userName.length >= 3) payload.userName = userName;
+            if (userMobile.length >= 3) payload.userMobile = userMobile;
 
             const res = await getQrTransactionReport(payload);
 
             const mapped = res.data.data.reportList.map((item: any) => ({
-                transactionId: item.transactionId,
-                transactionDate: item.transactionDate,
-                amount: item.amount,
-                paymentStatus: item.paymentStatus,
-                qrCodeId: item.qrCodeId,
-                userCode: item.userCode,
-                userName: item.userName,
-                email: item.email,
-                phone: item.phone,
-                latitude: item.latitude,
-                longitude: item.longitude,
-                address: item.address,
-                city: item.city,
-                country: item.country,
+                transactionId: formatCell(item.transactionId),
+                transactionDate: formatCell(item.transactionDate),
+                amount: formatCell(item.amount),
+                paymentStatus: formatCell(item.paymentStatus),
+                qrCodeId: formatCell(item.qrCodeId),
+                userCode: formatCell(item.userCode),
+                userName: formatCell(item.userName),
+                email: formatCell(item.email),
+                phone: formatCell(item.phone),
+                latitude: formatCell(item.latitude),
+                longitude: formatCell(item.longitude),
+                address: formatCell(item.address),
+                city: formatCell(item.city),
+                country: formatCell(item.country),
             }));
 
             setTableData(mapped);
@@ -75,7 +77,37 @@ const QRTransactionReport = () => {
 
     useEffect(() => {
         fetchReport();
-    }, [page]);
+    }, [page, fromDate, toDate]);
+
+    useEffect(() => {
+        if (userName.length === 0) {
+            setPage(1);
+            fetchReport();
+            return;
+        }
+        if (userName.length >= 3) {
+            const timeout = setTimeout(() => {
+                setPage(1);
+                fetchReport();
+            }, 500);
+            return () => clearTimeout(timeout);
+        }
+    }, [userName]);
+
+    useEffect(() => {
+        if (userMobile.length === 0) {
+            setPage(1);
+            fetchReport();
+            return;
+        }
+        if (userMobile.length >= 3) {
+            const timeout = setTimeout(() => {
+                setPage(1);
+                fetchReport();
+            }, 500);
+            return () => clearTimeout(timeout);
+        }
+    }, [userMobile]);
 
     const onPageChange = (newPage: number) => {
         setPage(newPage);
@@ -90,26 +122,26 @@ const QRTransactionReport = () => {
 
             if (fromDate) payload.fromDate = fromDate;
             if (toDate) payload.toDate = toDate;
-            if (userName) payload.userName = userName;
-            if (userMobile) payload.userMobile = userMobile;
+            if (userName.length >= 3) payload.userName = userName;
+            if (userMobile.length >= 3) payload.userMobile = userMobile;
 
             const res = await getQrTransactionReport(payload);
 
             const mapped = res.data.data.reportList.map((item: any) => ({
-                transactionId: item.transactionId,
-                transactionDate: item.transactionDate,
-                amount: item.amount,
-                paymentStatus: item.paymentStatus,
-                qrCodeId: item.qrCodeId,
-                userCode: item.userCode,
-                userName: item.userName,
-                email: item.email,
-                phone: item.phone,
-                latitude: item.latitude,
-                longitude: item.longitude,
-                address: item.address,
-                city: item.city,
-                country: item.country,
+                transactionId: formatCell(item.transactionId),
+                transactionDate: formatCell(item.transactionDate),
+                amount: formatCell(item.amount),
+                paymentStatus: formatCell(item.paymentStatus),
+                qrCodeId: formatCell(item.qrCodeId),
+                userCode: formatCell(item.userCode),
+                userName: formatCell(item.userName),
+                email: formatCell(item.email),
+                phone: formatCell(item.phone),
+                latitude: formatCell(item.latitude),
+                longitude: formatCell(item.longitude),
+                address: formatCell(item.address),
+                city: formatCell(item.city),
+                country: formatCell(item.country),
             }));
 
             return mapped;
@@ -134,7 +166,6 @@ const QRTransactionReport = () => {
                 />
             </div>
 
-            {/* FILTERS */}
             <div className="mt-6">
                 <div className="flex bg-gray-50 p-4 rounded-lg items-center gap-2">
 
@@ -144,8 +175,6 @@ const QRTransactionReport = () => {
                         </label>
                         <input
                             id="fromDate"
-                            aria-label="From Date"
-                            title="Select From Date"
                             type="date"
                             className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
                             value={fromDate}
@@ -159,8 +188,6 @@ const QRTransactionReport = () => {
                         </label>
                         <input
                             id="toDate"
-                            aria-label="To Date"
-                            title="Select To Date"
                             type="date"
                             className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
                             value={toDate}
@@ -174,8 +201,6 @@ const QRTransactionReport = () => {
                         </label>
                         <input
                             id="userName"
-                            aria-label="User Name"
-                            title="Enter User Name"
                             type="text"
                             placeholder="Enter user name"
                             className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
@@ -190,8 +215,6 @@ const QRTransactionReport = () => {
                         </label>
                         <input
                             id="userMobile"
-                            aria-label="User Mobile"
-                            title="Enter User Mobile"
                             type="text"
                             placeholder="Enter mobile number"
                             className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
@@ -200,16 +223,6 @@ const QRTransactionReport = () => {
                         />
                     </div>
 
-                </div>
-
-                <div className="flex justify-end mt-3">
-                    <button
-                        className="px-5 py-2 bg-blue-600 text-white rounded-md flex items-center text-sm whitespace-nowrap"
-                        onClick={() => setPage(1)}
-                    >
-                        <FilterListIcon fontSize="small" className="mr-2" />
-                        Apply Filters
-                    </button>
                 </div>
             </div>
 

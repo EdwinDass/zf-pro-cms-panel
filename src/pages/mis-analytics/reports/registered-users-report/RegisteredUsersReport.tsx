@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 
-import FilterListIcon from "@mui/icons-material/FilterList";
 import CustomTable, { Column } from "../../../../components/CustomTable";
 import { getregisteredUsersReport } from "../../../../services/ApiService";
 import ExporterButton from "../../../../components/ExportButton";
@@ -15,8 +14,13 @@ const RegisteredUsersReport = () => {
     const [page, setPage] = useState(1);
     const pageSize = 10;
 
+    const formatCell = (value: any) => {
+        if (value === null || value === undefined || value === "") return "-";
+        return value;
+    };
+
     const columns: Column[] = [
-        { key: "userId", label: "User ID" },
+        // { key: "userId", label: "User ID" },
         { key: "uniqueCode", label: "Unique Code" },
         { key: "roleName", label: "Role Name" },
         { key: "status", label: "Status" },
@@ -45,30 +49,30 @@ const RegisteredUsersReport = () => {
 
             if (fromDate) payload.fromDate = fromDate;
             if (toDate) payload.toDate = toDate;
-            if (userName) payload.userName = userName;
-            if (userMobile) payload.userMobile = userMobile;
+            if (userName.length >= 3) payload.userName = userName;
+            if (userMobile.length >= 3) payload.userMobile = userMobile;
 
             const res = await getregisteredUsersReport(payload);
 
             const mapped = res.data.data.reportList.map((item: any) => ({
-                userId: item.userId,
-                uniqueCode: item.uniqueCode,
-                roleName: item.roleName,
-                status: item.status,
-                email: item.email,
-                mobileNumber: item.mobile,
-                fullName: item.fullName,
-                aadhaarMasked: item.aadhaarNumberMasked ?? "",
-                panNumber: item.panNumber ?? "",
+                userId: formatCell(item.userId),
+                uniqueCode: formatCell(item.uniqueCode),
+                roleName: formatCell(item.roleName),
+                status: formatCell(item.status),
+                email: formatCell(item.email),
+                mobileNumber: formatCell(item.mobile),
+                fullName: formatCell(item.fullName),
+                aadhaarMasked: formatCell(item.aadhaarNumberMasked),
+                panNumber: formatCell(item.panNumber),
                 aadhaarStatus: item.aadhaarStatus ? "Verified" : "Not Verified",
-                gender: item.gender ?? "",
-                age: item.age ?? "",
-                country: item.country ?? "",
-                state: item.state ?? "",
-                city: item.city ?? "",
-                pincode: item.pincode ?? "",
-                zone: item.zone ?? "",
-                mappedRetailers: item.mappedRetailers?.join(", ") ?? "",
+                gender: formatCell(item.gender),
+                age: formatCell(item.age),
+                country: formatCell(item.country),
+                state: formatCell(item.state),
+                city: formatCell(item.city),
+                pincode: formatCell(item.pincode),
+                zone: formatCell(item.zone),
+                mappedRetailers: formatCell(item.mappedRetailers?.join(", "))
             }));
 
             setTableData(mapped);
@@ -79,10 +83,42 @@ const RegisteredUsersReport = () => {
         }
     };
 
+    // Fetch on page/date change
     useEffect(() => {
         fetchReport();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page]);
+    }, [page, fromDate, toDate]);
+
+    // userName typing
+    useEffect(() => {
+        if (userName.length === 0) {
+            setPage(1);
+            fetchReport();
+            return;
+        }
+        if (userName.length >= 3) {
+            const timeout = setTimeout(() => {
+                setPage(1);
+                fetchReport();
+            }, 500);
+            return () => clearTimeout(timeout);
+        }
+    }, [userName]);
+
+    // userMobile typing
+    useEffect(() => {
+        if (userMobile.length === 0) {
+            setPage(1);
+            fetchReport();
+            return;
+        }
+        if (userMobile.length >= 3) {
+            const timeout = setTimeout(() => {
+                setPage(1);
+                fetchReport();
+            }, 500);
+            return () => clearTimeout(timeout);
+        }
+    }, [userMobile]);
 
     const onPageChange = (newPage: number) => {
         setPage(newPage);
@@ -97,30 +133,30 @@ const RegisteredUsersReport = () => {
 
             if (fromDate) payload.fromDate = fromDate;
             if (toDate) payload.toDate = toDate;
-            if (userName) payload.userName = userName;
-            if (userMobile) payload.userMobile = userMobile;
+            if (userName.length >= 3) payload.userName = userName;
+            if (userMobile.length >= 3) payload.userMobile = userMobile;
 
             const res = await getregisteredUsersReport(payload);
 
             const mapped = res.data.data.reportList.map((item: any) => ({
-                userId: item.userId,
-                uniqueCode: item.uniqueCode,
-                roleName: item.roleName,
-                status: item.status,
-                email: item.email,
-                mobileNumber: item.mobile,
-                fullName: item.fullName,
-                aadhaarMasked: item.aadhaarNumberMasked ?? "",
-                panNumber: item.panNumber ?? "",
+                userId: formatCell(item.userId),
+                uniqueCode: formatCell(item.uniqueCode),
+                roleName: formatCell(item.roleName),
+                status: formatCell(item.status),
+                email: formatCell(item.email),
+                mobileNumber: formatCell(item.mobile),
+                fullName: formatCell(item.fullName),
+                aadhaarMasked: formatCell(item.aadhaarNumberMasked),
+                panNumber: formatCell(item.panNumber),
                 aadhaarStatus: item.aadhaarStatus ? "Verified" : "Not Verified",
-                gender: item.gender ?? "",
-                age: item.age ?? "",
-                country: item.country ?? "",
-                state: item.state ?? "",
-                city: item.city ?? "",
-                pincode: item.pincode ?? "",
-                zone: item.zone ?? "",
-                mappedRetailers: item.mappedRetailers?.join(", ") ?? "",
+                gender: formatCell(item.gender),
+                age: formatCell(item.age),
+                country: formatCell(item.country),
+                state: formatCell(item.state),
+                city: formatCell(item.city),
+                pincode: formatCell(item.pincode),
+                zone: formatCell(item.zone),
+                mappedRetailers: formatCell(item.mappedRetailers?.join(", "))
             }));
 
             return mapped;
@@ -200,15 +236,6 @@ const RegisteredUsersReport = () => {
 
                 </div>
 
-                <div className="flex justify-end mt-3">
-                    <button
-                        className="px-5 py-2 bg-blue-600 text-white rounded-md flex items-center text-sm whitespace-nowrap"
-                        onClick={() => setPage(1)}
-                    >
-                        <FilterListIcon fontSize="small" className="mr-2" />
-                        Apply Filters
-                    </button>
-                </div>
             </div>
 
             <div className="mt-6">

@@ -24,9 +24,9 @@ import AssignmentAddIcon from "@mui/icons-material/AssignmentAdd";
 import DoneIcon from "@mui/icons-material/Done";
 
 interface TicketsTableProps {
-    defaultStatus?: string;          // e.g., Pending / Resolved
-    showStats?: boolean;             // hide in Pending/Resolved
-    disableStatusFilter?: boolean;   // hide status dropdown
+    defaultStatus?: string;
+    showStats?: boolean;
+    disableStatusFilter?: boolean;
 }
 
 interface Ticket {
@@ -80,21 +80,29 @@ const TicketsTable: React.FC<TicketsTableProps> = ({
     const [statuses, setStatuses] = useState<string[]>([]);
     const [roles, setRoles] = useState<Role[]>([]);
 
-    // Modals
     const [resolveModalOpen, setResolveModalOpen] = useState(false);
     const [assignModalOpen, setAssignModalOpen] = useState(false);
     const [viewModalOpen, setViewModalOpen] = useState(false);
 
-    // Selected Ticket References
     const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
     const [assignTicketId, setAssignTicketId] = useState<number | null>(null);
     const [viewTicketData, setViewTicketData] = useState<any | null>(null);
+
+    // 🔥 pagination states
+    const [page, setPage] = useState(1);
+    const pageSize = 10;
+    const [totalRows, setTotalRows] = useState(0);
 
     /** INITIAL LOAD */
     useEffect(() => {
         fetchMasterData();
         fetchTickets({ ticketStatus: defaultStatus || undefined });
     }, [defaultStatus]);
+
+    /** Re-fetch on page change */
+    useEffect(() => {
+        fetchTickets({ ticketStatus: defaultStatus || undefined });
+    }, [page]);
 
     /** Fetch master data (categories, roles, statuses) */
     const fetchMasterData = async () => {
@@ -106,21 +114,30 @@ const TicketsTable: React.FC<TicketsTableProps> = ({
     /** Fetch Tickets */
     const fetchTickets = async (params?: any) => {
         try {
-            const response = await getTickets(params);
+            const payload = {
+                page: page,
+                limit: pageSize,
+                ...params
+            };
+
+            const response = await getTickets(payload);
+
             const raw = response?.data?.data?.data || [];
+            setTotalRows(response?.data?.data?.total || 0);
+
             const mapped: Ticket[] = raw.map((x: any) => ({
-                TicketID: x.ticket.ticketId,
-                Category: x.category.name,
-                Description: x.ticket.description,
-                Username: x.user.name,
-                email: x.user.email,
-                mobile: x.user.mobile,
-                Status: x.ticket.ticketStatus,
-                roleAssigned: x.role.roleName,
-                resolvedComments: x.ticket.resolvedComments,
-                createdAt: x.ticket.createdAt,
-                createdBy: x.ticket.createdBy,
-                imageUrl: x.ticket.imgUrl,
+                TicketID: x.ticket?.ticketId || "-",
+                Category: x.category?.name || "-",
+                Description: x.ticket?.description || "-",
+                Username: x.user?.name || "-",
+                email: x.user?.email || "-",
+                mobile: x.user?.mobile || "-",
+                Status: x.ticket?.ticketStatus || "-",
+                roleAssigned: x.role?.roleName || "-",
+                resolvedComments: x.ticket?.resolvedComments || "-",
+                createdAt: x.ticket?.createdAt || "-",
+                createdBy: x.ticket?.createdBy || "-",
+                imageUrl: x.ticket?.imgUrl || null,
             }));
 
             setTickets(mapped);
@@ -176,6 +193,8 @@ const TicketsTable: React.FC<TicketsTableProps> = ({
     const handleFilterChange = async (filters: any) => {
         const { status, role, category } = filters;
 
+        setPage(1);
+
         await fetchTickets({
             ticketStatus:
                 disableStatusFilter || status === "all" ? defaultStatus : status,
@@ -217,15 +236,11 @@ const TicketsTable: React.FC<TicketsTableProps> = ({
                 );
             },
         },
-
-        /** ACTIONS COLUMN */
         {
             key: "actions",
             label: "Actions",
             render: (u: Ticket) => (
                 <div className="flex items-center space-x-4">
-
-                    {/* View */}
                     <button
                         onClick={() => {
                             setViewTicketData(u);
@@ -236,7 +251,6 @@ const TicketsTable: React.FC<TicketsTableProps> = ({
                         <RemoveRedEyeIcon fontSize="small" className="mr-1" /> View
                     </button>
 
-                    {/* Assign - only Pending */}
                     {u.Status === "Pending" && (
                         <button
                             onClick={() => {
@@ -249,7 +263,6 @@ const TicketsTable: React.FC<TicketsTableProps> = ({
                         </button>
                     )}
 
-                    {/* Resolve - only Pending */}
                     {u.Status === "Pending" && (
                         <button
                             onClick={() => {
@@ -266,12 +279,14 @@ const TicketsTable: React.FC<TicketsTableProps> = ({
         },
     ];
 
+    const onPageChange = (newPage: number) => {
+        setPage(newPage);
+    };
+
     return (
         <div>
-            {/* Stats */}
             {showStats && <StatsRowOne />}
 
-            {/* Filters */}
             <FiltersBar
                 statusOptions={disableStatusFilter ? [] : statuses.map((s) => ({ label: s, value: s }))}
                 roleOptions={roles.map((r) => ({ label: r.roleName, value: r.roleId.toString() }))}
@@ -280,10 +295,15 @@ const TicketsTable: React.FC<TicketsTableProps> = ({
                 onFilterChange={handleFilterChange}
             />
 
-            {/* Table */}
-            <CustomTable columns={columns} data={filteredTickets} pageSize={5} />
+            <CustomTable
+                columns={columns}
+                data={filteredTickets}
+                pageSize={pageSize}
+                totalRows={totalRows}
+                currentPage={page}
+                onPageChange={onPageChange}
+            />
 
-            {/* Resolve Modal */}
             <ResolveTicket
                 isOpen={resolveModalOpen}
                 onClose={() => setResolveModalOpen(false)}
@@ -292,7 +312,6 @@ const TicketsTable: React.FC<TicketsTableProps> = ({
                 resolveApi={resolveTicket}
             />
 
-            {/* Assign Modal */}
             <AssignTicket
                 isOpen={assignModalOpen}
                 onClose={() => setAssignModalOpen(false)}
@@ -305,7 +324,6 @@ const TicketsTable: React.FC<TicketsTableProps> = ({
                 onAssigned={() => fetchTickets()}
             />
 
-            {/* View Ticket Modal */}
             <ViewTicket
                 isOpen={viewModalOpen}
                 onClose={() => setViewModalOpen(false)}

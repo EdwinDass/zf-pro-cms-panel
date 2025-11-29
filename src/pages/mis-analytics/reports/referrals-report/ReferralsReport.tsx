@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
 
-import FilterListIcon from "@mui/icons-material/FilterList";
-import DownloadIcon from "@mui/icons-material/Download";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CustomTable, { Column } from "../../../../components/CustomTable";
 import { getAdminreferralReport } from "../../../../services/ApiService";
 import ExporterButton from "../../../../components/ExportButton";
@@ -19,6 +15,11 @@ const ReferralsReport = () => {
     const [totalRows, setTotalRows] = useState(0);
     const [page, setPage] = useState(1);
     const pageSize = 10;
+
+    const formatCell = (value: any) => {
+        if (value === null || value === undefined || value === "") return "-";
+        return value;
+    };
 
     const columns: Column[] = [
         { key: "senderUniqueCode", label: "Sender Unique Code" },
@@ -42,22 +43,22 @@ const ReferralsReport = () => {
 
             if (fromDate) payload.fromDate = fromDate;
             if (toDate) payload.toDate = toDate;
-            if (referralCode) payload.referralCode = referralCode;
-            if (receiverMobileNumber) payload.receiverMobileNumber = receiverMobileNumber;
+            if (referralCode.length >= 3) payload.referralCode = referralCode;
+            if (receiverMobileNumber.length >= 3) payload.receiverMobileNumber = receiverMobileNumber;
 
             const res = await getAdminreferralReport(payload);
 
             const mapped = res.data.data.reportList.map((item: any) => ({
-                senderUniqueCode: item.senderUniqueCode ?? "",
-                senderMobileNumber: item.senderMobileNumber ?? "",
-                senderName: item.senderName ?? "",
-                receiverUniqueCode: item.receiverUniqueCode ?? "",
-                receiverMobileNumber: item.receiverMobileNumber ?? "",
-                receiverName: item.receiverName ?? "",
-                referralCode: item.referralCode ?? "",
-                pointsEarnedBySender: item.pointsEarnedBySender ?? 0,
-                pointsEarnedByReceiver: item.pointsEarnedByReceiver ?? 0,
-                dateOfReferral: item.dateOfReferral ?? "",
+                senderUniqueCode: formatCell(item.senderUniqueCode),
+                senderMobileNumber: formatCell(item.senderMobileNumber),
+                senderName: formatCell(item.senderName),
+                receiverUniqueCode: formatCell(item.receiverUniqueCode),
+                receiverMobileNumber: formatCell(item.receiverMobileNumber),
+                receiverName: formatCell(item.receiverName),
+                referralCode: formatCell(item.referralCode),
+                pointsEarnedBySender: formatCell(item.pointsEarnedBySender),
+                pointsEarnedByReceiver: formatCell(item.pointsEarnedByReceiver),
+                dateOfReferral: formatCell(item.dateOfReferral),
             }));
 
             setTableData(mapped);
@@ -68,9 +69,42 @@ const ReferralsReport = () => {
         }
     };
 
+    // Fetch on page and date change
     useEffect(() => {
         fetchReport();
-    }, [page]);
+    }, [page, fromDate, toDate]);
+
+    // referralCode typing behavior
+    useEffect(() => {
+        if (referralCode.length === 0) {
+            setPage(1);
+            fetchReport();
+            return;
+        }
+        if (referralCode.length >= 3) {
+            const timeout = setTimeout(() => {
+                setPage(1);
+                fetchReport();
+            }, 500);
+            return () => clearTimeout(timeout);
+        }
+    }, [referralCode]);
+
+    // receiverMobileNumber typing behavior
+    useEffect(() => {
+        if (receiverMobileNumber.length === 0) {
+            setPage(1);
+            fetchReport();
+            return;
+        }
+        if (receiverMobileNumber.length >= 3) {
+            const timeout = setTimeout(() => {
+                setPage(1);
+                fetchReport();
+            }, 500);
+            return () => clearTimeout(timeout);
+        }
+    }, [receiverMobileNumber]);
 
     const onPageChange = (newPage: number) => {
         setPage(newPage);
@@ -86,22 +120,22 @@ const ReferralsReport = () => {
 
             if (fromDate) payload.fromDate = fromDate;
             if (toDate) payload.toDate = toDate;
-            if (referralCode) payload.referralCode = referralCode;
-            if (receiverMobileNumber) payload.receiverMobileNumber = receiverMobileNumber;
+            if (referralCode.length >= 3) payload.referralCode = referralCode;
+            if (receiverMobileNumber.length >= 3) payload.receiverMobileNumber = receiverMobileNumber;
 
             const res = await getAdminreferralReport(payload);
 
             const mapped = res.data.data.reportList.map((item: any) => ({
-                senderUniqueCode: item.senderUniqueCode ?? "",
-                senderMobileNumber: item.senderMobileNumber ?? "",
-                senderName: item.senderName ?? "",
-                receiverUniqueCode: item.receiverUniqueCode ?? "",
-                receiverMobileNumber: item.receiverMobileNumber ?? "",
-                receiverName: item.receiverName ?? "",
-                referralCode: item.referralCode ?? "",
-                pointsEarnedBySender: item.pointsEarnedBySender ?? 0,
-                pointsEarnedByReceiver: item.pointsEarnedByReceiver ?? 0,
-                dateOfReferral: item.dateOfReferral ?? "",
+                senderUniqueCode: formatCell(item.senderUniqueCode),
+                senderMobileNumber: formatCell(item.senderMobileNumber),
+                senderName: formatCell(item.senderName),
+                receiverUniqueCode: formatCell(item.receiverUniqueCode),
+                receiverMobileNumber: formatCell(item.receiverMobileNumber),
+                receiverName: formatCell(item.receiverName),
+                referralCode: formatCell(item.referralCode),
+                pointsEarnedBySender: formatCell(item.pointsEarnedBySender),
+                pointsEarnedByReceiver: formatCell(item.pointsEarnedByReceiver),
+                dateOfReferral: formatCell(item.dateOfReferral),
             }));
 
             return mapped;
@@ -121,34 +155,12 @@ const ReferralsReport = () => {
                     <p className="text-gray-500 text-sm">Referral activity overview</p>
                 </div>
 
-                {/* ORIGINAL BUTTONS COMMENTED OUT */}
-                {/*
-                <div className="flex flex-wrap gap-3">
-                    <button className="px-3 py-1.5 bg-blue-600 text-white rounded-md flex items-center text-sm whitespace-nowrap">
-                        <DownloadIcon fontSize="small" className="mr-2" />
-                        Export CSV
-                    </button>
-
-                    <button className="px-3 py-1.5 bg-red-600 text-white rounded-md flex items-center text-sm whitespace-nowrap">
-                        <PictureAsPdfIcon fontSize="small" className="mr-2" />
-                        Export PDF
-                    </button>
-
-                    <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md flex items-center text-sm whitespace-nowrap">
-                        <AccessTimeIcon fontSize="small" className="mr-2" />
-                        Schedule
-                    </button>
-                </div>
-                */}
-
-                {/* NEW EXPORT BUTTON */}
                 <ExporterButton
                     exporter={fileExporter}
                     reportName="Referrals Report"
                 />
             </div>
 
-            {/* FILTERS */}
             <div className="mt-6">
                 <div className="flex bg-gray-50 p-4 rounded-lg items-center gap-2">
 
@@ -161,7 +173,6 @@ const ReferralsReport = () => {
                             type="date"
                             title="Select start date"
                             aria-label="From Date"
-                            placeholder="From Date"
                             className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
                             value={fromDate}
                             onChange={(e) => setFromDate(e.target.value)}
@@ -177,7 +188,6 @@ const ReferralsReport = () => {
                             type="date"
                             title="Select end date"
                             aria-label="To Date"
-                            placeholder="To Date"
                             className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
                             value={toDate}
                             onChange={(e) => setToDate(e.target.value)}
@@ -206,16 +216,6 @@ const ReferralsReport = () => {
                         />
                     </div>
 
-                </div>
-
-                <div className="flex justify-end mt-3">
-                    <button
-                        className="px-5 py-2 bg-blue-600 text-white rounded-md flex items-center text-sm whitespace-nowrap"
-                        onClick={() => setPage(1)}
-                    >
-                        <FilterListIcon fontSize="small" className="mr-2" />
-                        Apply Filters
-                    </button>
                 </div>
             </div>
 

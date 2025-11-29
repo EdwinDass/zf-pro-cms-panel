@@ -12,6 +12,7 @@ import ProcessManagement from "../pages/process-management/Processmanagement";
 import Integrations from "../pages/integrations/Integrations";
 import MisAnalytics from "../pages/mis-analytics/MsiAnalytics";
 import Reports from "../pages/mis-analytics/reports/Reports";
+import MembersManagment from "../pages/members-and-kyc/MembersManagement";
 
 const AppRoutes = () => {
     return (
@@ -26,6 +27,7 @@ const AppRoutes = () => {
             <Route path="/integrations" element={<PrivateRoute element={<Integrations />} />} />
             <Route path="/mis-analytics" element={<PrivateRoute element={<MisAnalytics />} />} />
             <Route path="/reports" element={<PrivateRoute element={<Reports />} />} />
+            <Route path="/members-management" element={<PrivateRoute element={<MembersManagment />} />} />
         </Routes>
     );
 };

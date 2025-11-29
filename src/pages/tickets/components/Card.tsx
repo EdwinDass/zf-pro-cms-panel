@@ -1,4 +1,3 @@
-// src/components/Card/Card.tsx
 import React from "react";
 
 interface CardProps {
@@ -7,7 +6,7 @@ interface CardProps {
   percentage: string;
   percentageColor?: string; 
   icon: React.ReactNode;
-  iconColor?: string; // ⭐ NEW — dynamic icon color
+  iconColor?: string;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -16,7 +15,7 @@ const Card: React.FC<CardProps> = ({
   percentage,
   percentageColor = "text-green-600",
   icon,
-  iconColor = "text-blue-600", // ⭐ default icon color
+  iconColor = "text-blue-600",
 }) => {
   return (
     <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-5 flex flex-col gap-3">

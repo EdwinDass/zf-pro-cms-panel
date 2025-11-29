@@ -41,7 +41,7 @@ interface User {
     status: string;
 }
 
-const StaffScreen: React.FC = () => {
+const Staff: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [roleFilter, setRoleFilter] = useState<string>("");
     const [statusFilter, setStatusFilter] = useState<string>("");
@@ -396,7 +396,7 @@ const StaffScreen: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 <div className="bg-white rounded-xl shadow p-6 border border-gray-100 transition-transform transform hover:scale-[1.02] hover:shadow-lg">
                     <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-sm font-medium text-gray-600">Total Users</h4>
+                        <h4 className="text-sm font-medium text-gray-600">Total Staff</h4>
                         <GroupsIcon className="text-blue-500" />
                     </div>
                     <p className="text-3xl font-bold text-gray-900 mb-1">{totalUsers}</p>
@@ -407,7 +407,7 @@ const StaffScreen: React.FC = () => {
                 </div>
                 <div className="bg-white rounded-xl shadow p-6 border border-gray-100 transition-transform transform hover:scale-[1.02] hover:shadow-lg">
                     <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-sm font-medium text-gray-600">Active Users</h4>
+                        <h4 className="text-sm font-medium text-gray-600">Active Staff</h4>
                         <PersonAddAlt1Icon className="text-green-500" />
                     </div>
                     <p className="text-3xl font-bold text-gray-900 mb-1">{activeUsers}</p>
@@ -570,4 +570,4 @@ const StaffScreen: React.FC = () => {
     );
 };
 
-export default StaffScreen;
+export default Staff;

@@ -15,8 +15,16 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
 
     if (!isOpen) return null;
 
-    // API field names exactly
+    // required excel headers
     const REQUIRED_HEADERS = ["redemptionref", "status", "comments"];
+
+    // 🔥 NEW — normalizes status
+    const normalizeStatus = (status: string) => {
+        const s = String(status).trim().toLowerCase();
+        if (s.startsWith("appr")) return "Approve";
+        if (s.startsWith("rej")) return "Reject";
+        return "Pending"; // default fallback
+    };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -40,9 +48,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
                     return;
                 }
 
-                // normalize headers to lowercase
                 const headers = Object.keys(json[0]).map((h) => h.toLowerCase());
-
                 const isValid = REQUIRED_HEADERS.every((required) =>
                     headers.includes(required)
                 );
@@ -53,10 +59,9 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
                     return;
                 }
 
-                // ✔ EXACT API FIELD NAMES
                 const processed = json.map((row) => ({
                     redemptionRef: row.redemptionRef,
-                    status: row.status || "pending",
+                    status: normalizeStatus(row.status),
                     comments: row.comments || ""
                 }));
 
@@ -89,13 +94,10 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
             };
 
             console.log("📤 EXCEL API PAYLOAD SENT:", apiPayload);
-
             const res = await updateRedemptionStatus(apiPayload);
-
             console.log("📥 EXCEL API RESPONSE RECEIVED:", res);
 
             toast.success(`✔ Successfully updated ${excelData.length} records`);
-
             handleClose();
 
         } catch (error: any) {
@@ -116,7 +118,6 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 <div className="flex-1 overflow-auto p-6">
-
                     {excelData.length === 0 && (
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-blue-500 transition">
                             <div className="mb-4">
@@ -161,22 +162,17 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ isOpen, onClose }) => {
                                             </td>
                                             <td className="px-4 py-3 text-sm">
                                                 <span
-                                                    className={`px-2 py-1 rounded-full text-xs font-medium ${row.status.toLowerCase() === "pending"
-                                                        ? "bg-yellow-100 text-yellow-700"
-                                                        : row.status.toLowerCase() === "approved"
-                                                            ? "bg-green-100 text-green-700"
-                                                            : "bg-red-100 text-red-700"
+                                                    className={`px-2 py-1 rounded-full text-xs font-medium 
+                                                        ${row.status === "Pending" ? "bg-yellow-100 text-yellow-700"
+                                                            : row.status === "Approve" ? "bg-green-100 text-green-700"
+                                                                : "bg-red-100 text-red-700"
                                                         }`}
                                                 >
                                                     {row.status}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3 text-sm text-gray-600">
-                                                {row.comments || (
-                                                    <span className="text-gray-400 italic">
-                                                        No comment
-                                                    </span>
-                                                )}
+                                                {row.comments || <span className="text-gray-400 italic">No comment</span>}
                                             </td>
                                         </tr>
                                     ))}

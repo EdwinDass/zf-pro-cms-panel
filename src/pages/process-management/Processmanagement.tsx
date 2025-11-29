@@ -81,7 +81,7 @@ const ProcessManagement = () => {
             <div className="mt-6 px-8">
                 {activeTab === "ProcessRedemption" && <ProcessRedemption />}
                 {/* {activeTab === "RedemptionRequests" && <RedemptionRequests />} */}
-                {/* {activeTab === "ManualEntry" && <ManualEntry />} */}
+                {activeTab === "ManualEntry" && <ManualEntry />}
             </div>
         </div>
     );

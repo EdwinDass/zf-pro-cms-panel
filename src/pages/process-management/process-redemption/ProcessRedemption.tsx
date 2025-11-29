@@ -5,6 +5,7 @@ import ExcelUpload from "../excel-upload/ExcelUpload";
 import * as XLSX from "xlsx";
 import { toast } from "react-toastify";
 import { getRedemptionHistory, updateRedemptionStatus } from "../../../services/ApiService";
+import ExporterButton from "../../../components/ExportButton";
 
 interface ProcessRedemption {
     id: string;
@@ -27,11 +28,8 @@ const ProcessRedemption: React.FC = () => {
     const [showExcelUpload, setShowExcelUpload] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-
     const menuRef = useRef<HTMLDivElement>(null);
-
-    // Pagination
-    const [skip, setSkip] = useState(0);
+    const [page, setPage] = useState(1);
     const limit = 10;
     const [totalCount, setTotalCount] = useState(0);
 
@@ -40,7 +38,7 @@ const ProcessRedemption: React.FC = () => {
             setLoading(true);
             const payload: any = {
                 status: ["Pending"],
-                skip,
+                skip: (page - 1) * limit,
                 limit
             };
             console.log("📤 API PAYLOAD SENT:", payload);
@@ -69,7 +67,7 @@ const ProcessRedemption: React.FC = () => {
 
     useEffect(() => {
         fetchRedemptionHistory();
-    }, [skip]);
+    }, [page]);
 
     const handleApprove = () => {
         if (selectedRows.length === 0) {
@@ -95,6 +93,32 @@ const ProcessRedemption: React.FC = () => {
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Process Redemption");
         XLSX.writeFile(wb, "process_redemption.xlsx");
+    };
+
+    const fileExporter = async () => {
+        try {
+            const payload: any = {
+                status: ["Pending"],
+                skip: 0,
+                limit: totalCount,
+            };
+            const res = await getRedemptionHistory(payload);
+            const mapped = res.data.reportList.map((item: any) => ({
+                slno: item.slno,
+                redemptionRef: item.redemptionRef,
+                userName: item.userName,
+                userMobile: item.userMobile,
+                userRole: item.userRole,
+                redeemedPoints: item.redeemedPoints,
+                createdAt: item.createdAt,
+                redemptionMode: item.redemptionMode,
+                redemptionStatus: item.redemptionStatus,
+            }));
+            return mapped;
+        } catch (err) {
+            console.error("EXPORT ERROR:", err);
+            return [];
+        }
     };
 
     const handleConfirm = async (comments: { [key: string]: string }) => {
@@ -184,13 +208,10 @@ const ProcessRedemption: React.FC = () => {
                             Reject
                         </button>
 
-                        <button
-                            onClick={() => exportData()}
-                            className="px-3 py-1 bg-white border border-black text-black text-sm rounded-lg flex items-center space-x-2 hover:bg-gray-100 transition"
-                        >
-                            <i className="fas fa-download"></i>
-                            <span>Export</span>
-                        </button>
+                        <ExporterButton
+                            exporter={fileExporter}
+                            reportName="Process Redemption"
+                        />
 
                         {/* 3 DOTS MENU */}
                         <div className="relative" ref={menuRef}>
@@ -234,6 +255,9 @@ const ProcessRedemption: React.FC = () => {
                     columns={columns}
                     data={data}
                     pageSize={limit}
+                    totalRows={totalCount}
+                    currentPage={page}
+                    onPageChange={(newPage) => setPage(newPage)}
                     selectable
                     selectedRows={selectedRows}
                     onSelectionChange={setSelectedRows}
