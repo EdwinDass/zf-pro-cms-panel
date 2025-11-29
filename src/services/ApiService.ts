@@ -289,9 +289,7 @@ export const resolveTicket = async (ticketId: number, comments: string) => {
             resolvedComments: comments
         }
     ];
-
-    return api.post("/user/resolve-ticket", payload);
-    // existing axios instance "api" with baseURL + token interceptor
+    return api.post("user/resolve-ticket", payload);
 };
 
 export const assignTicket = async (ticketId: number, roleId: number) => {
@@ -301,12 +299,121 @@ export const assignTicket = async (ticketId: number, roleId: number) => {
             ticketId
         }
     ];
-
-    return api.post("/user/assign-ticket", payload);
+    return api.post("user/assign-ticket", payload);
 };
 
 export const getTicketImage = async (ticketId: number) => {
-  return api.get(`/user/tickets/image?ticketId=${ticketId}`);
+    return api.get(`user/tickets/image?ticketId=${ticketId}`);
 };
 
+export const getUserCount = async (params: string) => {
+    return api.get(`user/count?${params}`);
+};
 
+export const getUserList = async (filters: {
+    status?: string;
+    role?: number[];
+    search?: string;
+    page?: number;
+    limit?: number;
+}) => {
+    const query = new URLSearchParams();
+    if (filters.status) query.append("status", filters.status);
+    if (filters.search) query.append("search", filters.search);
+    if (filters.page !== undefined) query.append("page", String(filters.page));
+    if (filters.limit !== undefined) query.append("limit", String(filters.limit));
+    if (filters.role && filters.role.length > 0) {
+        filters.role.forEach(r => query.append("role", String(r)));
+    }
+    return api.get(`user/list?${query.toString()}`);
+};
+
+export const getUserActivityLogs = async (filters: {
+    activityType?: "login" | "logout";
+    userId?: number;
+    fromDate?: string;
+    toDate?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+}) => {
+    const query = new URLSearchParams();
+    if (filters.activityType) query.append("activityType", filters.activityType);
+    if (filters.userId !== undefined) query.append("userId", String(filters.userId));
+    if (filters.fromDate) query.append("fromDate", filters.fromDate);
+    if (filters.toDate) query.append("toDate", filters.toDate);
+    if (filters.search) query.append("search", filters.search);
+    if (filters.page !== undefined) query.append("page", String(filters.page));
+    if (filters.limit !== undefined) query.append("limit", String(filters.limit));
+    return api.get(`user/activity/logs?${query.toString()}`);
+};
+
+export const getUserRoles = async () => {
+    return api.get(`user/roles`);
+};
+
+export const activateUser = async (userId: number) => {
+    return api.patch(`user/${userId}/activate`);
+};
+
+export const deactivateUser = async (userId: number) => {
+    return api.patch(`user/${userId}/deactivate`);
+};
+
+export const editUser = async (userId: number, payload: any) => {
+    return api.put(`user/users/${userId}`, payload);
+};
+
+export const getActivityLogs = async (filters: {
+    fromDate?: string;
+    toDate?: string;
+    activityType?: "login" | "logout";
+    search?: string;
+    page?: number;
+    limit?: number;
+}) => {
+    const query = new URLSearchParams();
+    if (filters.fromDate) query.append("fromDate", filters.fromDate);
+    if (filters.toDate) query.append("toDate", filters.toDate);
+    if (filters.activityType) query.append("activityType", filters.activityType);
+    if (filters.search && filters.search.trim().length >= 3) {
+        query.append("search", filters.search);
+    }
+    if (filters.page !== undefined) query.append("page", String(filters.page));
+    if (filters.limit !== undefined) query.append("limit", String(filters.limit));
+    return api.get(`user/activity/logs?${query.toString()}`);
+};
+
+export const addUser = (data: any) => {
+    return api.post('user/addUser', data);
+};
+
+export const getUserKycsByUserId = async (userId: number, page: number, limit: number) => {
+    return api.get(`kyc/kycs`, {
+        params: { userId, page, limit }
+    });
+};
+
+export const updateKycRecords = async (updates: { detailId: number; status: "Approved" | "Rejected"; comment?: string }[]) => {
+    return api.post(`kyc/updateKycRecords`, {
+        updates
+    });
+};
+
+export const raiseTicket = async (
+    ticketId: string,
+    description: string,
+    userId: string,
+    ticketImage: File | Blob
+) => {
+    const formData = new FormData();
+    formData.append("ticketId", ticketId);
+    formData.append("description", description);
+    formData.append("userId", userId);
+    formData.append("ticket", ticketImage);
+    return api.post("user/raise-ticket", formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        }
+    });
+};

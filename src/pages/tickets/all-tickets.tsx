@@ -1,4 +1,3 @@
-// tickets/pages/AllTickets.tsx
 import TicketsTable from "./components/TicketsTable";
 
 const AllTickets = () => {

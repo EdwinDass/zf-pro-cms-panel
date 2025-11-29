@@ -79,3 +79,15 @@ export const ReferralsReportKeys: any = {
     pointsEarnedByReceiver: "Points Earned by Receiver",
     dateOfReferral: "Date of Referral",
 };
+
+export const ProcessRedemptionKeys: any = {
+    slno: "SL No",
+    redemptionRef: "Redemption Ref",
+    userName: "User Name",
+    userMobile: "User Mobile",
+    userRole: "Role",
+    redeemedPoints: "Redeemed Points",
+    createdAt: "Created At",
+    redemptionMode: "Mode",
+    redemptionStatus: "Status",
+};

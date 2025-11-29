@@ -59,7 +59,7 @@ export const Layout: React.FC<LayoutProps> = ({
         // { id: 'integrations', label: 'Integrations', icon: 'fas fa-plug', path: '/integrations' },
         { id: 'process', label: 'Process redemption', icon: 'fas fa-cogs', path: '/process-management' },
         { id: 'tickets', label: 'Tickets', icon: 'fas fa-ticket-alt', path: '/tickets' },
-        { id: 'members', label: 'Members and KYC', icon: 'fas fa-users', path: '/members' },
+        { id: 'members', label: 'Members and KYC', icon: 'fas fa-users', path: '/members-management' },
         // { id: 'configuration', label: 'Configuration', icon: 'fas fa-sliders-h', path: '/configuration' },
     ];
 

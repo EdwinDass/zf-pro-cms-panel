@@ -1,7 +1,4 @@
 import React, { useState } from "react";
-import StaffScreen from "./staff/StaffPage";
-import RolesScreen from "./roles/RolesPage";
-import AccessLogsScreen from "./access-logs/AccessLogsPage";
 import TopBar from "../../layouts/top-bar";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
@@ -21,6 +18,9 @@ import { userLogout, getUserRoles, addUser } from "../../services/ApiService";
 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import MechanicsScreen from "./mechanics/Mechanics";
+import WorkshopsScreen from "./workshops/Workshops";
+import Staff from "./staff/Staff";
 
 // ROLE TYPE
 type RoleType = {
@@ -31,8 +31,8 @@ type RoleType = {
     isActive: boolean;
 };
 
-const UserRoleManagement = () => {
-    const [activeTab, setActiveTab] = useState("staff");
+const MembersManagment = () => {
+    const [activeTab, setActiveTab] = useState("mechanics");
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -115,16 +115,17 @@ const UserRoleManagement = () => {
     };
 
     const tabs = [
+        { id: "mechanics", label: "Mechanics" },
+        // { id: "workshops", label: "Workshops" },
         { id: "staff", label: "Staff" },
-        { id: "logs", label: "Access Logs" },
     ];
 
     return (
         <>
             <div className="h-screen overflow-y-auto bg-gray-100 pb-10">
                 <TopBar
-                    title="Role Management"
-                    description="Manage user roles, permissions and access control"
+                    title="Members Management"
+                    description="Manage users, KYC verification, and account controls"
                     actionButton={
                         <button
                             className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg"
@@ -172,9 +173,9 @@ const UserRoleManagement = () => {
                 </div>
 
                 <div className="mt-6 px-8">
-                    {activeTab === "staff" && <StaffScreen />}
-                    {activeTab === "roles" && <RolesScreen />}
-                    {activeTab === "logs" && <AccessLogsScreen />}
+                    {activeTab === "mechanics" && <MechanicsScreen />}
+                    {activeTab === "workshops" && <WorkshopsScreen />}
+                    {activeTab === "staff" && <Staff />}
                 </div>
 
                 {/* MODAL */}
@@ -298,4 +299,4 @@ const UserRoleManagement = () => {
     );
 };
 
-export default UserRoleManagement;
+export default MembersManagment;

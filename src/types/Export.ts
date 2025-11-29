@@ -6,4 +6,5 @@ export interface ExporterType {
     | "QR Transaction Report"
     | "Redemption Report"
     | "Referrals Report"
+    | "Process Redemption"
 }

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import AccessLogsScreen from "../role-management/access-logs/AccessLogsPage";
 import TopBar from "../../layouts/top-bar";
 import AllTickets from "./all-tickets";
 import PendingTickets from "./PendingTickets";
@@ -9,9 +8,11 @@ import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../redux/slices/userDataSlice";
 import { clearTokens } from "../../redux/slices/authTokenSlice";
 import { userLogout } from "../../services/ApiService";
+import CreateTicket from "./components/CreateTicket";
 
 const Tickets = () => {
     const [activeTab, setActiveTab] = useState("all-tickets");
+    const [showModal, setShowModal] = useState(false);  // <<< added modal state
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -31,6 +32,7 @@ const Tickets = () => {
         { id: "pending", label: "Pending" },
         { id: "resolved", label: "Resolved" },
     ];
+
     return (
         <div className="h-screen overflow-y-auto bg-gray-100 pb-10">
             <div className="bg-white">
@@ -38,13 +40,17 @@ const Tickets = () => {
                     title="Tickets Management"
                     description="Manage customer support tickets and inquiries"
                     actionButton={
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                        <button
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                            onClick={() => setShowModal(true)}   // <<< opens modal
+                        >
                             Create Ticket
                         </button>
                     }
                     logout={logout}
                 />
             </div>
+
             {/* TABS SECTION */}
             <div>
                 <div
@@ -86,6 +92,11 @@ const Tickets = () => {
                 {activeTab === "pending" && <PendingTickets />}
                 {activeTab === "resolved" && <ResolvedTickets />}
             </div>
+
+            {/* MODAL RENDER */}
+            {showModal && (
+                <CreateTicket onClose={() => setShowModal(false)} />
+            )}
         </div>
     );
 };

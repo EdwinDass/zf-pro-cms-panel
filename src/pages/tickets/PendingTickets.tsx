@@ -1,4 +1,3 @@
-// tickets/pages/PendingTickets.tsx
 import TicketsTable from "./components/TicketsTable";
 
 const PendingTickets = () => {

@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
 
-import FilterListIcon from "@mui/icons-material/FilterList";
-import DownloadIcon from "@mui/icons-material/Download";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CustomTable, { Column } from "../../../../components/CustomTable";
 import { getRedemptionHistory } from "../../../../services/ApiService";
 import ExporterButton from "../../../../components/ExportButton";
@@ -18,6 +14,11 @@ const RedemptionReport = () => {
     const [totalRows, setTotalRows] = useState(0);
     const [page, setPage] = useState(1);
     const pageSize = 10;
+
+    const formatCell = (value: any) => {
+        if (value === null || value === undefined || value === "") return "-";
+        return value;
+    };
 
     const columns: Column[] = [
         { key: "redemptionRef", label: "Redemption ID" },
@@ -62,25 +63,25 @@ const RedemptionReport = () => {
             if (fromDate) payload.fromDate = fromDate;
             if (toDate) payload.toDate = toDate;
             if (status) payload.status = [status];
-            if (redemptionRef) payload.redemptionRef = [redemptionRef];
+            if (redemptionRef.length >= 3) payload.redemptionRef = [redemptionRef];
 
             const res = await getRedemptionHistory(payload);
 
             const mapped = res.data.data.reportList.map((item: any) => ({
-                redemptionRef: item.redemptionRef,
-                userName: item.userName,
-                userCode: item.userCode,
-                redeemedPoints: item.redeemedPoints,
-                redemptionMode: item.redemptionMode,
-                redemptionStatus: item.redemptionStatus,
+                redemptionRef: formatCell(item.redemptionRef),
+                userName: formatCell(item.userName),
+                userCode: formatCell(item.userCode),
+                redeemedPoints: formatCell(item.redeemedPoints),
+                redemptionMode: formatCell(item.redemptionMode),
+                redemptionStatus: formatCell(item.redemptionStatus),
                 statusColor: getStatusColor(item.redemptionStatus),
-                userMobile: item.userMobile,
-                userRole: item.userRole,
-                dateOfJoining: item.dateOfJoining,
-                totalEarnedPoints: item.totalEarnedPoints,
-                createdAt: item.createdAt,
-                redemptionProcessedDate: item.redemptionProcessedDate,
-                redemptionDetails: item.redemptionDetails
+                userMobile: formatCell(item.userMobile),
+                userRole: formatCell(item.userRole),
+                dateOfJoining: formatCell(item.dateOfJoining),
+                totalEarnedPoints: formatCell(item.totalEarnedPoints),
+                createdAt: formatCell(item.createdAt),
+                redemptionProcessedDate: formatCell(item.redemptionProcessedDate),
+                redemptionDetails: formatCell(item.redemptionDetails)
             }));
 
             setTableData(mapped);
@@ -93,13 +94,27 @@ const RedemptionReport = () => {
 
     useEffect(() => {
         fetchReport();
-    }, [page]);
+    }, [page, fromDate, toDate, status]);
+
+    useEffect(() => {
+        if (redemptionRef.length === 0) {
+            setPage(1);
+            fetchReport();
+            return;
+        }
+        if (redemptionRef.length >= 3) {
+            const timeout = setTimeout(() => {
+                setPage(1);
+                fetchReport();
+            }, 500);
+            return () => clearTimeout(timeout);
+        }
+    }, [redemptionRef]);
 
     const onPageChange = (newPage: number) => {
         setPage(newPage);
     };
 
-    // EXPORT FUNCTION
     const fileExporter = async () => {
         try {
             const payload: any = {
@@ -110,24 +125,24 @@ const RedemptionReport = () => {
             if (fromDate) payload.fromDate = fromDate;
             if (toDate) payload.toDate = toDate;
             if (status) payload.status = [status];
-            if (redemptionRef) payload.redemptionRef = [redemptionRef];
+            if (redemptionRef.length >= 3) payload.redemptionRef = [redemptionRef];
 
             const res = await getRedemptionHistory(payload);
 
             const mapped = res.data.data.reportList.map((item: any) => ({
-                redemptionRef: item.redemptionRef,
-                userName: item.userName,
-                userCode: item.userCode,
-                redeemedPoints: item.redeemedPoints,
-                redemptionMode: item.redemptionMode,
-                redemptionStatus: item.redemptionStatus,
-                userMobile: item.userMobile,
-                userRole: item.userRole,
-                dateOfJoining: item.dateOfJoining,
-                totalEarnedPoints: item.totalEarnedPoints,
-                createdAt: item.createdAt,
-                redemptionProcessedDate: item.redemptionProcessedDate,
-                redemptionDetails: item.redemptionDetails
+                redemptionRef: formatCell(item.redemptionRef),
+                userName: formatCell(item.userName),
+                userCode: formatCell(item.userCode),
+                redeemedPoints: formatCell(item.redeemedPoints),
+                redemptionMode: formatCell(item.redemptionMode),
+                redemptionStatus: formatCell(item.redemptionStatus),
+                userMobile: formatCell(item.userMobile),
+                userRole: formatCell(item.userRole),
+                dateOfJoining: formatCell(item.dateOfJoining),
+                totalEarnedPoints: formatCell(item.totalEarnedPoints),
+                createdAt: formatCell(item.createdAt),
+                redemptionProcessedDate: formatCell(item.redemptionProcessedDate),
+                redemptionDetails: formatCell(item.redemptionDetails)
             }));
 
             return mapped;
@@ -146,34 +161,12 @@ const RedemptionReport = () => {
                     <p className="text-gray-500 text-sm">View all redemption activity details</p>
                 </div>
 
-                {/* ORIGINAL BUTTONS COMMENTED */}
-                {/*
-                <div className="flex flex-wrap gap-3">
-                    <button className="px-3 py-1.5 bg-blue-600 text-white rounded-md flex items-center text-sm whitespace-nowrap">
-                        <DownloadIcon fontSize="small" className="mr-2" />
-                        Export CSV
-                    </button>
-
-                    <button className="px-3 py-1.5 bg-red-600 text-white rounded-md flex items-center text-sm whitespace-nowrap">
-                        <PictureAsPdfIcon fontSize="small" className="mr-2" />
-                        Export PDF
-                    </button>
-
-                    <button className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md flex items-center text-sm whitespace-nowrap">
-                        <AccessTimeIcon fontSize="small" className="mr-2" />
-                        Schedule
-                    </button>
-                </div>
-                */}
-
-                {/* NEW EXPORT BUTTON */}
                 <ExporterButton
                     exporter={fileExporter}
                     reportName="Redemption Report"
                 />
             </div>
 
-            {/* FILTERS */}
             <div className="mt-6">
                 <div className="flex bg-gray-50 p-4 rounded-lg items-center gap-2">
 
@@ -209,8 +202,6 @@ const RedemptionReport = () => {
                         </label>
                         <select
                             id="statusSelect"
-                            name="statusSelect"
-                            aria-label="Redemption Status"
                             className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
                             value={status}
                             onChange={(e) => setStatus(e.target.value)}
@@ -228,8 +219,6 @@ const RedemptionReport = () => {
                         </label>
                         <input
                             id="redemptionRefInput"
-                            name="redemptionRefInput"
-                            aria-label="Redemption Reference"
                             type="text"
                             placeholder="Enter Reference ID"
                             className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
@@ -237,16 +226,6 @@ const RedemptionReport = () => {
                             onChange={(e) => setRedemptionRef(e.target.value)}
                         />
                     </div>
-                </div>
-
-                <div className="flex justify-end mt-3">
-                    <button
-                        className="px-5 py-2 bg-blue-600 text-white rounded-md flex items-center text-sm whitespace-nowrap"
-                        onClick={() => setPage(1)}
-                    >
-                        <FilterListIcon fontSize="small" className="mr-2" />
-                        Apply Filters
-                    </button>
                 </div>
             </div>
 

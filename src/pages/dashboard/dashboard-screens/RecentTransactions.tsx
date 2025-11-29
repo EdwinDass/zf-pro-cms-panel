@@ -1,11 +1,11 @@
-// src/components/dashboard-screens/RecentTransactions.tsx
-
 import React, { useEffect, useState } from "react";
 import { getRecentTransactions } from "../../../services/ApiService";
+import { useNavigate } from "react-router-dom";
 
 const RecentTransactions: React.FC = () => {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchTransactions();
@@ -32,7 +32,11 @@ const RecentTransactions: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold text-gray-800">Recent Transactions</h2>
-        <button className="text-blue-600 text-sm font-medium hover:underline">
+
+        <button
+          className="text-blue-600 text-sm font-medium hover:underline"
+          onClick={() => navigate("/mis-analytics", { state: { report: "qr" } })}
+        >
           View All
         </button>
       </div>
@@ -56,33 +60,27 @@ const RecentTransactions: React.FC = () => {
             key={index}
             className="grid grid-cols-5 py-3 text-sm items-center border-b last:border-none"
           >
-            {/* ID */}
             <div className="text-gray-800">#{txn.id}</div>
 
-            {/* Member */}
             <div className="text-gray-800">
               {txn.displayName || txn.userEmail}
             </div>
 
-            {/* Type */}
             <div>
               <span
-                className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  txn.type === "scan"
-                    ? "bg-blue-50 text-blue-600"
-                    : "bg-orange-50 text-orange-600"
-                }`}
+                className={`px-3 py-1 rounded-full text-xs font-medium ${txn.type === "scan"
+                  ? "bg-blue-50 text-blue-600"
+                  : "bg-orange-50 text-orange-600"
+                  }`}
               >
                 {txn.type}
               </span>
             </div>
 
-            {/* Points */}
             <div className="font-medium text-green-600">
               +{txn.points}
             </div>
 
-            {/* Time */}
             <div className="text-gray-600">
               {new Date(txn.createdAt).toLocaleTimeString("en-IN", {
                 hour: "2-digit",

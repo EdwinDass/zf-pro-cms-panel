@@ -52,7 +52,13 @@ const AssignTicket: React.FC<Props> = ({
 
         <h2 className="text-xl font-semibold mb-4">Assign Ticket</h2>
 
+        <label htmlFor="roleSelect" className="sr-only">
+          Select Role
+        </label>
+
         <select
+          id="roleSelect"
+          aria-label="Select Role"
           className="w-full border rounded-lg p-3 mb-4"
           value={selectedRole}
           onChange={(e) => setSelectedRole(e.target.value)}

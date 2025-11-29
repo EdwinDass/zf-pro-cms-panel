@@ -1,4 +1,8 @@
-import React, { useState } from "react";
+// src/pages/mis-analytics/Reports.tsx
+
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+
 import RedemptionReport from "./redemption-report/RedemptionReport";
 import ApplicationLoginReport from "./application-login-report/ApplicationLoginReport";
 import RegisteredUsersReport from "./registered-users-report/RegisteredUsersReport";
@@ -12,7 +16,15 @@ import ShareIcon from "@mui/icons-material/Share";
 import GroupsIcon from "@mui/icons-material/Groups";
 
 const Reports = () => {
+    const location = useLocation();
     const [activeReport, setActiveReport] = useState("application-login");
+
+    // AUTO SELECT QR REPORT WHEN COMING FROM DASHBOARD
+    useEffect(() => {
+        if (location.state?.report === "qr") {
+            setActiveReport("qr");
+        }
+    }, [location.state]);
 
     return (
         <div className="min-h-screen bg-gray-100 overflow-visible">

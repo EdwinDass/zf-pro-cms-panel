@@ -1,194 +1,206 @@
-import React, { useState } from "react";
-import FilterListIcon from "@mui/icons-material/FilterList";
+import React, { useState, useEffect } from "react";
 import CustomTable, { Column } from "../../../components/CustomTable";
+import { getActivityLogs } from "../../../services/ApiService";
 
 interface AccessLog {
     id: number;
     timestamp: string;
     user: string;
+    userMobile: string;
+    userEmail: string;
     action: string;
     actionBadge: string;
-    module: string;
-    ipAddress: string;
-    status: string;
-    statusBadge: string;
 }
 
 const AccessLogsScreen: React.FC = () => {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
-    const [userFilter, setUserFilter] = useState("");
-    const [actionFilter, setActionFilter] = useState("");
+    const [searchFilter, setSearchFilter] = useState("");
+    const [actionFilter, setActionFilter] = useState<"" | "login" | "logout">("");
+    const [tableData, setTableData] = useState<AccessLog[]>([]);
+    const [totalRows, setTotalRows] = useState(0);
+    const [page, setPage] = useState(1);
+    const pageSize = 10;
 
-    const logs: AccessLog[] = [
-        {
-            id: 1,
-            timestamp: "Oct 25, 2023 10:30:15 AM",
-            user: "John Doe",
-            action: "Login",
-            actionBadge: "bg-green-100 text-green-600",
-            module: "Authentication",
-            ipAddress: "192.168.1.100",
-            status: "Success",
-            statusBadge: "bg-green-100 text-green-600",
-        },
-        {
-            id: 2,
-            timestamp: "Oct 25, 2023 10:15:22 AM",
-            user: "Alice Smith",
-            action: "Update",
-            actionBadge: "bg-blue-100 text-blue-600",
-            module: "User Management",
-            ipAddress: "192.168.1.101",
-            status: "Success",
-            statusBadge: "bg-green-100 text-green-600",
-        },
-        {
-            id: 3,
-            timestamp: "Oct 25, 2023 09:45:33 AM",
-            user: "Robert Johnson",
-            action: "Delete",
-            actionBadge: "bg-red-100 text-red-600",
-            module: "Content",
-            ipAddress: "192.168.1.102",
-            status: "Success",
-            statusBadge: "bg-green-100 text-green-600",
-        },
-        {
-            id: 4,
-            timestamp: "Oct 25, 2023 09:30:45 AM",
-            user: "Emma Wilson",
-            action: "Login Failed",
-            actionBadge: "bg-orange-100 text-orange-600",
-            module: "Authentication",
-            ipAddress: "192.168.1.103",
-            status: "Failed",
-            statusBadge: "bg-red-100 text-red-600",
-        },
-        {
-            id: 5,
-            timestamp: "Oct 25, 2023 09:15:12 AM",
-            user: "Michael Brown",
-            action: "Logout",
-            actionBadge: "bg-gray-100 text-gray-600",
-            module: "Authentication",
-            ipAddress: "192.168.1.104",
-            status: "Success",
-            statusBadge: "bg-green-100 text-green-600",
-        },
-    ];
+    const formatCell = (value: any) => {
+        if (value === null || value === undefined || value === "" || value === "N/A" || value === "Unknown") return "-";
+        return value;
+    };
 
-    // ------------------------
-    // Columns for CustomTable
-    // ------------------------
     const columns: Column[] = [
         { key: "timestamp", label: "Timestamp" },
         { key: "user", label: "User" },
+        { key: "userMobile", label: "User Mobile" },
         {
             key: "action",
             label: "Action",
             render: (log: AccessLog) => (
-                <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${log.actionBadge}`}
-                >
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${log.actionBadge}`}>
                     {log.action}
                 </span>
             ),
         },
-        { key: "module", label: "Module" },
-        { key: "ipAddress", label: "IP Address" },
-        {
-            key: "status",
-            label: "Status",
-            render: (log: AccessLog) => (
-                <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${log.statusBadge}`}
-                >
-                    {log.status}
-                </span>
-            ),
-        },
+        { key: "userEmail", label: "User Email" },
     ];
+
+    const fetchLogs = async () => {
+        try {
+            const payload: any = {
+                page: page,
+                limit: pageSize,
+            };
+
+            if (startDate) payload.fromDate = startDate;
+            if (endDate) payload.toDate = endDate;
+            if (actionFilter) payload.activityType = actionFilter;
+            if (searchFilter.length >= 3) payload.search = searchFilter;
+
+            const res = await getActivityLogs(payload);
+
+            const mapped = res.data.data.map((item: any) => ({
+                id: item.logId,
+                timestamp: new Date(item.createdAt).toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: true,
+                }),
+                user: formatCell(item.userName),
+                userMobile: formatCell(item.userMobile),
+                userEmail: formatCell(item.userEmail),
+                action: formatCell(item.activityType.charAt(0).toUpperCase() + item.activityType.slice(1)),
+                actionBadge: getActionBadge(item.activityType),
+            }));
+
+            setTableData(mapped);
+            setTotalRows(res.data.totalRecords);
+
+        } catch (err) {
+            console.error("API ERROR:", err);
+        }
+    };
+
+    const getActionBadge = (action: string) => {
+        if (!action) return "bg-gray-100 text-gray-600";
+        const value = action.toLowerCase();
+        if (value === "login") return "bg-green-100 text-green-600";
+        if (value === "logout") return "bg-gray-100 text-gray-600";
+        return "bg-gray-100 text-gray-600";
+    };
+
+    useEffect(() => {
+        fetchLogs();
+    }, [page, startDate, endDate, actionFilter]);
+
+    useEffect(() => {
+        setPage(1);
+    }, [startDate, endDate, actionFilter]);
+
+    useEffect(() => {
+        if (searchFilter.length === 0) {
+            setPage(1);
+            fetchLogs();
+            return;
+        }
+        if (searchFilter.length >= 3) {
+            const timeout = setTimeout(() => {
+                setPage(1);
+                fetchLogs();
+            }, 500);
+            return () => clearTimeout(timeout);
+        }
+    }, [searchFilter]);
+
+    const onPageChange = (newPage: number) => {
+        setPage(newPage);
+    };
 
     return (
         <div>
+            <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-100">
 
-            {/* FILTER SECTION */}
-            <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-100 transition-transform transform hover:scale-[1.01] hover:shadow-lg">
-                <div className="flex flex-wrap gap-4 mb-6">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="flex flex-wrap gap-4 mb-4">
 
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="log-start-date" className="block mb-2 text-sm font-medium text-gray-700">
-                            Start Date
-                        </label>
-                        <input
-                            type="date"
-                            id="log-start-date"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                        />
-                    </div>
+                        <div className="flex-1 min-w-[200px]">
+                            <label htmlFor="from-date-filter" className="block mb-2 text-sm font-medium text-gray-700">
+                                From Date
+                            </label>
+                            <input
+                                id="from-date-filter"
+                                type="date"
+                                aria-label="Filter From Date"
+                                title="Select starting date"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                            />
+                        </div>
 
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="log-end-date" className="block mb-2 text-sm font-medium text-gray-700">
-                            End Date
-                        </label>
-                        <input
-                            type="date"
-                            id="log-end-date"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                        />
-                    </div>
+                        <div className="flex-1 min-w-[200px]">
+                            <label htmlFor="to-date-filter" className="block mb-2 text-sm font-medium text-gray-700">
+                                To Date
+                            </label>
+                            <input
+                                id="to-date-filter"
+                                type="date"
+                                aria-label="Filter To Date"
+                                title="Select ending date"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                            />
+                        </div>
 
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="log-user-filter" className="block mb-2 text-sm font-medium text-gray-700">
-                            User
-                        </label>
-                        <select
-                            id="log-user-filter"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            value={userFilter}
-                            onChange={(e) => setUserFilter(e.target.value)}
-                        >
-                            <option value="">All Users</option>
-                            <option value="john.doe">John Doe</option>
-                            <option value="alice.smith">Alice Smith</option>
-                            <option value="robert.johnson">Robert Johnson</option>
-                        </select>
-                    </div>
+                        <div className="flex-1 min-w-[200px]">
+                            <label htmlFor="action-filter" className="block mb-2 text-sm font-medium text-gray-700">
+                                Action
+                            </label>
+                            <select
+                                id="action-filter"
+                                aria-label="Select Action Type"
+                                title="Filter by Action"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                value={actionFilter}
+                                onChange={(e) => setActionFilter(e.target.value as "" | "login" | "logout")}
+                            >
+                                <option value="">All Actions</option>
+                                <option value="login">Login</option>
+                                <option value="logout">Logout</option>
+                            </select>
+                        </div>
 
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="log-action-filter" className="block mb-2 text-sm font-medium text-gray-700">
-                            Action
-                        </label>
-                        <select
-                            id="log-action-filter"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            value={actionFilter}
-                            onChange={(e) => setActionFilter(e.target.value)}
-                        >
-                            <option value="">All Actions</option>
-                            <option value="login">Login</option>
-                            <option value="logout">Logout</option>
-                            <option value="create">Create</option>
-                            <option value="update">Update</option>
-                            <option value="delete">Delete</option>
-                        </select>
-                    </div>
+                        <div className="flex-1 min-w-[200px]">
+                            <label htmlFor="search-input" className="block mb-2 text-sm font-medium text-gray-700">
+                                Search
+                            </label>
+                            <input
+                                id="search-input"
+                                type="text"
+                                aria-label="Search logs"
+                                title="Search (min 3 characters)"
+                                placeholder="Search (min 3 characters)"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                value={searchFilter}
+                                onChange={(e) => setSearchFilter(e.target.value)}
+                            />
+                        </div>
 
-                    <div className="flex items-end">
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition flex items-center">
-                            <FilterListIcon className="mr-2" /> Apply Filters
-                        </button>
                     </div>
                 </div>
             </div>
 
-            {/* CUSTOM TABLE FOR ACCESS LOGS */}
-            <CustomTable columns={columns} data={logs} pageSize={5} />
+            <CustomTable
+                columns={columns}
+                data={tableData}
+                pageSize={pageSize}
+                totalRows={totalRows}
+                currentPage={page}
+                onPageChange={onPageChange}
+            />
         </div>
     );
 };

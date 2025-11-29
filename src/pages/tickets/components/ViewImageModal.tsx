@@ -17,8 +17,14 @@ const ViewImageModal: React.FC<Props> = ({ isOpen, onClose, imageUrl }) => {
         {/* Header */}
         <div className="flex justify-between items-center px-4 py-3 border-b bg-gray-50">
           <h2 className="text-lg font-semibold">Ticket Image</h2>
-          <button className="text-gray-600 hover:text-gray-900" onClick={onClose}>
+
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="text-gray-600 hover:text-gray-900"
+          >
             <CloseIcon />
+            <span className="sr-only">Close</span>
           </button>
         </div>
 
