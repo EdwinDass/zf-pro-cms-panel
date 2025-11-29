@@ -225,8 +225,8 @@ const WorkshopsScreen: React.FC = () => {
                                             <div className="flex items-center gap-2">
                                                 <span
                                                     className={`px-3 py-1 rounded-md text-sm font-medium ${mechanic.kycStatus === "Pending"
-                                                            ? "bg-orange-100 text-orange-600"
-                                                            : "bg-green-100 text-green-600"
+                                                        ? "bg-orange-100 text-orange-600"
+                                                        : "bg-green-100 text-green-600"
                                                         }`}
                                                 >
                                                     {mechanic.kycStatus}
@@ -414,8 +414,8 @@ const WorkshopsScreen: React.FC = () => {
                                 key={i + 1}
                                 onClick={() => setCurrentPage(i + 1)}
                                 className={`w-10 h-10 rounded-lg text-sm font-medium transition ${currentPage === i + 1
-                                        ? "bg-blue-600 text-white"
-                                        : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                    ? "bg-blue-600 text-white"
+                                    : "border border-gray-300 text-gray-700 hover:bg-gray-50"
                                     }`}
                             >
                                 {i + 1}
@@ -434,12 +434,12 @@ const WorkshopsScreen: React.FC = () => {
             </div>
 
             {/* KYC Modal */}
-            <KycModal
+            {/* <KycModal
                 isOpen={kycModalOpen}
                 onClose={() => setKycModalOpen(false)}
                 mechanicName={selectedMechanic?.name || ""}
                 mechanicId={selectedMechanic?.id || ""}
-            />
+            /> */}
 
         </div>
     );
