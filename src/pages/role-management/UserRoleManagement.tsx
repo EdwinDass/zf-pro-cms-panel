@@ -22,6 +22,8 @@ import { userLogout, getUserRoles, addUser } from "../../services/ApiService";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { customEncodeBase64 } from "../../utils/random";   // <-- IMPORTANT
+
 // ROLE TYPE
 type RoleType = {
     roleId: number;
@@ -76,26 +78,32 @@ const UserRoleManagement = () => {
     };
 
     const handleSubmit = async () => {
+
+        const encodedPassword = customEncodeBase64(formData.password, true);
+
         const payload = {
             userName: formData.userName,
             userEmail: formData.userEmail,
             displayName: formData.displayName,
             userMobile: formData.userMobile,
             userRole: Number(formData.userRole),
-            userPassword: formData.password
+            userPassword: encodedPassword  // <-- ENCODED
         };
 
         try {
             const res = await addUser(payload);
 
-            if (res.data?.code !== 200) {
+            if (res.data?.code !== 200 && res.data?.code !== 201) {
                 toast.error(res.data?.message || "Something went wrong");
                 return;
             }
 
-            toast.success("User added successfully 👍");
-            resetForm();
-            setShowModal(false);
+            toast.success(res.data?.message || "User added successfully 👍", { theme: "colored" });
+
+            setTimeout(() => {
+                resetForm();
+                setShowModal(false);
+            }, 800);
 
         } catch (err: any) {
             const msg = err?.response?.data?.message ?? "Something went wrong";

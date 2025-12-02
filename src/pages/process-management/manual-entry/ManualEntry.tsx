@@ -1,5 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import CustomTable, { Column } from "../../../components/CustomTable";
+import { toast } from "react-toastify";
+import { bulkProductScan, bulkRedeemPoints } from "../../../services/ApiService";
+import * as XLSX from "xlsx";
+import ScanExcelUpload from "../manual-scan-upload/ManualScanExcelUpload";
+import RedeemExcelUpload from "../manual-redemption-excel-upload/ManualRedemptionExcelUpload";
+
 
 interface ManualEntryRow {
     id: string;
@@ -12,9 +18,91 @@ interface ManualEntryRow {
 }
 
 const ManualEntry: React.FC = () => {
+
+    const [scanUserCode, setScanUserCode] = useState("");
+    const [scanQR, setScanQR] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [redeemUserCode, setRedeemUserCode] = useState("");
+    const [redeemType, setRedeemType] = useState("");
+    const [redeemValue, setRedeemValue] = useState("");
+    const [menuOpenScan, setMenuOpenScan] = useState(false);
+    const [showScanExcelUpload, setShowScanExcelUpload] = useState(false);
+    const [menuOpenRedeem, setMenuOpenRedeem] = useState(false);
+    const [showRedeemExcelUpload, setShowRedeemExcelUpload] = useState(false);
+
+    const handleSubmitScan = async () => {
+        if (!scanUserCode || !scanQR) {
+            return toast.error("Please fill all fields");
+        }
+        const payload = [
+            {
+                userCode: scanUserCode,
+                payload: { qr: scanQR }
+            }
+        ];
+        setLoading(true);
+        try {
+            const response = await bulkProductScan(payload);
+            if (response?.data?.failedCount > 0) {
+                response.data.failed.forEach((err: any) => {
+                    toast.error(`${err.userCode} — ${err.error}`);
+                });
+            }
+            if (response?.data?.successCount > 0) {
+                toast.success(response.message || "Bulk scan processed successfully");
+            }
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || "Scan failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSubmitRedemption = async () => {
+        if (!redeemUserCode || !redeemType || !redeemValue) {
+            return toast.error("Please fill all fields");
+        }
+        const payload = [
+            {
+                userCode: redeemUserCode,
+                payload: { type: redeemType, value: Number(redeemValue) }
+            }
+        ];
+        setLoading(true);
+        try {
+            const response = await bulkRedeemPoints(payload);
+            if (response?.code && response?.code !== 200) {
+                toast.error(response.message);
+                return;
+            }
+            toast.success(response?.message || "Redemption successful");
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || "Redemption failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const downloadScanFormat = () => {
+        const ws = XLSX.utils.json_to_sheet([], {
+            header: ["userCode", "qr"]
+        });
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Format");
+        XLSX.writeFile(wb, "scan_format.xlsx");
+    };
+
+    const downloadRedeemFormat = () => {
+        const ws = XLSX.utils.json_to_sheet([], {
+            header: ["userCode", "type", "value"]
+        });
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Format");
+        XLSX.writeFile(wb, "redeem_format.xlsx");
+    };
+
     const columns: Column[] = [
         { key: "id", label: "Entry ID" },
-
         {
             key: "user",
             label: "User",
@@ -31,7 +119,6 @@ const ManualEntry: React.FC = () => {
                 </div>
             ),
         },
-
         {
             key: "type",
             label: "Type",
@@ -42,7 +129,6 @@ const ManualEntry: React.FC = () => {
                         : row.type === "Redemption"
                             ? "bg-yellow-100 text-yellow-700"
                             : "bg-green-100 text-green-700";
-
                 return (
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${badgeColor}`}>
                         {row.type}
@@ -50,11 +136,8 @@ const ManualEntry: React.FC = () => {
                 );
             },
         },
-
         { key: "amount", label: "Amount/Points" },
-
         { key: "datetime", label: "Date/Time" },
-
         {
             key: "status",
             label: "Status",
@@ -99,132 +182,166 @@ const ManualEntry: React.FC = () => {
     return (
         <div className="space-y-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                {/* LEFT BOX — Manual Scan/Transaction Entry */}
+                {/* LEFT BOX — Manual Scan Entry */}
                 <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                        Manual Scan/Transaction Entry
-                    </h3>
-
-                    {/* User ID */}
-                    <label htmlFor="scanUser" className="block text-sm text-gray-700 mb-1">
-                        User ID / Mobile Number
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                            Manual Scan Entry
+                        </h3>
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setMenuOpenScan(!menuOpenScan)}
+                                aria-label="More options"
+                                className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50"
+                            >
+                                <i className="fas fa-ellipsis-v"></i>
+                            </button>
+                            {menuOpenScan && (
+                                <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border py-2 z-50">
+                                    <button
+                                        onClick={() => {
+                                            setMenuOpenScan(false);
+                                            setShowScanExcelUpload(true);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                    >
+                                        Upload Excel
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setMenuOpenScan(false);
+                                            downloadScanFormat();
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                    >
+                                        Download Format
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <label htmlFor="scanUserCode" className="block text-sm text-gray-700 mb-1">
+                        User Code
                     </label>
                     <input
-                        id="scanUser"
+                        id="scanUserCode"
                         type="text"
-                        placeholder="Enter user ID or mobile number"
+                        placeholder="Enter user code"
+                        value={scanUserCode}
+                        aria-label="User Code"
+                        onChange={(e) => setScanUserCode(e.target.value)}
                         className="w-full border rounded-md px-4 py-2 mb-4 text-sm"
                     />
-
-                    {/* Entry Type */}
-                    <label htmlFor="entryType" className="block text-sm text-gray-700 mb-1">
-                        Entry Type
-                    </label>
-                    <select
-                        id="entryType"
-                        className="w-full border rounded-md px-4 py-2 mb-4 text-sm"
-                    >
-                        <option value="scan">Scan</option>
-                        <option value="transaction">Transaction</option>
-                    </select>
-
-                    {/* Amount */}
-                    <label htmlFor="amount" className="block text-sm text-gray-700 mb-1">
-                        Amount (₹)
+                    <label htmlFor="scanType" className="block text-sm text-gray-700 mb-1">
+                        Transaction Type
                     </label>
                     <input
-                        id="amount"
-                        type="number"
-                        placeholder="Enter amount"
-                        className="w-full border rounded-md px-4 py-2 mb-4 text-sm"
-                    />
-
-                    {/* Merchant */}
-                    <label htmlFor="merchant" className="block text-sm text-gray-700 mb-1">
-                        Merchant/Store
-                    </label>
-                    <input
-                        id="merchant"
+                        id="scanType"
                         type="text"
-                        placeholder="Enter merchant/store name"
-                        className="w-full border rounded-md px-4 py-2 mb-4 text-sm"
+                        value="Scan"
+                        aria-label="Transaction Type"
+                        disabled
+                        className="w-full border rounded-md px-4 py-2 mb-4 text-sm bg-gray-100 text-gray-600"
                     />
-
-                    {/* Date */}
-                    <label htmlFor="scanDate" className="block text-sm text-gray-700 mb-1">
-                        Date
+                    <label htmlFor="scanQR" className="block text-sm text-gray-700 mb-1">
+                        QR Code
                     </label>
                     <input
-                        id="scanDate"
-                        type="date"
-                        className="w-full border rounded-md px-4 py-2 mb-4 text-sm"
-                        defaultValue={new Date().toISOString().slice(0, 10)}
+                        id="scanQR"
+                        type="text"
+                        placeholder="Enter QR code"
+                        value={scanQR}
+                        aria-label="QR Code"
+                        onChange={(e) => setScanQR(e.target.value)}
+                        className="w-full border rounded-md px-4 py-2 mb-6 text-sm"
                     />
-
-                    {/* Remarks */}
-                    <label htmlFor="scanRemarks" className="block text-sm text-gray-700 mb-1">
-                        Remarks
-                    </label>
-                    <textarea
-                        id="scanRemarks"
-                        placeholder="Enter any additional remarks"
-                        className="w-full border rounded-md px-4 py-2 mb-4 text-sm h-24 resize-none"
-                    />
-
-                    {/* Buttons */}
-                    <div className="flex justify-end space-x-3">
-                        <button className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50">
-                            Cancel
-                        </button>
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
-                            Submit Entry
+                    <div className="flex justify-end">
+                        <button
+                            onClick={handleSubmitScan}
+                            disabled={loading}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? "Submitting..." : "Submit Entry"}
                         </button>
                     </div>
                 </div>
-
                 {/* RIGHT BOX — Manual Redemption Entry */}
                 <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                        Manual Redemption Entry
-                    </h3>
-
-                    {/* User ID */}
-                    <label htmlFor="redeemUser" className="block text-sm text-gray-700 mb-1">
-                        User ID / Mobile Number
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                            Manual Redemption Entry
+                        </h3>
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setMenuOpenRedeem(!menuOpenRedeem)}
+                                aria-label="More options"
+                                className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50"
+                            >
+                                <i className="fas fa-ellipsis-v"></i>
+                            </button>
+                            {menuOpenRedeem && (
+                                <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border py-2 z-50">
+                                    <button
+                                        onClick={() => {
+                                            setMenuOpenRedeem(false);
+                                            setShowRedeemExcelUpload(true);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                    >
+                                        Upload Excel
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setMenuOpenRedeem(false);
+                                            downloadRedeemFormat();
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                                    >
+                                        Download Format
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <label htmlFor="redeemUserCode" className="block text-sm text-gray-700 mb-1">
+                        User Code
                     </label>
                     <input
-                        id="redeemUser"
+                        id="redeemUserCode"
                         type="text"
-                        placeholder="Enter user ID or mobile number"
+                        placeholder="Enter user code"
+                        value={redeemUserCode}
+                        aria-label="Redemption User Code"
+                        onChange={(e) => setRedeemUserCode(e.target.value)}
                         className="w-full border rounded-md px-4 py-2 mb-4 text-sm"
                     />
-
-                    {/* Points */}
-                    <label htmlFor="points" className="block text-sm text-gray-700 mb-1">
-                        Points to Redeem
+                    <label htmlFor="redeemTypeStatic" className="block text-sm text-gray-700 mb-1">
+                        Transaction Type
                     </label>
                     <input
-                        id="points"
-                        type="number"
-                        placeholder="Enter points to redeem"
-                        className="w-full border rounded-md px-4 py-2 mb-4 text-sm"
+                        id="redeemTypeStatic"
+                        type="text"
+                        value="Redemption"
+                        aria-label="Transaction Type"
+                        disabled
+                        className="w-full border rounded-md px-4 py-2 mb-4 text-sm bg-gray-100 text-gray-600"
                     />
-
-                    {/* Redemption Type */}
-                    <label htmlFor="redemptionType" className="block text-sm text-gray-700 mb-1">
+                    <label htmlFor="redeemType" className="block text-sm text-gray-700 mb-1">
                         Redemption Type
                     </label>
                     <select
-                        id="redemptionType"
+                        id="redeemType"
+                        aria-label="Redemption Type"
+                        value={redeemType}
+                        onChange={(e) => setRedeemType(e.target.value)}
                         className="w-full border rounded-md px-4 py-2 mb-4 text-sm"
                     >
-                        <option value="cash">Cash</option>
-                        <option value="voucher">Voucher</option>
-                        <option value="credit">Credit</option>
+                        <option value="">Select Type</option>
+                        <option value="upi">UPI</option>
+                        <option value="bank-transfer">Bank Transfer</option>
                     </select>
-
-                    {/* Redemption Value */}
                     <label htmlFor="redeemValue" className="block text-sm text-gray-700 mb-1">
                         Redemption Value (₹)
                     </label>
@@ -232,57 +349,52 @@ const ManualEntry: React.FC = () => {
                         id="redeemValue"
                         type="number"
                         placeholder="Enter redemption value"
+                        value={redeemValue}
+                        aria-label="Redemption Value"
+                        onChange={(e) => setRedeemValue(e.target.value)}
                         className="w-full border rounded-md px-4 py-2 mb-4 text-sm"
                     />
-
-                    {/* Date */}
-                    <label htmlFor="redeemDate" className="block text-sm text-gray-700 mb-1">
-                        Date
-                    </label>
-                    <input
-                        id="redeemDate"
-                        type="date"
-                        className="w-full border rounded-md px-4 py-2 mb-4 text-sm"
-                        defaultValue={new Date().toISOString().slice(0, 10)}
-                    />
-
-                    {/* Remarks */}
-                    <label htmlFor="redeemRemarks" className="block text-sm text-gray-700 mb-1">
-                        Remarks
-                    </label>
-                    <textarea
-                        id="redeemRemarks"
-                        placeholder="Enter any additional remarks"
-                        className="w-full border rounded-md px-4 py-2 mb-4 text-sm h-24 resize-none"
-                    />
-
-                    {/* Buttons */}
                     <div className="flex justify-end space-x-3">
                         <button className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50">
                             Cancel
                         </button>
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
-                            Submit Entry
+                        <button
+                            onClick={handleSubmitRedemption}
+                            disabled={loading}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? "Submitting..." : "Submit Entry"}
                         </button>
                     </div>
                 </div>
             </div>
+            {/* =============================
+                ❗ RECENT MANUAL ENTRIES HIDDEN
+            ============================== */}
+            {/*
             <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
-
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-lg font-semibold text-gray-900">Recent Manual Entries</h3>
                     <button className="text-blue-600 text-sm font-medium hover:underline">
                         View All
                     </button>
                 </div>
-
                 <CustomTable
                     pageSize={5}
                     columns={columns}
                     data={recentEntries}
                 />
             </div>
-
+            */}
+        
+            <ScanExcelUpload
+                isOpen={showScanExcelUpload}
+                onClose={() => setShowScanExcelUpload(false)}
+            />
+            <RedeemExcelUpload
+                isOpen={showRedeemExcelUpload}
+                onClose={() => setShowRedeemExcelUpload(false)}
+            />
         </div>
     );
 };
