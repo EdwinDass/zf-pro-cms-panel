@@ -417,3 +417,7 @@ export const raiseTicket = async (
         }
     });
 };
+
+export const getAdminOtpReport = (params: any) => {
+    return api.get("report/otp-report", { params });
+};

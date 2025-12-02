@@ -8,12 +8,16 @@ import ApplicationLoginReport from "./application-login-report/ApplicationLoginR
 import RegisteredUsersReport from "./registered-users-report/RegisteredUsersReport";
 import QRTransactionReport from "./qr-transaction-report/QRTransactionReport";
 import ReferralsReport from "./referrals-report/ReferralsReport";
+import OtpReport from "./otp-report/OtpReport";
 
+// Icons
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import GridViewIcon from "@mui/icons-material/GridView";
 import SyncAltIcon from "@mui/icons-material/SyncAlt";
 import ShareIcon from "@mui/icons-material/Share";
 import GroupsIcon from "@mui/icons-material/Groups";
+import PasswordIcon from "@mui/icons-material/Password";
+
 
 const Reports = () => {
     const location = useLocation();
@@ -37,6 +41,7 @@ const Reports = () => {
 
                     <div className="space-y-2">
 
+                        {/* Application Login */}
                         <button
                             onClick={() => setActiveReport("application-login")}
                             className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-2
@@ -48,6 +53,7 @@ const Reports = () => {
                             <span className="text-[14px]">Application Login Report</span>
                         </button>
 
+                        {/* Registered Users */}
                         <button
                             onClick={() => setActiveReport("registered-users")}
                             className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-2 mt-1
@@ -59,6 +65,7 @@ const Reports = () => {
                             <span className="text-[14px]">Registered Users Report</span>
                         </button>
 
+                        {/* QR */}
                         <button
                             onClick={() => setActiveReport("qr")}
                             className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-2
@@ -68,6 +75,7 @@ const Reports = () => {
                             <span className="text-[14px]">QR Transaction Report</span>
                         </button>
 
+                        {/* Redemptions */}
                         <button
                             onClick={() => setActiveReport("redemptions")}
                             className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-2
@@ -79,6 +87,7 @@ const Reports = () => {
                             <span className="text-[14px]">Redemptions</span>
                         </button>
 
+                        {/* Referrals */}
                         <button
                             onClick={() => setActiveReport("referrals")}
                             className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-2
@@ -89,6 +98,19 @@ const Reports = () => {
                             <ShareIcon fontSize="small" />
                             <span className="text-[14px]">Referrals Report</span>
                         </button>
+
+                        {/* OTP Report */}
+                        <button
+                            onClick={() => setActiveReport("otp")}
+                            className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-2
+                                ${activeReport === "otp"
+                                    ? "bg-blue-50 text-blue-600"
+                                    : "hover:bg-gray-100"}`}
+                        >
+                            <PasswordIcon fontSize="small" />
+                            <span className="text-[14px]">OTP Report</span>
+                        </button>
+
                     </div>
                 </div>
 
@@ -122,6 +144,12 @@ const Reports = () => {
                     {activeReport === "referrals" && (
                         <div className="min-h-[80vh] px-4 md:px-6 lg:px-8">
                             <ReferralsReport />
+                        </div>
+                    )}
+
+                    {activeReport === "otp" && (
+                        <div className="min-h-[80vh] px-4 md:px-6 lg:px-8">
+                            <OtpReport />
                         </div>
                     )}
 
