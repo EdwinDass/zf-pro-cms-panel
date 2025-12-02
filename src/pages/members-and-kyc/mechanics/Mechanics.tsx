@@ -38,7 +38,14 @@ interface Mechanic {
     userRole: number;
     blockStatus: string;
     userCreatedAt: string;
+    kycApproval: boolean;
     kycDocuments: KycDocument[];
+    preferredRetailerList?: {
+        retailerId: number;
+        mobile: string;
+        name: string;
+        pincode: number;
+    }[];
     workshopName?: string | null;
     color: string;
     initials: string;
@@ -115,8 +122,10 @@ const MechanicsScreen: React.FC = () => {
                     userRole: item.userRole,
                     blockStatus: item.blockStatus,
                     userCreatedAt: item.userCreatedAt,
+                    kycApproval: item.kycApproval,
                     kycDocuments: item.kycDocuments || [],
-                    workshopName: item.workshopName,
+                    preferredRetailerList: item.preferredRetailerList || [],
+                    workshopName: item.workshop,
                     initials: getInitials(item.userName),
                     color: getColor(index),
                 }));
@@ -254,12 +263,6 @@ const MechanicsScreen: React.FC = () => {
     const formatDate = useCallback((dateString: string): string => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    }, []);
-
-    const getKycStatus = useCallback((kycDocuments: KycDocument[]): "Pending" | "Approved" => {
-        if (!kycDocuments || kycDocuments.length === 0) return "Pending";
-        const allApproved = kycDocuments.every(doc => doc.docStatus === "Approved");
-        return allApproved ? "Approved" : "Pending";
     }, []);
 
     const hasScanBlocked = useCallback((blockStatus: string): boolean => {
@@ -489,7 +492,7 @@ const MechanicsScreen: React.FC = () => {
                                 </tr>
                             ) : (
                                 displayedMechanics.map((mechanic) => {
-                                    const kycStatus = getKycStatus(mechanic.kycDocuments);
+                                    const kycStatus = mechanic.kycApproval ? "Approved" : "Pending";
                                     const scanBlocked = hasScanBlocked(mechanic.blockStatus);
 
                                     return (
@@ -503,7 +506,10 @@ const MechanicsScreen: React.FC = () => {
                                                     </div>
                                                     <div className="ml-4">
                                                         <div className="font-medium text-gray-900">
-                                                            {mechanic.userName}
+                                                            {mechanic.displayName || mechanic.userName}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500">
+                                                            {mechanic.workshopName}
                                                         </div>
                                                         <div className="text-sm text-gray-500">
                                                             ID: {mechanic.userId}
@@ -616,45 +622,43 @@ const MechanicsScreen: React.FC = () => {
                                                     </div> */}
 
                                                     {/* More Dropdown */}
-                                                    {kycStatus === "Approved" && (
-                                                        <div className="relative">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => toggleDropdown(mechanic.userId, "more")}
-                                                                className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition"
-                                                            >
-                                                                <MoreHorizIcon fontSize="small" />
-                                                                More
-                                                                <KeyboardArrowDownIcon fontSize="small" />
-                                                            </button>
-                                                            {openMoreDropdown === mechanic.userId && (
-                                                                <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[180px]">
-                                                                    {/* <button
-                                                                        type="button"
-                                                                        className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 font-medium"
-                                                                    >
-                                                                        <VisibilityIcon fontSize="small" />
-                                                                        View Details
-                                                                    </button> */}
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleEditClick(mechanic)}
-                                                                        className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 font-medium"
-                                                                    >
-                                                                        <EditIcon fontSize="small" />
-                                                                        Edit Member
-                                                                    </button>
-                                                                    {/* <button
-                                                                        type="button"
-                                                                        className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 font-medium"
-                                                                    >
-                                                                        <MessageIcon fontSize="small" />
-                                                                        Send Message
-                                                                    </button> */}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )}
+                                                    <div className="relative">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => toggleDropdown(mechanic.userId, "more")}
+                                                            className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition"
+                                                        >
+                                                            <MoreHorizIcon fontSize="small" />
+                                                            More
+                                                            <KeyboardArrowDownIcon fontSize="small" />
+                                                        </button>
+                                                        {openMoreDropdown === mechanic.userId && (
+                                                            <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[180px]">
+                                                                {/* <button
+                                                                    type="button"
+                                                                    className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 font-medium"
+                                                                >
+                                                                    <VisibilityIcon fontSize="small" />
+                                                                    View Details
+                                                                </button> */}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleEditClick(mechanic)}
+                                                                    className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 font-medium"
+                                                                >
+                                                                    <EditIcon fontSize="small" />
+                                                                    Edit Member
+                                                                </button>
+                                                                {/* <button
+                                                                    type="button"
+                                                                    className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 font-medium"
+                                                                >
+                                                                    <MessageIcon fontSize="small" />
+                                                                    Send Message
+                                                                </button> */}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -729,6 +733,7 @@ const MechanicsScreen: React.FC = () => {
                     mechanicName={selectedMechanic.userName}
                     mechanicId={selectedMechanic.userId.toString()}
                     kycDocuments={selectedMechanic.kycDocuments}
+                    preferredRetailerList={selectedMechanic.preferredRetailerList}
                 />
             )}
 

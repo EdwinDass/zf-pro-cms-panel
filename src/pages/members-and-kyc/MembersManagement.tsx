@@ -22,6 +22,8 @@ import MechanicsScreen from "./mechanics/Mechanics";
 import WorkshopsScreen from "./workshops/Workshops";
 import Staff from "./staff/Staff";
 
+import { customEncodeBase64 } from "../../utils/random";  // <-- HERE
+
 // ROLE TYPE
 type RoleType = {
     roleId: number;
@@ -75,33 +77,39 @@ const MembersManagment = () => {
         setShowModal(true);
     };
 
-    const handleSubmit = async () => {
-        const payload = {
-            userName: formData.userName,
-            userEmail: formData.userEmail,
-            displayName: formData.displayName,
-            userMobile: formData.userMobile,
-            userRole: Number(formData.userRole),
-            userPassword: formData.password
-        };
+const handleSubmit = async () => {
 
-        try {
-            const res = await addUser(payload);
+    const encodedPassword = customEncodeBase64(formData.password, true);
 
-            if (res.data?.code !== 200) {
-                toast.error(res.data?.message || "Something went wrong");
-                return;
-            }
+    const payload = {
+        userName: formData.userName,
+        userEmail: formData.userEmail,
+        displayName: formData.displayName,
+        userMobile: formData.userMobile,
+        userRole: Number(formData.userRole),
+        userPassword: encodedPassword
+    };
 
-            toast.success("User added successfully 👍");
+    try {
+        const res = await addUser(payload);
+
+        if (res.data?.code !== 200 && res.data?.code !== 201) {
+            toast.error(res.data?.message || "Something went wrong");
+            return;
+        }
+
+        toast.success(res.data?.message || "User added successfully 👍", { theme: "colored" });
+
+        setTimeout(() => {
             resetForm();
             setShowModal(false);
+        }, 800);
 
-        } catch (err: any) {
-            const msg = err?.response?.data?.message ?? "Something went wrong";
-            toast.error(msg);
-        }
-    };
+    } catch (err: any) {
+        const msg = err?.response?.data?.message ?? "Something went wrong";
+        toast.error(msg);
+    }
+};
 
     const logout = async () => {
         try {
@@ -116,7 +124,6 @@ const MembersManagment = () => {
 
     const tabs = [
         { id: "mechanics", label: "Mechanics" },
-        // { id: "workshops", label: "Workshops" },
         { id: "staff", label: "Staff" },
     ];
 
@@ -174,7 +181,6 @@ const MembersManagment = () => {
 
                 <div className="mt-6 px-8">
                     {activeTab === "mechanics" && <MechanicsScreen />}
-                    {activeTab === "workshops" && <WorkshopsScreen />}
                     {activeTab === "staff" && <Staff />}
                 </div>
 
@@ -183,7 +189,6 @@ const MembersManagment = () => {
                     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                         <div className="bg-white p-8 rounded-2xl w-[650px] shadow-2xl border border-gray-200">
 
-                            {/* 🔵 TITLE FIXED TO BLUE */}
                             <h2 className="text-3xl font-semibold mb-6 text-blue-600 flex items-center gap-3">
                                 <PersonAddIcon fontSize="large" className="text-blue-600" />
                                 Add New User

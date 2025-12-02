@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { updateKycRecords } from "../services/ApiService";
+import { toast } from "react-toastify";
+import { updateKycRecords, getUserKycsByUserId } from "../services/ApiService";
 
 type KYCStatus = "Pending" | "Approved" | "Rejected";
 
@@ -22,11 +23,43 @@ interface KycModalProps {
     mechanicName: string;
     mechanicId: string;
     kycDocuments: KycDocument[];
+    preferredRetailerList?: {
+        retailerId: number;
+        mobile: string;
+        name: string;
+        pincode: number;
+    }[];
 }
 
-const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mechanicId, kycDocuments }) => {
+const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mechanicId, kycDocuments, preferredRetailerList = [] }) => {
     const [comments, setComments] = useState<Record<number, string>>({});
     const [loading, setLoading] = useState<Record<number, boolean>>({});
+    const [imageModalOpen, setImageModalOpen] = useState(false);
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [localKycDocuments, setLocalKycDocuments] = useState<KycDocument[]>(kycDocuments);
+    const [localPreferred, setLocalPreferred] = useState<typeof preferredRetailerList>(preferredRetailerList);
+
+    const fetchDocuments = useCallback(async () => {
+        if (!mechanicId) return;
+        try {
+            const response = await getUserKycsByUserId(Number(mechanicId), 1, 1);
+            if (response.data.success) {
+                const data = response.data.data;
+                setLocalKycDocuments(data.kycDocuments || []);
+                setLocalPreferred(data.preferredRetailerList || []);
+            }
+        } catch (error) {
+            console.error("Error fetching KYC documents:", error);
+            toast.error("Failed to fetch KYC documents");
+        }
+    }, [mechanicId]);
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchDocuments();
+            setComments({});
+        }
+    }, [isOpen, fetchDocuments]);
 
     if (!isOpen) return null;
 
@@ -52,13 +85,20 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
             await updateKycRecords(updates);
 
             // Show success message
-            alert(`Document ${status.toLowerCase()} successfully!`);
+            toast.success(`Document ${status.toLowerCase()}d successfully!`);
 
-            // Close modal and refresh data
-            onClose();
+            // Clear comment for this detailId
+            setComments(prev => {
+                const newComments = { ...prev };
+                delete newComments[detailId];
+                return newComments;
+            });
+
+            // Refresh documents
+            await fetchDocuments();
         } catch (error) {
             console.error("Error updating KYC record:", error);
-            alert("Failed to update document status. Please try again.");
+            toast.error("Failed to update document status. Please try again.");
         } finally {
             setLoading(prev => ({ ...prev, [detailId]: false }));
         }
@@ -118,8 +158,13 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                     type="button"
                     className="px-4 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 text-sm font-medium transition flex items-center gap-2"
                     onClick={() => {
-                        // TODO: Integrate view image API here
-                        alert("View image API integration pending");
+                        // Open image modal with the provided URL (doc.kycDoc)
+                        if (doc.kycDoc) {
+                            setImageUrl(doc.kycDoc);
+                            setImageModalOpen(true);
+                        } else {
+                            toast.error("Image URL not available");
+                        }
                     }}
                 >
                     <VisibilityIcon fontSize="small" />
@@ -128,6 +173,14 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
             );
         }
     };
+
+    const closeImageModal = () => {
+        setImageModalOpen(false);
+        setImageUrl(null);
+    };
+
+    // Exclude the preferred-retailers doc from the main documents table; it is handled separately below
+    const nonPreferredDocs = localKycDocuments.filter(d => d.kycType !== "preferred-retailers");
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -157,14 +210,14 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            {kycDocuments.length === 0 ? (
+                            {nonPreferredDocs.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                                         No KYC documents found
                                     </td>
                                 </tr>
                             ) : (
-                                kycDocuments.map((doc) => (
+                                nonPreferredDocs.map((doc) => (
                                     <tr key={doc.detailId} className="hover:bg-gray-50">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
@@ -190,11 +243,6 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                                                     className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                     disabled={doc.docStatus !== "Pending"}
                                                 />
-                                                {doc.comment && doc.docStatus !== "Pending" && (
-                                                    <p className="text-xs text-gray-500 italic">
-                                                        Previous: {doc.comment}
-                                                    </p>
-                                                )}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
@@ -230,11 +278,16 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                     </table>
                 </div>
 
-                {/* Mapped Retailers - TODO: Integrate API */}
-                {/* {kycDocuments.some(doc => doc.kycType === "preferred-retailers") && (
-                    <div className="border border-gray-200 rounded-lg overflow-hidden">
-                        <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
+                {/* Mapped Retailers - show mapped retailers from API and provide a single approve/reject+comment control */}
+                {localPreferred && localPreferred.length > 0 && (
+                    <div className="border border-gray-200 rounded-lg overflow-hidden mb-6">
+                        <div className="bg-gray-50 px-6 py-3 border-b border-gray-200 flex items-center justify-between">
                             <h3 className="text-sm font-semibold text-gray-900">Mapped Retailers</h3>
+                            {/* show status of preferred-retailers doc if present */}
+                            {(() => {
+                                const prefDoc = localKycDocuments.find(d => d.kycType === "preferred-retailers");
+                                return prefDoc ? getStatusBadge(prefDoc.docStatus) : null;
+                            })()}
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full">
@@ -242,20 +295,71 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Retailer ID</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Location</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Mobile</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Pincode</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">
-                                    <tr className="hover:bg-gray-50">
-                                        <td colSpan={3} className="px-6 py-4 text-center text-sm text-gray-500">
-                                            Retailer mapping will be shown here
-                                        </td>
-                                    </tr>
+                                    {localPreferred.map((r) => (
+                                        <tr key={r.retailerId} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 text-sm text-gray-900">{r.retailerId}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-900">{r.name}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-900">{r.mobile}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-900">{r.pincode}</td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Single comment + actions for preferred-retailers doc */}
+                        {(() => {
+                            const prefDoc = localKycDocuments.find(d => d.kycType === "preferred-retailers");
+                            if (!prefDoc) return null;
+
+                            return (
+                                <div className="px-6 py-4 border-t border-gray-200">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                                        <div className="md:col-span-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Add comment"
+                                                value={comments[prefDoc.detailId] || prefDoc.comment || ""}
+                                                onChange={(e) => handleCommentChange(prefDoc.detailId, e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                disabled={prefDoc.docStatus !== "Pending"}
+                                            />
+                                        </div>
+                                        <div className="flex gap-2 justify-end">
+                                            {prefDoc.docStatus === "Pending" ? (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleStatusUpdate(prefDoc.detailId, "Approved")}
+                                                        disabled={loading[prefDoc.detailId]}
+                                                        className="px-4 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {loading[prefDoc.detailId] ? "..." : "Approve"}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleStatusUpdate(prefDoc.detailId, "Rejected")}
+                                                        disabled={loading[prefDoc.detailId]}
+                                                        className="px-4 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {loading[prefDoc.detailId] ? "..." : "Reject"}
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <span className="text-sm text-gray-500 italic">{prefDoc.docStatus}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
                     </div>
-                )} */}
+                )}
 
                 <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-200 mt-6">
                     <button
@@ -266,6 +370,24 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                         Close
                     </button>
                 </div>
+                {/* Image view modal */}
+                {imageModalOpen && imageUrl && (
+                    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-60 p-4">
+                        <div className="bg-white rounded-lg shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-auto p-4 relative">
+                            <button
+                                type="button"
+                                onClick={closeImageModal}
+                                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                                aria-label="Close image modal"
+                            >
+                                <CloseIcon />
+                            </button>
+                            <div className="flex items-center justify-center">
+                                <img src={imageUrl} alt="KYC Document" className="max-w-full max-h-[80vh] object-contain" />
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

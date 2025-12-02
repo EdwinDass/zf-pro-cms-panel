@@ -30,7 +30,7 @@ const ProcessManagement = () => {
     const tabs = [
         { id: "ProcessRedemption", label: "Process Redemption" },
         // { id: "RedemptionRequests", label: "Redemption Requests" },
-        // { id: "ManualEntry", label: "Manual Entry" },
+        { id: "ManualEntry", label: "Manual Entry" },
     ];
 
     return (
@@ -80,7 +80,7 @@ const ProcessManagement = () => {
             {/* CONTENT SECTION */}
             <div className="mt-6 px-8">
                 {activeTab === "ProcessRedemption" && <ProcessRedemption />}
-                {/* {activeTab === "RedemptionRequests" && <RedemptionRequests />} */}
+                {activeTab === "RedemptionRequests" && <RedemptionRequests />}
                 {activeTab === "ManualEntry" && <ManualEntry />}
             </div>
         </div>

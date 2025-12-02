@@ -421,3 +421,19 @@ export const raiseTicket = async (
 export const getAdminOtpReport = (params: any) => {
     return api.get("report/otp-report", { params });
 };
+
+export const bulkProductScan = async (items: { userCode: string; payload: { qr: string } }[]) => {
+    return api
+        .post("qr/bulk-product-scan", { items })
+        .then((response) => response?.data)
+        .catch((error) => { throw error });
+};
+
+export const bulkRedeemPoints = async (
+    items: { userCode: string; payload: { type: string; value: number } }[]
+) => {
+    return api
+        .post("redeem/bulk-redeem-points", { items })
+        .then((response) => response?.data)
+        .catch((error) => { throw error });
+};
