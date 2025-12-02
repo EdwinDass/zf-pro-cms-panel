@@ -4,6 +4,7 @@ import {
     QRTransactionReportKeys,
     ReferralsReportKeys,
     RedemptionReportKeys,
+    OtpReportKeys,
 } from "../utils/ExportKeyMappings";
 import * as XLSX from "xlsx";
 import { ExporterType } from "../types/Export";
@@ -40,6 +41,9 @@ const ExporterButton = ({
 
                 case "Redemption Report":
                     mappings = RedemptionReportKeys;
+                    break;
+                case "OTP Report":
+                    mappings = OtpReportKeys;
                     break;
 
                 default:

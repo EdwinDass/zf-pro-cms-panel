@@ -10,7 +10,7 @@ export const ApplicationLoginReportKeys: any = {
     totalScannedPoints: "Total Scanned Points",
     totalRewardPoints: "Total Reward Points",
     totalRedeemedPoints: "Total Redeemed Points",
-    totalBalancePoints: "Total Balance Points"
+    totalBalancePoints: "Total Balance Points",
 };
 
 export const RegisteredUsersReportKeys: any = {
@@ -91,3 +91,21 @@ export const ProcessRedemptionKeys: any = {
     redemptionMode: "Mode",
     redemptionStatus: "Status",
 };
+
+export const OtpReportKeys: any = {
+    userCode: "User Unique Code",
+    otp: "OTP",
+    userName: "User Name",
+    userMobile: "Mobile",
+    userEmail: "Email",
+    otpType: "OTP Type",
+    isVerified: "Verified",
+    expiryAt: "Expiry Time",
+    createdAt: "Created At",
+    currentCity: "City",
+    currentDistrict: "District",
+    currentState: "State",
+    zoneId: "Zone",
+    branchId: "Branch",
+};
+

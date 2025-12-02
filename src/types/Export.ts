@@ -7,4 +7,5 @@ export interface ExporterType {
     | "Redemption Report"
     | "Referrals Report"
     | "Process Redemption"
+    | "OTP Report"
 }
