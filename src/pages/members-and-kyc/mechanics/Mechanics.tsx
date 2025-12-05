@@ -15,9 +15,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import MessageIcon from "@mui/icons-material/Message";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import CloseIcon from "@mui/icons-material/Close";
-import { getUserKycsByUserId, getUserCount, getKycStatus as apiGetKycStatus, getUserList, editUser } from "../../../services/ApiService";
+import { getUserKycsByUserId, getUserCount, getKycStatus as apiGetKycStatus, getUserList, editUser, getUserProfile } from "../../../services/ApiService";
 import { toast } from "react-toastify";
 import KycModal from "../../../components/KycModal";
+import { UserDetails } from "../../../types/User";
 
 interface KycDocument {
     detailId: number;
@@ -79,6 +80,7 @@ const MechanicsScreen: React.FC = () => {
     const [editDisplayName, setEditDisplayName] = useState<string>("");
     const [editWorkshopName, setEditWorkshopName] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [loggedUserDetails, setLoggedUserDetails] = useState<UserDetails | null>(null)
     const userDropdownRef = useRef<HTMLDivElement>(null);
 
     const pageSize = 10;
@@ -177,7 +179,18 @@ const MechanicsScreen: React.FC = () => {
         fetchTotalMechanics();
         fetchKycCounts();
         fetchUsers();
+        userProfile();
     }, []);
+
+    const userProfile = async () => {
+        try {
+            const res = await getUserProfile();
+            setLoggedUserDetails(res?.data?.data);
+            console.log("dacwvwrgr",res?.data?.data)
+        } catch (error) {
+
+        }
+    }
 
     const fetchTotalMechanics = async () => {
         try {
@@ -734,6 +747,7 @@ const MechanicsScreen: React.FC = () => {
                     mechanicId={selectedMechanic.userId.toString()}
                     kycDocuments={selectedMechanic.kycDocuments}
                     preferredRetailerList={selectedMechanic.preferredRetailerList}
+                    loggedUser={loggedUserDetails as UserDetails}
                 />
             )}
 

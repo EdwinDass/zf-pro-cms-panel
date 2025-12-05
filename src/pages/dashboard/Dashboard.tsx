@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, Typography, Card, CardContent, Button } from "@mui/material";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,7 @@ import { useDispatch } from "react-redux";
 import { RootState } from "../../redux/store";
 import { clearTokens } from "../../redux/slices/authTokenSlice";
 import { logoutUser } from "../../redux/slices/userDataSlice";
-import { userLogout } from "../../services/ApiService";
+import { getUserProfile, userLogout } from "../../services/ApiService";
 
 const Dashboard = () => {
     const navigate = useNavigate();

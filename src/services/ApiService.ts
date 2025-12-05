@@ -278,6 +278,10 @@ export const getAdminreferralReport = (data: any) => {
     return api.post('report/admin-referal-history', data);
 };
 
+export const getUserProfile = () => {
+    return api.get('user/user-profile');
+};
+
 export const userLogout = () => {
     return api.get('auth/user-logout');
 };
@@ -394,7 +398,7 @@ export const getUserKycsByUserId = async (userId: number, page: number, limit: n
     });
 };
 
-export const updateKycRecords = async (updates: { detailId: number; status: "Approved" | "Rejected"; comment?: string }[]) => {
+export const updateKycRecords = async (updates: { detailId: number; status: "Approved" | "Rejected" | "Completed"; comment?: string }[]) => {
     return api.post(`kyc/updateKycRecords`, {
         updates
     });

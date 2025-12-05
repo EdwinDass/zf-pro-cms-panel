@@ -4,8 +4,10 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { toast } from "react-toastify";
 import { updateKycRecords, getUserKycsByUserId } from "../services/ApiService";
+import { UserDetails } from "../types/User";
+import { ROLES } from "../values/constants";
 
-type KYCStatus = "Pending" | "Approved" | "Rejected";
+type KYCStatus = "Pending" | "Approved" | "Rejected" | "Completed";
 
 interface KycDocument {
     detailId: number;
@@ -29,9 +31,10 @@ interface KycModalProps {
         name: string;
         pincode: number;
     }[];
+    loggedUser: UserDetails
 }
 
-const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mechanicId, kycDocuments, preferredRetailerList = [] }) => {
+const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mechanicId, kycDocuments, preferredRetailerList = [], loggedUser }) => {
     const [comments, setComments] = useState<Record<number, string>>({});
     const [loading, setLoading] = useState<Record<number, boolean>>({});
     const [imageModalOpen, setImageModalOpen] = useState(false);
@@ -45,8 +48,8 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
             const response = await getUserKycsByUserId(Number(mechanicId), 1, 1);
             if (response.data.success) {
                 const data = response.data.data;
-                setLocalKycDocuments(data.kycDocuments || []);
-                setLocalPreferred(data.preferredRetailerList || []);
+                setLocalKycDocuments(data?.kycDocuments || []);
+                setLocalPreferred(data?.preferredRetailerList || []);
             }
         } catch (error) {
             console.error("Error fetching KYC documents:", error);
@@ -70,7 +73,7 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
         }));
     };
 
-    const handleStatusUpdate = async (detailId: number, status: "Approved" | "Rejected") => {
+    const handleStatusUpdate = async (detailId: number, status: "Approved" | "Rejected" | "Completed") => {
         setLoading(prev => ({ ...prev, [detailId]: true }));
 
         try {
@@ -85,7 +88,7 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
             await updateKycRecords(updates);
 
             // Show success message
-            toast.success(`Document ${status.toLowerCase()}d successfully!`);
+            toast.success(`Document ${status == 'Completed' ? 'Approved' : status.toLowerCase()} successfully!`);
 
             // Clear comment for this detailId
             setComments(prev => {
@@ -129,12 +132,13 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
         const statusStyles = {
             Pending: "bg-orange-100 text-orange-600",
             Approved: "bg-green-100 text-green-600",
-            Rejected: "bg-red-100 text-red-600"
+            Completed: "bg-green-100 text-green-600",
+            Rejected: "bg-red-100 text-red-600",
         };
 
         return (
             <span className={`px-3 py-1 rounded-md text-xs font-medium ${statusStyles[status]}`}>
-                {status}
+                {status == 'Completed' ? 'Approved' : status}
             </span>
         );
     };
@@ -203,7 +207,7 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Document Type</th>
-                                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                                {/* <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th> */}
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Details</th>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Comment</th>
                                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
@@ -227,9 +231,9 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        {/* <td className="px-6 py-4">
                                             {getStatusBadge(doc.docStatus)}
-                                        </td>
+                                        </td> */}
                                         <td className="px-6 py-4">
                                             {renderDocumentDetails(doc)}
                                         </td>
@@ -241,16 +245,16 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                                                     value={comments[doc.detailId] || doc.comment || ""}
                                                     onChange={(e) => handleCommentChange(doc.detailId, e.target.value)}
                                                     className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                    disabled={doc.docStatus !== "Pending"}
+                                                    disabled={(loggedUser?.userRoleId == ROLES.REGION_MANAGER && doc.docStatus !== "Pending") || (loggedUser?.userRoleId == ROLES.MARKETING_MANAGER && doc.docStatus !== "Approved")}
                                                 />
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            {doc.docStatus === "Pending" ? (
+                                            {(loggedUser?.userRoleId == ROLES.REGION_MANAGER && doc.docStatus === "Pending") || (loggedUser?.userRoleId == ROLES.MARKETING_MANAGER && doc.docStatus === "Approved") ? (
                                                 <div className="flex gap-2">
                                                     <button
                                                         type="button"
-                                                        onClick={() => handleStatusUpdate(doc.detailId, "Approved")}
+                                                        onClick={() => handleStatusUpdate(doc.detailId, loggedUser?.userRoleId == ROLES.MARKETING_MANAGER ? "Completed" : "Approved")}
                                                         disabled={loading[doc.detailId]}
                                                         className="px-4 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
@@ -267,7 +271,7 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                                                 </div>
                                             ) : (
                                                 <span className="text-sm text-gray-500 italic">
-                                                    {doc.docStatus === "Approved" ? "Approved" : "Rejected"}
+                                                    {(doc.docStatus === "Approved" || doc.docStatus == "Completed") ? "Approved" : "Rejected"}
                                                 </span>
                                             )}
                                         </td>
@@ -284,10 +288,10 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                         <div className="bg-gray-50 px-6 py-3 border-b border-gray-200 flex items-center justify-between">
                             <h3 className="text-sm font-semibold text-gray-900">Mapped Retailers</h3>
                             {/* show status of preferred-retailers doc if present */}
-                            {(() => {
+                            {/* {(() => {
                                 const prefDoc = localKycDocuments.find(d => d.kycType === "preferred-retailers");
                                 return prefDoc ? getStatusBadge(prefDoc.docStatus) : null;
-                            })()}
+                            })()} */}
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full">
@@ -327,15 +331,15 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                                                 value={comments[prefDoc.detailId] || prefDoc.comment || ""}
                                                 onChange={(e) => handleCommentChange(prefDoc.detailId, e.target.value)}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                disabled={prefDoc.docStatus !== "Pending"}
+                                                disabled={(loggedUser?.userRoleId == ROLES.REGION_MANAGER && prefDoc.docStatus !== "Pending") || (loggedUser?.userRoleId == ROLES.MARKETING_MANAGER && prefDoc.docStatus !== "Approved")}
                                             />
                                         </div>
                                         <div className="flex gap-2 justify-end">
-                                            {prefDoc.docStatus === "Pending" ? (
+                                            {(loggedUser?.userRoleId == ROLES.REGION_MANAGER && prefDoc.docStatus === "Pending") || (loggedUser?.userRoleId == ROLES.MARKETING_MANAGER && prefDoc.docStatus === "Approved") ? (
                                                 <>
                                                     <button
                                                         type="button"
-                                                        onClick={() => handleStatusUpdate(prefDoc.detailId, "Approved")}
+                                                        onClick={() => handleStatusUpdate(prefDoc.detailId, loggedUser?.userRoleId == ROLES.MARKETING_MANAGER ? "Completed" : "Approved")}
                                                         disabled={loading[prefDoc.detailId]}
                                                         className="px-4 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
                                                     >
