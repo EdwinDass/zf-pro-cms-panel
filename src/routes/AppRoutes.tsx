@@ -13,6 +13,7 @@ import Integrations from "../pages/integrations/Integrations";
 import MisAnalytics from "../pages/mis-analytics/MsiAnalytics";
 import Reports from "../pages/mis-analytics/reports/Reports";
 import MembersManagment from "../pages/members-and-kyc/MembersManagement";
+import Communication from "../pages/communication/Communication";
 
 const AppRoutes = () => {
     return (
@@ -28,6 +29,7 @@ const AppRoutes = () => {
             <Route path="/mis-analytics" element={<PrivateRoute element={<MisAnalytics />} />} />
             <Route path="/reports" element={<PrivateRoute element={<Reports />} />} />
             <Route path="/members-management" element={<PrivateRoute element={<MembersManagment />} />} />
+            <Route path="/communication" element={<PrivateRoute element={<Communication />} />} />
         </Routes>
     );
 };

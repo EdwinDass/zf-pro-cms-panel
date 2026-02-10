@@ -5,13 +5,15 @@ interface Props {
     description?: string;
     actionButton?: React.ReactNode;
     logout?: () => void;
+    hideNotificationIcon?: boolean;
 }
 
 const TopBar: React.FC<Props> = ({
     title = "Dashboard",
     description = "Welcome back! Here's your loyalty program overview",
     actionButton,
-    logout = () => { }
+    logout = () => { },
+    hideNotificationIcon = false
 }) => {
     const [showMobileMenu, setShowMobileMenu] = useState(false);
 
@@ -38,16 +40,18 @@ const TopBar: React.FC<Props> = ({
                         </button>
                     )}
 
-                    <div className="relative">
-                        <button
-                            className="p-2 text-gray-600 hover:text-gray-900 relative"
-                            aria-label="View notifications"
-                            title="View notifications"
-                        >
-                            <i className="fas fa-bell text-lg"></i>
-                            <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
-                        </button>
-                    </div>
+                    {!hideNotificationIcon && (
+                        <div className="relative">
+                            <button
+                                className="p-2 text-gray-600 hover:text-gray-900 relative"
+                                aria-label="View notifications"
+                                title="View notifications"
+                            >
+                                <i className="fas fa-bell text-lg"></i>
+                                <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                            </button>
+                        </div>
+                    )}
 
                     <div className="relative">
                         <button
@@ -90,16 +94,18 @@ const TopBar: React.FC<Props> = ({
                         </button>
                     )}
 
-                    <div className="relative">
-                        <button
-                            className="p-2 text-gray-600 hover:text-gray-900 relative"
-                            aria-label="View notifications"
-                            title="View notifications"
-                        >
-                            <i className="fas fa-bell"></i>
-                            <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
-                        </button>
-                    </div>
+                    {!hideNotificationIcon && (
+                        <div className="relative">
+                            <button
+                                className="p-2 text-gray-600 hover:text-gray-900 relative"
+                                aria-label="View notifications"
+                                title="View notifications"
+                            >
+                                <i className="fas fa-bell"></i>
+                                <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                            </button>
+                        </div>
+                    )}
 
                     <div className="relative">
                         <button
@@ -159,15 +165,17 @@ const TopBar: React.FC<Props> = ({
                                 </button>
                             )}
 
-                            <button
-                                className="w-full px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition flex items-center justify-center"
-                                aria-label="View notifications"
-                                title="View notifications"
-                                onClick={() => setShowMobileMenu(false)}
-                            >
-                                <i className="fas fa-bell mr-2"></i> Notifications
-                                <span className="ml-2 inline-block h-2 w-2 rounded-full bg-red-500"></span>
-                            </button>
+                            {!hideNotificationIcon && (
+                                <button
+                                    className="w-full px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition flex items-center justify-center"
+                                    aria-label="View notifications"
+                                    title="View notifications"
+                                    onClick={() => setShowMobileMenu(false)}
+                                >
+                                    <i className="fas fa-bell mr-2"></i> Notifications
+                                    <span className="ml-2 inline-block h-2 w-2 rounded-full bg-red-500"></span>
+                                </button>
+                            )}
 
                             <button
                                 className="w-full px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition flex items-center justify-center"
