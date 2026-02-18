@@ -130,6 +130,7 @@ const ViewTicket: React.FC<Props> = ({ isOpen, onClose, ticketData }) => {
         isOpen={imageModalOpen}
         onClose={() => setImageModalOpen(false)}
         imageUrl={imageUrl}
+        title="Ticket Image"
       />
     </div>
   );

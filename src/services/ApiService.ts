@@ -441,3 +441,34 @@ export const bulkRedeemPoints = async (
         .then((response) => response?.data)
         .catch((error) => { throw error });
 };
+
+// Amazon Marketplace
+export const getAmazonProducts = async (payload: { limit: number; skip: number }) => {
+    return api
+        .post("amazon-market/products", payload)
+        .then((response) => response?.data);
+};
+
+export const editAmazonProduct = async (formData: FormData) => {
+    return api
+        .post("amazon-market/edit-product", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        })
+        .then((response) => response?.data);
+};
+
+export const addAmazonProducts = async (data: any[]) => {
+    return api
+        .post("amazon-market/add-products", data)
+        .then((response) => response?.data);
+};
+
+export const getDeliveryStatuses = async () => {
+    return api.get("amazon-market/delivery-statuses").then((res) => res?.data);
+};
+
+export const updateDeliveryStatus = async (payload: { status: string; redemptionId: number }) => {
+    return api.post("amazon-market/update-delivery-status", payload).then((res) => res?.data);
+};

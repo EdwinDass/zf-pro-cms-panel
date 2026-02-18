@@ -8,4 +8,5 @@ export interface ExporterType {
     | "Referrals Report"
     | "Process Redemption"
     | "OTP Report"
+    | "Amazon Marketplace"
 }
