@@ -441,3 +441,22 @@ export const bulkRedeemPoints = async (
         .then((response) => response?.data)
         .catch((error) => { throw error });
 };
+
+export const getFaqs = async () => {
+    return api
+        .get("masters/faqs")
+        .then((response) => response)
+        .catch((error) => { throw error });
+};
+
+export const addFaq = async (payload: { question: string; answer: string }) => {
+    return api
+        .post("masters/faqs", payload)
+        .then((response) => response);
+};
+
+export const deleteFaq = async (faqId: number) => {
+    return api
+        .delete(`masters/faqs/${faqId}`)
+        .then((response) => response);
+};

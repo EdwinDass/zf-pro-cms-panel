@@ -60,6 +60,7 @@ export const Layout: React.FC<LayoutProps> = ({
         { id: 'process', label: 'Process Redemption', icon: 'fas fa-cogs', path: '/process-management' },
         { id: 'tickets', label: 'Tickets', icon: 'fas fa-ticket-alt', path: '/tickets' },
         { id: 'members', label: 'Members and KYC', icon: 'fas fa-users', path: '/members-management' },
+        { id: 'faqs', label: 'FAQs', icon: 'fas fa-question-circle', path: '/faqs' },
         // { id: 'configuration', label: 'Configuration', icon: 'fas fa-sliders-h', path: '/configuration' },
     ];
 
