@@ -109,3 +109,17 @@ export const OtpReportKeys: any = {
     branchId: "Branch",
 };
 
+export const AmazonMarketplaceKeys: any = {
+    productId: "Product ID",
+    amazonAsinSku: "ASIN/SKU",
+    amazonProductName: "Product Name",
+    amazonCategory: "Category",
+    amazonSubCategory: "Sub Category",
+    amazonMrp: "MRP",
+    amazonCspPrice: "CSP Price",
+    amazonDiscountedPrice: "Discounted Price",
+    amazonPoints: "Points",
+    amazonCommentsVendor: "Vendor Comments",
+    amazonProductDescription: "Description"
+};
+

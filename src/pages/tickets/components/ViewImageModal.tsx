@@ -5,9 +5,10 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   imageUrl: string | null;
+  title?: string;
 }
 
-const ViewImageModal: React.FC<Props> = ({ isOpen, onClose, imageUrl }) => {
+const ViewImageModal: React.FC<Props> = ({ isOpen, onClose, imageUrl, title = "Image Preview" }) => {
   if (!isOpen || !imageUrl) return null;
 
   return (
@@ -16,7 +17,7 @@ const ViewImageModal: React.FC<Props> = ({ isOpen, onClose, imageUrl }) => {
 
         {/* Header */}
         <div className="flex justify-between items-center px-4 py-3 border-b bg-gray-50">
-          <h2 className="text-lg font-semibold">Ticket Image</h2>
+          <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
 
           <button
             onClick={onClose}

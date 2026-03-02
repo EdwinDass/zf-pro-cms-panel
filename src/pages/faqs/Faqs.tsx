@@ -12,10 +12,11 @@ import { logoutUser } from "../../redux/slices/userDataSlice";
 import { clearTokens } from "../../redux/slices/authTokenSlice";
 
 export interface FAQ {
-    id: number;
-    question: string;
-    answer: string;
+    faqId: number;
+    faqQuestion: string;
+    faqAnswer: string;
     isActive: boolean;
+    loading?: boolean;
 }
 
 const Faqs = () => {
@@ -71,8 +72,8 @@ const Faqs = () => {
 
         try {
             await addFaq({
-                question: trimmedQuestion,
-                answer: trimmedAnswer
+                faqQuestion: trimmedQuestion,
+                faqAnswer: trimmedAnswer
             });
             toast.success("FAQ added successfully");
             setOpenAddDialog(false);
@@ -87,6 +88,7 @@ const Faqs = () => {
     const handleDeleteConfirm = async () => {
         if (selectedFaqId === null) return;
         try {
+            console.log(`Testing delete for FAQ ID: ${selectedFaqId}`);
             await deleteFaq(selectedFaqId);
             toast.success("FAQ deleted successfully");
             setOpenDeleteDialog(false);
@@ -98,14 +100,14 @@ const Faqs = () => {
     };
 
     const columns: Column[] = [
-        { key: "question", label: "Question", className: "w-1/4" },
+        { key: "faqQuestion", label: "Question", className: "w-1/4" },
         {
-            key: "answer",
+            key: "faqAnswer",
             label: "Answer",
             className: "w-1/2",
             render: (item: FAQ) => (
                 <div className="whitespace-pre-wrap break-words">
-                    {item.answer}
+                    {item.faqAnswer}
                 </div>
             )
         },
@@ -125,7 +127,7 @@ const Faqs = () => {
                 <IconButton
                     color="error"
                     onClick={() => {
-                        setSelectedFaqId(item.id);
+                        setSelectedFaqId(item.faqId);
                         setOpenDeleteDialog(true);
                     }}
                     title="Delete FAQ"
@@ -175,7 +177,7 @@ const Faqs = () => {
                             variant="outlined"
                             fullWidth
                             value={question}
-                            onChange={(e) => setQuestion(e.target.value)}
+                            onChange={(e) => setQuestion(e?.target?.value)}
                             required
                         />
                         <TextField
@@ -185,7 +187,7 @@ const Faqs = () => {
                             multiline
                             rows={4}
                             value={answer}
-                            onChange={(e) => setAnswer(e.target.value)}
+                            onChange={(e) => setAnswer(e?.target?.value)}
                             required
                         />
                     </div>
@@ -194,7 +196,7 @@ const Faqs = () => {
                     <button onClick={() => setOpenAddDialog(false)} className="px-4 py-2 text-gray-700 hover:bg-gray-100 font-medium rounded-lg transition mr-2">
                         Cancel
                     </button>
-                    <button onClick={handleAddSubmit} className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 transition">
+                    <button onClick={() => handleAddSubmit()} className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 transition">
                         Submit
                     </button>
                 </DialogActions>
@@ -210,7 +212,7 @@ const Faqs = () => {
                     <button onClick={() => setOpenDeleteDialog(false)} className="px-4 py-2 text-gray-700 hover:bg-gray-100 font-medium rounded-lg transition mr-2">
                         Cancel
                     </button>
-                    <button onClick={handleDeleteConfirm} className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg shadow-sm hover:bg-red-700 transition">
+                    <button onClick={() => handleDeleteConfirm()} className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg shadow-sm hover:bg-red-700 transition">
                         Delete
                     </button>
                 </DialogActions>

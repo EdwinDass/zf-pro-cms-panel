@@ -5,6 +5,7 @@ import {
     ReferralsReportKeys,
     RedemptionReportKeys,
     OtpReportKeys,
+    AmazonMarketplaceKeys,
 } from "../utils/ExportKeyMappings";
 import * as XLSX from "xlsx";
 import { ExporterType } from "../types/Export";
@@ -44,6 +45,9 @@ const ExporterButton = ({
                     break;
                 case "OTP Report":
                     mappings = OtpReportKeys;
+                    break;
+                case "Amazon Marketplace":
+                    mappings = AmazonMarketplaceKeys;
                     break;
 
                 default:
