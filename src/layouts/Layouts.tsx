@@ -51,7 +51,7 @@ export const Layout: React.FC<LayoutProps> = ({
         // { id: 'masters-config', label: 'Masters & Config', icon: 'fas fa-cogs', path: '/masters-config' },
         // { id: 'schemes-campaigns', label: 'Schemes & Campaigns', icon: 'fas fa-bullhorn', path: '/schemes-campaigns' },
         { id: 'qr-management', label: 'QR Management', icon: 'fas fa-qrcode', path: '/qr' },
-        { id: 'communication', label: 'Communication', icon: 'fas fa-broadcast-tower', path: '/communication' },
+        // { id: 'communication', label: 'Communication', icon: 'fas fa-broadcast-tower', path: '/communication' },
         // { id: 'finance-compliance', label: 'Finance & Compliance', icon: 'fas fa-coins', path: '/finance-compliance' },
         // { id: 'fraud-detection', label: 'Fraud Detection', icon: 'fas fa-shield-alt', path: '/fraud-detection' },
         { id: 'mis-analytics', label: 'MIS & Analytics', icon: 'fas fa-chart-line', path: '/mis-analytics' },
