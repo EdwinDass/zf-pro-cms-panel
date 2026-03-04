@@ -13,6 +13,8 @@ import Integrations from "../pages/integrations/Integrations";
 import MisAnalytics from "../pages/mis-analytics/MsiAnalytics";
 import Reports from "../pages/mis-analytics/reports/Reports";
 import MembersManagment from "../pages/members-and-kyc/MembersManagement";
+import Communication from "../pages/communication/Communication";
+import AmazonMarketplace from "../pages/amazon-marketplace/AmazonMarketplace";
 import Faqs from "../pages/faqs/Faqs";
 import Communication from "../pages/communication/Communication";
 import AmazonMarketplace from "../pages/amazon-marketplace/AmazonMarketplace";
@@ -31,6 +33,8 @@ const AppRoutes = () => {
             <Route path="/mis-analytics" element={<PrivateRoute element={<MisAnalytics />} />} />
             <Route path="/reports" element={<PrivateRoute element={<Reports />} />} />
             <Route path="/members-management" element={<PrivateRoute element={<MembersManagment />} />} />
+            <Route path="/communication" element={<PrivateRoute element={<Communication />} />} />
+            <Route path="/amazon-marketplace" element={<PrivateRoute element={<AmazonMarketplace />} />} />
             <Route path="/faqs" element={<PrivateRoute element={<Faqs />} />} />
             <Route path="/communication" element={<PrivateRoute element={<Communication />} />} />
             <Route path="/amazon-marketplace" element={<PrivateRoute element={<AmazonMarketplace />} />} />
