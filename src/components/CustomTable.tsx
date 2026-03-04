@@ -5,6 +5,8 @@ export interface Column {
     label: string;
     className?: string;
     render?: (item: any) => React.ReactNode;
+    format?: (value: any) => string;
+    isImage?: boolean;
 }
 
 interface TableComponentProps {
@@ -18,6 +20,7 @@ interface TableComponentProps {
     selectable?: boolean;
     selectedRows?: any[];
     onSelectionChange?: (selected: any[]) => void;
+    loading?: boolean;
 }
 
 const CustomTable: React.FC<TableComponentProps> = ({

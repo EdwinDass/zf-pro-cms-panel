@@ -6,6 +6,15 @@ import {
     RedemptionReportKeys,
     OtpReportKeys,
     AmazonMarketplaceKeys,
+    BankDetailsReportKeys,
+    KycReportKeys,
+    ProductWiseReportKeys,
+    CategoryReportKeys,
+    ErrorTransactionReportKeys,
+    NotificationReportKeys,
+    BlockedMemberReportKeys,
+    BlockedMemberScanReportKeys,
+    AnomalyTransactionsReportKeys,
 } from "../utils/ExportKeyMappings";
 import * as XLSX from "xlsx";
 import { ExporterType } from "../types/Export";
@@ -49,6 +58,33 @@ const ExporterButton = ({
                 case "Amazon Marketplace":
                     mappings = AmazonMarketplaceKeys;
                     break;
+                case "Bank Details Report":
+                    mappings = BankDetailsReportKeys;
+                    break;
+                case "KYC Report":
+                    mappings = KycReportKeys;
+                    break;
+                case "Product Wise Report":
+                    mappings = ProductWiseReportKeys;
+                    break;
+                case "Category Report":
+                    mappings = CategoryReportKeys;
+                    break;
+                case "Error Transaction Report":
+                    mappings = ErrorTransactionReportKeys;
+                    break;
+                case "Notification Report":
+                    mappings = NotificationReportKeys;
+                    break;
+                case "Blocked Member Report":
+                    mappings = BlockedMemberReportKeys;
+                    break;
+                case "Blocked Member Scan Report":
+                    mappings = BlockedMemberScanReportKeys;
+                    break;
+                case "Anomaly Transactions Report":
+                    mappings = AnomalyTransactionsReportKeys;
+                    break;
 
                 default:
                     console.warn("❗ Export mapping not found for:", reportName);
@@ -65,6 +101,14 @@ const ExporterButton = ({
                 "createdAt",
                 "redemptionProcessedDate",
                 "dateOfJoining",
+                "scanDate",
+                "deliveredDate",
+                "sentDate",
+                "redemptionRequestDate",
+                "dateOfScan",
+                "firstScanDate",
+                "lastScanDate",
+                "updatedAt"
             ];
 
             const numberFields: string[] = [
@@ -77,7 +121,15 @@ const ExporterButton = ({
                 "pointsEarnedByReceiver",
                 "redeemedPoints",
                 "totalEarnedPoints",
-                "amount"
+                "amount",
+                "productsInCategory",
+                "bonusPoints",
+                "basePoint",
+                "extraBonusPoint",
+                "totalPoints",
+                "anomalyValueScanned",
+                "totalPointsScanned",
+                "frequencyOfAnomaly"
             ];
 
             const worksheet = XLSX.utils.json_to_sheet(

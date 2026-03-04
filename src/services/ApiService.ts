@@ -472,3 +472,39 @@ export const getDeliveryStatuses = async () => {
 export const updateDeliveryStatus = async (payload: { status: string; redemptionId: number }) => {
     return api.post("amazon-market/update-delivery-status", payload).then((res) => res?.data);
 };
+
+export const getBankDetailsReport = (data: any) => {
+    return api.post('report/bank-details-report', data);
+};
+
+export const getKycReport = (data: any) => {
+    return api.post('report/kyc-report', data);
+};
+
+export const getProductWiseReport = (data: any) => {
+    return api.post('report/product-wise-report', data);
+};
+
+export const getCategoryReport = (data: any) => {
+    return api.post('report/category-report', data);
+};
+
+export const getErrorTransactionReport = (data: any) => {
+    return api.post('report/error-transaction-report', data);
+};
+
+export const getNotificationReport = (data: any) => {
+    return api.post('report/notification-report', data);
+};
+
+export const getBlockedMemberReport = (data: any) => {
+    return api.post('report/blocked-member-report', data);
+};
+
+export const getBlockedMemberQrScanReport = (data: any) => {
+    return api.post('report/blocked-member-qr-scan-report', data);
+};
+
+export const getAnomalyTransactionsReport = (data: any) => {
+    return api.post('report/anomaly-transactions-report', data);
+};
