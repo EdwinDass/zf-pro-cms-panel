@@ -493,35 +493,64 @@ export const deleteFaq = async (faqId: number) => {
         .then((response) => response);
 };
 
-// Amazon Marketplace
-export const getAmazonProducts = async (payload: { limit: number; skip: number }) => {
+// // Amazon Marketplace
+// export const getAmazonProducts = async (payload: { limit: number; skip: number }) => {
+//     return api
+//         .post("amazon-market/products", payload)
+//         .then((response) => response?.data);
+// };
+
+// export const editAmazonProduct = async (formData: FormData) => {
+//     return api
+//         .post("amazon-market/edit-product", formData, {
+//             headers: {
+//                 "Content-Type": "multipart/form-data",
+//             },
+//         })
+//         .then((response) => response?.data);
+// };
+
+// export const addAmazonProducts = async (data: any[]) => {
+//     return api
+//         .post("amazon-market/add-products", data)
+//         .then((response) => response?.data);
+// };
+
+// export const getDeliveryStatuses = async () => {
+//     return api.get("amazon-market/delivery-statuses").then((res) => res?.data);
+// };
+
+// export const updateDeliveryStatus = async (payload: { status: string; redemptionId: number }) => {
+//     return api.post("amazon-market/update-delivery-status", payload)
+//         .then((response) => response)
+//         .catch((error) => { throw error });
+// };
+
+// Survey Module
+export const getSurveyQuestions = async () => {
     return api
-        .post("amazon-market/products", payload)
-        .then((response) => response?.data);
+        .get("surveys/questions")
+        .then((response) => response)
+        .catch((error) => { throw error });
 };
 
-export const editAmazonProduct = async (formData: FormData) => {
+export const createSurveyQuestion = async (payload: { questionText: string; answerType: string; options: string[] }) => {
     return api
-        .post("amazon-market/edit-product", formData, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-            },
-        })
-        .then((response) => response?.data);
+        .post("surveys/questions", payload)
+        .then((response) => response)
+        .catch((error) => { throw error });
 };
 
-export const addAmazonProducts = async (data: any[]) => {
+export const deleteSurveyQuestion = async (id: number) => {
     return api
-        .post("amazon-market/add-products", data)
-        .then((response) => response?.data);
+        .delete(`surveys/questions/${id}`)
+        .then((response) => response)
+        .catch((error) => { throw error });
 };
 
-export const getDeliveryStatuses = async () => {
-    return api.get("amazon-market/delivery-statuses").then((res) => res?.data);
-};
-
-export const updateDeliveryStatus = async (payload: { status: string; redemptionId: number }) => {
-    return api.post("amazon-market/update-delivery-status", payload)
+export const getSurveyResults = async () => {
+    return api
+        .get("surveys/results")
         .then((response) => response)
         .catch((error) => { throw error });
 };

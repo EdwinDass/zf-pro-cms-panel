@@ -12,6 +12,7 @@ interface NavItem {
     label: string;
     icon: string;
     path: string;
+    subItems?: { id: string; label: string; path: string; }[];
 }
 
 export const Layout: React.FC<LayoutProps> = ({
@@ -26,6 +27,7 @@ export const Layout: React.FC<LayoutProps> = ({
         return savedExpanded !== null ? JSON.parse(savedExpanded) : false;
     });
     const [isMobile, setIsMobile] = useState(false);
+    const [openSubMenus, setOpenSubMenus] = useState<{ [key: string]: boolean }>({});
 
     useEffect(() => {
         const checkIfMobile = () => {
@@ -63,6 +65,16 @@ export const Layout: React.FC<LayoutProps> = ({
         { id: 'faqs', label: 'FAQs', icon: 'fas fa-question-circle', path: '/faqs' },
         // { id: 'configuration', label: 'Configuration', icon: 'fas fa-sliders-h', path: '/configuration' },
         { id: 'amazon-marketplace', label: 'Amazon Marketplace', icon: 'fas fa-store', path: '/amazon-marketplace' },
+        {
+            id: 'surveys',
+            label: 'Survey Module',
+            icon: 'fas fa-poll',
+            path: '',
+            subItems: [
+                { id: 'survey-questions', label: 'Survey Questions', path: '/survey-questions' },
+                { id: 'survey-responses', label: 'Survey Responses', path: '/survey-responses' }
+            ]
+        },
     ];
 
     const handleNavigation = (path: string) => {
@@ -153,23 +165,51 @@ export const Layout: React.FC<LayoutProps> = ({
                     <div className="flex-1 overflow-y-auto py-4">
                         <nav className="px-2 space-y-1">
                             {navItems.map((item) => (
-                                <button
-                                    key={item.id}
-                                    onClick={() => handleNavigation(item.path)}
-                                    aria-label={item.label}
-                                    title={item.label}
-                                    className={`
-                                        flex items-center w-full text-left rounded-lg transition-all duration-200
-                                        ${expanded ? 'px-4 py-3' : 'px-3 py-3 justify-center'}
-                                        ${isActive(item.path)
-                                            ? 'bg-blue-50 text-blue-600 font-medium'
-                                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:translate-x-1'
-                                        }
-                                    `}
-                                >
-                                    <i className={`${item.icon} ${expanded ? 'mr-3' : ''} text-lg`}></i>
-                                    {expanded && <span className="text-sm whitespace-nowrap">{item.label}</span>}
-                                </button>
+                                <div key={item.id}>
+                                    <button
+                                        onClick={() => {
+                                            if (item.subItems) {
+                                                setOpenSubMenus(prev => ({ ...prev, [item.id]: !prev[item.id] }));
+                                                if (!expanded && !isMobile) setExpanded(true);
+                                            } else {
+                                                handleNavigation(item.path);
+                                            }
+                                        }}
+                                        aria-label={item.label}
+                                        title={item.label}
+                                        className={`
+                                            flex items-center w-full text-left rounded-lg transition-all duration-200
+                                            ${expanded ? 'px-4 py-3' : 'px-3 py-3 justify-center'}
+                                            ${(isActive(item.path) || (item.subItems && item.subItems.some(sub => isActive(sub.path))))
+                                                ? 'bg-blue-50 text-blue-600 font-medium'
+                                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:translate-x-1'
+                                            }
+                                        `}
+                                    >
+                                        <i className={`${item.icon} ${expanded ? 'mr-3' : ''} text-lg`}></i>
+                                        {expanded && <span className="text-sm whitespace-nowrap flex-1">{item.label}</span>}
+                                        {expanded && item.subItems && (
+                                            <i className={`fas fa-chevron-${openSubMenus[item.id] ? 'up' : 'down'} text-xs ml-2`}></i>
+                                        )}
+                                    </button>
+
+                                    {item.subItems && expanded && openSubMenus[item.id] && (
+                                        <div className="pl-10 pr-2 mt-1 space-y-1">
+                                            {item.subItems.map((sub: any) => (
+                                                <button
+                                                    key={sub.id}
+                                                    onClick={() => handleNavigation(sub.path)}
+                                                    className={`
+                                                        w-full text-left px-4 py-2 text-sm rounded-lg transition-colors
+                                                        ${isActive(sub.path) ? 'text-blue-600 font-medium bg-blue-50' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}
+                                                    `}
+                                                >
+                                                    {sub.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             ))}
                         </nav>
                     </div>

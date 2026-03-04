@@ -16,9 +16,10 @@ import MembersManagment from "../pages/members-and-kyc/MembersManagement";
 import Communication from "../pages/communication/Communication";
 import AmazonMarketplace from "../pages/amazon-marketplace/AmazonMarketplace";
 import Faqs from "../pages/faqs/Faqs";
-import Communication from "../pages/communication/Communication";
-import AmazonMarketplace from "../pages/amazon-marketplace/AmazonMarketplace";
-
+// import Communication from "../pages/communication/Communication";
+// import AmazonMarketplace from "../pages/amazon-marketplace/AmazonMarketplace";
+import SurveyQuestions from "../pages/surveys/SurveyQuestions";
+import SurveyResponses from "../pages/surveys/SurveyResponses";
 const AppRoutes = () => {
     return (
         <Routes>
@@ -38,6 +39,8 @@ const AppRoutes = () => {
             <Route path="/faqs" element={<PrivateRoute element={<Faqs />} />} />
             <Route path="/communication" element={<PrivateRoute element={<Communication />} />} />
             <Route path="/amazon-marketplace" element={<PrivateRoute element={<AmazonMarketplace />} />} />
+            <Route path="/survey-questions" element={<PrivateRoute element={<SurveyQuestions />} />} />
+            <Route path="/survey-responses" element={<PrivateRoute element={<SurveyResponses />} />} />
         </Routes>
     );
 };
