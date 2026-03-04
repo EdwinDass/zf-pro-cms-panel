@@ -169,11 +169,15 @@ export const getSubcategoriesBySku = async (skuId: number) => {
 };
 
 export const getCategories = async () => {
-    return api.get("sku/categories").then((res) => res);
+    return api.get("sku/categories/all").then((res) => res);
 };
 
 export const getSubcategoriesByCategory = async (categoryId: number) => {
     return api.get(`sku/categories/${categoryId}/subcategories`).then((res) => res);
+};
+
+export const editCategory = async (categoryId: number, payload: any) => {
+    return api.put(`sku/categories/${categoryId}`, payload).then((res) => res);
 };
 
 export const getSkusBySubcategory = async (subCategoryId: number) => {
