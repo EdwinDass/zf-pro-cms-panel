@@ -184,6 +184,14 @@ export const editSubcategory = async (subCategoryId: number, payload: any) => {
     return api.put(`sku/subcategories/${subCategoryId}`, payload).then((res) => res);
 };
 
+export const addSubcategory = async (payload: {
+    categoryId: number;
+    subCategoryName: string;
+    subCategoryDescription: string;
+}) => {
+    return api.post(`sku/subcategories`, payload).then((res) => res);
+};
+
 export const editSku = async (skuId: number, payload: { skuName: string; skuDescription: string; isActive: boolean }) => {
     return api.put(`sku/skus/${skuId}`, payload).then((res) => res);
 };

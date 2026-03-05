@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import CustomTable, { Column } from "../../../components/CustomTable";
 import TopBar from "../../../layouts/top-bar";
-import { getSubcategoriesByCategory, userLogout, editSubcategory } from "../../../services/ApiService";
+import { getSubcategoriesByCategory, userLogout, editSubcategory, addSubcategory } from "../../../services/ApiService";
 import { toast } from "react-toastify";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch } from "react-redux";
@@ -11,21 +12,26 @@ import { useNavigate, useParams } from "react-router-dom";
 import { logoutUser } from "../../../redux/slices/userDataSlice";
 import { clearTokens } from "../../../redux/slices/authTokenSlice";
 
+const EMPTY_ADD_FORM = { subCategoryName: "", subCategoryDescription: "" };
+
 const SubCategories = () => {
     const { categoryId } = useParams();
     const [subCategories, setSubCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
+
+    // Edit state
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingSubcategory, setEditingSubcategory] = useState<any>(null);
-    const [editForm, setEditForm] = useState({
-        name: "",
-        description: "",
-        isActive: true
-    });
+    const [editForm, setEditForm] = useState({ name: "", description: "", isActive: true });
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const pageSize = 10;
 
+    // Add state
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [addForm, setAddForm] = useState(EMPTY_ADD_FORM);
+    const [isAddSubmitting, setIsAddSubmitting] = useState(false);
+
+    const pageSize = 10;
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -48,6 +54,7 @@ const SubCategories = () => {
         }
     };
 
+    // ── Edit handlers ─────────────────────────────────────────────────────────
     const handleEditClick = (subcategory: any) => {
         setEditingSubcategory(subcategory);
         setEditForm({
@@ -77,7 +84,7 @@ const SubCategories = () => {
             await editSubcategory(subcategoryId, payload);
             toast.success("Subcategory updated successfully");
             handleCloseEditModal();
-            if (categoryId) fetchSubCategories(categoryId); // Refresh list
+            if (categoryId) fetchSubCategories(categoryId);
         } catch (error: any) {
             console.error("Error updating subcategory:", error);
             toast.error(error?.response?.data?.message || "Failed to update subcategory");
@@ -86,6 +93,42 @@ const SubCategories = () => {
         }
     };
 
+    // ── Add handlers ──────────────────────────────────────────────────────────
+    const handleOpenAddModal = () => {
+        setAddForm(EMPTY_ADD_FORM);
+        setIsAddModalOpen(true);
+    };
+
+    const handleCloseAddModal = () => {
+        setIsAddModalOpen(false);
+        setAddForm(EMPTY_ADD_FORM);
+    };
+
+    const handleAddSubmit = async () => {
+        const { subCategoryName, subCategoryDescription } = addForm;
+        if (!subCategoryName || !subCategoryDescription) {
+            toast.error("All fields are required");
+            return;
+        }
+        setIsAddSubmitting(true);
+        try {
+            await addSubcategory({
+                categoryId: Number(categoryId),
+                subCategoryName,
+                subCategoryDescription,
+            });
+            toast.success("Subcategory added successfully");
+            handleCloseAddModal();
+            if (categoryId) fetchSubCategories(categoryId);
+        } catch (error: any) {
+            console.error("Error adding subcategory:", error);
+            toast.error(error?.response?.data?.message || "Failed to add subcategory");
+        } finally {
+            setIsAddSubmitting(false);
+        }
+    };
+
+    // ── Logout ────────────────────────────────────────────────────────────────
     const logout = async () => {
         try {
             await userLogout();
@@ -153,13 +196,22 @@ const SubCategories = () => {
                 title="Sub Categories"
                 description={`Viewing sub categories for category ${categoryId}`}
                 actionButton={
-                    <button
-                        onClick={() => navigate('/categories')}
-                        className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
-                    >
-                        <ArrowBackIcon fontSize="small" />
-                        Back to Categories
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={handleOpenAddModal}
+                            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                        >
+                            <AddIcon fontSize="small" />
+                            Add New Sub Category
+                        </button>
+                        <button
+                            onClick={() => navigate('/categories')}
+                            className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+                        >
+                            <ArrowBackIcon fontSize="small" />
+                            Back to Categories
+                        </button>
+                    </div>
                 }
                 logout={logout}
             />
@@ -183,7 +235,7 @@ const SubCategories = () => {
                 </div>
             </div>
 
-            {/* Edit Modal */}
+            {/* ── Edit Modal ─────────────────────────────────────────────────── */}
             {isEditModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
@@ -253,6 +305,80 @@ const SubCategories = () => {
                                     disabled={isSubmitting}
                                 >
                                     {isSubmitting ? "Saving..." : "Save Changes"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Add Modal ──────────────────────────────────────────────────── */}
+            {isAddModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-xl font-semibold text-gray-900">Add New Subcategory</h3>
+                            <button
+                                type="button"
+                                onClick={handleCloseAddModal}
+                                className="text-gray-400 hover:text-gray-600"
+                                aria-label="Close add modal"
+                            >
+                                <CloseIcon />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Subcategory Name <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    value={addForm.subCategoryName}
+                                    onChange={(e) => setAddForm(prev => ({ ...prev, subCategoryName: e.target.value }))}
+                                    placeholder="Enter subcategory name"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Description <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[100px]"
+                                    value={addForm.subCategoryDescription}
+                                    onChange={(e) => setAddForm(prev => ({ ...prev, subCategoryDescription: e.target.value }))}
+                                    placeholder="Enter subcategory description"
+                                />
+                            </div>
+
+                            {/* Read-only context */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Category ID</label>
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
+                                    value={categoryId || "—"}
+                                    readOnly
+                                />
+                            </div>
+
+                            <div className="flex gap-3 mt-6">
+                                <button
+                                    onClick={handleCloseAddModal}
+                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                                    disabled={isAddSubmitting}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleAddSubmit}
+                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-400"
+                                    disabled={isAddSubmitting}
+                                >
+                                    {isAddSubmitting ? "Adding..." : "Add Subcategory"}
                                 </button>
                             </div>
                         </div>
