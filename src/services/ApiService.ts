@@ -228,6 +228,10 @@ export const addSku = async (payload: {
     return api.post(`sku/skus`, payload).then((res) => res);
 };
 
+export const addBulkSkus = async (payload: any[]) => {
+    return api.post(`sku/skus/bulk`, payload).then((res) => res);
+};
+
 export const getSkusBySubcategory = async (subCategoryId: number, page: number = 1, limit: number = 10) => {
     return api.get(`sku/subcategories/${subCategoryId}/skus/all`, { params: { page, limit } }).then((res) => res);
 };
