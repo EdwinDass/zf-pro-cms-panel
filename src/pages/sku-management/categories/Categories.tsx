@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../../redux/slices/userDataSlice";
 import { clearTokens } from "../../../redux/slices/authTokenSlice";
+import CategoryBulkUpload from "./CategoryBulkUpload";
 
 const EMPTY_ADD_FORM = { categoryName: "", categoryShortCode: "", categoryDescription: "" };
 
@@ -36,6 +37,9 @@ const Categories = () => {
     const [shortCodeStatus, setShortCodeStatus] = useState<null | boolean>(null);
     const [isCheckingShortCode, setIsCheckingShortCode] = useState(false);
     const shortCodeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Bulk Upload state
+    const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -242,13 +246,24 @@ const Categories = () => {
                 title="Categories Management"
                 description="Manage SKU product categories"
                 actionButton={
-                    <button
-                        onClick={handleOpenAddModal}
-                        className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                    >
-                        <AddBoxIcon fontSize="small" />
-                        Add Category
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setIsBulkUploadOpen(true)}
+                            className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            Bulk Upload
+                        </button>
+                        <button
+                            onClick={handleOpenAddModal}
+                            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                        >
+                            <AddBoxIcon fontSize="small" />
+                            Add Category
+                        </button>
+                    </div>
                 }
                 logout={logout}
             />
@@ -423,6 +438,12 @@ const Categories = () => {
                     </div>
                 </div>
             )}
+
+            <CategoryBulkUpload
+                isOpen={isBulkUploadOpen}
+                onClose={() => setIsBulkUploadOpen(false)}
+                onUpload={() => fetchCategories(page)}
+            />
         </div>
     );
 };

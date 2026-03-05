@@ -188,6 +188,10 @@ export const addCategory = async (payload: {
     return api.post(`sku/categories`, payload).then((res) => res);
 };
 
+export const addBulkCategories = async (payload: any[]) => {
+    return api.post(`sku/categories/bulk`, payload).then((res) => res);
+};
+
 export const checkCategoryShortCode = async (shortCode: string) => {
     return api.get(`sku/categories/check-shortcode`, { params: { shortCode } }).then((res) => res);
 };
