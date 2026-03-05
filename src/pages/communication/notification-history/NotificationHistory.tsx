@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import DownloadIcon from "@mui/icons-material/Download";
 import CustomTable, { Column } from "../../../components/CustomTable";
 import ViewImageModal from "../components/ViewImageModal";
+import { getNotifications } from "../../../services/ApiService";
 
 interface NotificationHistoryProps {
     onSelectNotification?: (id: number) => void;
@@ -13,8 +14,8 @@ interface Notification {
     title: string;
     description: string;
     image: string | null;
-    redirection: string;
-    sentAt: string;
+    redirection: string | null;
+    sentAt: string | null;
     status: string;
     createdAt: string;
 }
@@ -31,122 +32,48 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const pageSize = 10;
 
-    // Dummy data
-    const dummyNotifications: Notification[] = [
-        {
-            id: 1,
-            notificationType: "Campaign",
-            title: "Special Offer",
-            description: "Get 20% off on all products this week",
-            image: "https://via.placeholder.com/150",
-            redirection: "/products",
-            sentAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            status: "Send",
-            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 2,
-            notificationType: "Manual",
-            title: "System Update",
-            description: "New features have been added to the platform",
-            image: null,
-            redirection: "/update-logs",
-            sentAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-            status: "Send",
-            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 3,
-            notificationType: "Scheduled",
-            title: "Account Alert",
-            description: "Unusual activity detected on your account",
-            image: "https://via.placeholder.com/150",
-            redirection: "/security",
-            sentAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-            status: "Send",
-            createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 4,
-            notificationType: "Campaign",
-            title: "Bonus Points Awarded",
-            description: "You have earned 500 bonus points",
-            image: "https://via.placeholder.com/150",
-            redirection: "/rewards",
-            sentAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-            status: "Failed",
-            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 5,
-            notificationType: "Manual",
-            title: "New Event Available",
-            description: "Join our upcoming webinar on digital marketing",
-            image: "https://via.placeholder.com/150",
-            redirection: "/events",
-            sentAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-            status: "Send",
-            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 6,
-            notificationType: "Scheduled",
-            title: "Flash Sale",
-            description: "Limited time offer: Buy one get one free",
-            image: "https://via.placeholder.com/150",
-            redirection: "/sales",
-            sentAt: new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString(),
-            status: "Send",
-            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 7,
-            notificationType: "Campaign",
-            title: "Maintenance Notice",
-            description: "Server maintenance scheduled for tonight",
-            image: null,
-            redirection: "/maintenance",
-            sentAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-            status: "Send",
-            createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 8,
-            notificationType: "Manual",
-            title: "Expiry Warning",
-            description: "Your membership expires in 7 days",
-            image: null,
-            redirection: "/membership",
-            sentAt: new Date(Date.now() - 60 * 60 * 60 * 1000).toISOString(),
-            status: "Failed",
-            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 9,
-            notificationType: "Scheduled",
-            title: "Referral Bonus",
-            description: "Earn rewards by referring friends",
-            image: "https://via.placeholder.com/150",
-            redirection: "/referral",
-            sentAt: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
-            status: "Send",
-            createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 10,
-            notificationType: "Campaign",
-            title: "Workshop Registration",
-            description: "Register now for our exclusive workshop",
-            image: "https://via.placeholder.com/150",
-            redirection: "/workshops",
-            sentAt: new Date(Date.now() - 84 * 60 * 60 * 1000).toISOString(),
-            status: "Failed",
-            createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-    ];
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [totalCount, setTotalCount] = useState<number>(0);
 
-    const [notifications, setNotifications] = useState<Notification[]>(dummyNotifications);
-    const [totalCount, setTotalCount] = useState<number>(dummyNotifications.length);
+    const fetchNotifications = useCallback(async () => {
+        setLoading(true);
+        try {
+            const params = {
+                page,
+                limit: pageSize,
+                searchTitle: titleFilter || undefined,
+                searchDescription: descriptionFilter || undefined,
+                fromDate: fromDateFilter || undefined,
+                toDate: toDateFilter || undefined,
+                type: notificationTypeFilter || undefined
+            };
+            const response = await getNotifications(params);
+            if (response && response.success) {
+                const apiData = response.data || [];
+                const mappedData: Notification[] = apiData.map((item: any) => ({
+                    id: item.id,
+                    notificationType: item.type || "Unknown",
+                    title: item.title,
+                    description: item.body,
+                    image: item.imageUrl || null,
+                    redirection: item.redirectionLink || null,
+                    sentAt: item.scheduledAt || item.processedAt || null,
+                    status: item.status || "Unknown",
+                    createdAt: item.createdAt,
+                }));
+                setNotifications(mappedData);
+                setTotalCount(response.totalCount || mappedData.length);
+            }
+        } catch (error) {
+            console.error("Failed to fetch notifications:", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [page, pageSize, titleFilter, descriptionFilter, fromDateFilter, toDateFilter, notificationTypeFilter]);
+
+    useEffect(() => {
+        fetchNotifications();
+    }, [fetchNotifications]);
 
     const formatDate = (dateString: string | null): string => {
         if (!dateString) return "N/A";
@@ -164,8 +91,10 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
         const colorMap: Record<string, string> = {
             send: "bg-green-100 text-green-600",
             failed: "bg-red-100 text-red-600",
+            completed: "bg-green-100 text-green-600",
+            pending: "bg-yellow-100 text-yellow-600",
         };
-        return colorMap[status.toLowerCase()];
+        return colorMap[status.toLowerCase()] || "bg-gray-100 text-gray-600";
     };
 
     const getTypeColor = (type: string): string => {
@@ -173,8 +102,9 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
             manual: "bg-blue-100 text-blue-600",
             campaign: "bg-purple-100 text-purple-600",
             scheduled: "bg-orange-100 text-orange-600",
+            regular: "bg-blue-100 text-blue-600",
         };
-        return colorMap[type.toLowerCase()];
+        return colorMap[type.toLowerCase()] || "bg-gray-100 text-gray-600";
     };
 
     const columns: Column[] = [

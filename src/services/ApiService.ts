@@ -528,3 +528,7 @@ export const getDeliveryStatuses = async () => {
 export const updateDeliveryStatus = async (payload: { status: string; redemptionId: number }) => {
     return api.post("amazon-market/update-delivery-status", payload).then((res) => res?.data);
 };
+
+export const getNotifications = async (params?: any) => {
+    return api.get("notifications", { params }).then((res) => res?.data);
+};
