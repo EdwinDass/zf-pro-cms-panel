@@ -180,6 +180,18 @@ export const editCategory = async (categoryId: number, payload: any) => {
     return api.put(`sku/categories/${categoryId}`, payload).then((res) => res);
 };
 
+export const addCategory = async (payload: {
+    categoryName: string;
+    categoryShortCode: string;
+    categoryDescription: string;
+}) => {
+    return api.post(`sku/categories`, payload).then((res) => res);
+};
+
+export const checkCategoryShortCode = async (shortCode: string) => {
+    return api.get(`sku/categories/check-shortcode`, { params: { shortCode } }).then((res) => res);
+};
+
 export const editSubcategory = async (subCategoryId: number, payload: any) => {
     return api.put(`sku/subcategories/${subCategoryId}`, payload).then((res) => res);
 };
