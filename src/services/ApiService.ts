@@ -173,15 +173,23 @@ export const getCategories = async () => {
 };
 
 export const getSubcategoriesByCategory = async (categoryId: number) => {
-    return api.get(`sku/categories/${categoryId}/subcategories`).then((res) => res);
+    return api.get(`sku/categories/${categoryId}/subcategories/all`).then((res) => res);
 };
 
 export const editCategory = async (categoryId: number, payload: any) => {
     return api.put(`sku/categories/${categoryId}`, payload).then((res) => res);
 };
 
+export const editSubcategory = async (subCategoryId: number, payload: any) => {
+    return api.put(`sku/subcategories/${subCategoryId}`, payload).then((res) => res);
+};
+
+export const editSku = async (skuId: number, payload: { skuName: string; skuDescription: string; isActive: boolean }) => {
+    return api.put(`sku/skus/${skuId}`, payload).then((res) => res);
+};
+
 export const getSkusBySubcategory = async (subCategoryId: number) => {
-    return api.get(`sku/subcategories/${subCategoryId}/skus`).then((res) => res);
+    return api.get(`sku/subcategories/${subCategoryId}/skus/all`).then((res) => res);
 };
 
 export const getSkusByCategoryAndSubcategory = async (

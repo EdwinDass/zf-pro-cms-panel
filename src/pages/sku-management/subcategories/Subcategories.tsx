@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from "react";
 import CustomTable, { Column } from "../../../components/CustomTable";
 import TopBar from "../../../layouts/top-bar";
-import { getCategories, userLogout, editCategory } from "../../../services/ApiService";
+import { getSubcategoriesByCategory, userLogout, editSubcategory } from "../../../services/ApiService";
 import { toast } from "react-toastify";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EditIcon from "@mui/icons-material/Edit";
-import AddBoxIcon from "@mui/icons-material/AddBox";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { logoutUser } from "../../../redux/slices/userDataSlice";
 import { clearTokens } from "../../../redux/slices/authTokenSlice";
 
-const Categories = () => {
-    const [categories, setCategories] = useState<any[]>([]);
+const SubCategories = () => {
+    const { categoryId } = useParams();
+    const [subCategories, setSubCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [editingCategory, setEditingCategory] = useState<any>(null);
+    const [editingSubcategory, setEditingSubcategory] = useState<any>(null);
     const [editForm, setEditForm] = useState({
         name: "",
         description: "",
@@ -29,19 +30,59 @@ const Categories = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchCategories();
-    }, []);
+        if (categoryId) {
+            fetchSubCategories(categoryId);
+        }
+    }, [categoryId]);
 
-    const fetchCategories = async () => {
+    const fetchSubCategories = async (catId: string) => {
         setLoading(true);
         try {
-            const res = await getCategories();
-            setCategories(res?.data?.data || res?.data || []);
+            const res = await getSubcategoriesByCategory(Number(catId));
+            setSubCategories(res?.data?.data || res?.data || []);
         } catch (error) {
-            console.error("Error fetching categories:", error);
-            toast.error("Failed to load categories");
+            console.error("Error fetching subcategories:", error);
+            toast.error("Failed to load subcategories");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleEditClick = (subcategory: any) => {
+        setEditingSubcategory(subcategory);
+        setEditForm({
+            name: subcategory.name || subcategory.subCategoryName || subcategory.title || "",
+            description: subcategory.subCategoryDescription || subcategory.description || "",
+            isActive: subcategory.isActive !== undefined ? subcategory.isActive : (subcategory.status === 'active' || true)
+        });
+        setIsEditModalOpen(true);
+    };
+
+    const handleCloseEditModal = () => {
+        setIsEditModalOpen(false);
+        setEditingSubcategory(null);
+        setEditForm({ name: "", description: "", isActive: true });
+    };
+
+    const handleEditSubmit = async () => {
+        if (!editingSubcategory) return;
+        setIsSubmitting(true);
+        try {
+            const subcategoryId = editingSubcategory.id || editingSubcategory.subCategoryId || editingSubcategory._id;
+            const payload = {
+                subCategoryName: editForm.name,
+                subCategoryDescription: editForm.description,
+                isActive: editForm.isActive
+            };
+            await editSubcategory(subcategoryId, payload);
+            toast.success("Subcategory updated successfully");
+            handleCloseEditModal();
+            if (categoryId) fetchSubCategories(categoryId); // Refresh list
+        } catch (error: any) {
+            console.error("Error updating subcategory:", error);
+            toast.error(error?.response?.data?.message || "Failed to update subcategory");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -56,59 +97,21 @@ const Categories = () => {
         navigate("/");
     };
 
-    const handleEditClick = (category: any) => {
-        setEditingCategory(category);
-        setEditForm({
-            name: category.name || category.categoryName || category.title || "",
-            description: category.categoryDescription || category.description || "",
-            isActive: category.isActive !== undefined ? category.isActive : (category.status === 'active' || true)
-        });
-        setIsEditModalOpen(true);
-    };
-
-    const handleCloseEditModal = () => {
-        setIsEditModalOpen(false);
-        setEditingCategory(null);
-        setEditForm({ name: "", description: "", isActive: true });
-    };
-
-    const handleEditSubmit = async () => {
-        if (!editingCategory) return;
-        setIsSubmitting(true);
-        try {
-            const categoryId = editingCategory.id || editingCategory.categoryId || editingCategory._id;
-            const payload = {
-                categoryName: editForm.name,
-                categoryDescription: editForm.description,
-                isActive: editForm.isActive
-            };
-            await editCategory(categoryId, payload);
-            toast.success("Category updated successfully");
-            handleCloseEditModal();
-            fetchCategories(); // Refresh list
-        } catch (error: any) {
-            console.error("Error updating category:", error);
-            toast.error(error?.response?.data?.message || "Failed to update category");
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
     const columns: Column[] = [
         {
             key: "id",
             label: "ID",
-            render: (row: any) => row.id || row.categoryId || row._id || "N/A"
+            render: (row: any) => row.id || row.subCategoryId || row._id || "N/A"
         },
         {
             key: "name",
-            label: "Category Name",
-            render: (row: any) => row.name || row.categoryName || row.title || "N/A"
+            label: "Sub Category Name",
+            render: (row: any) => row.name || row.subCategoryName || row.title || "N/A"
         },
         {
             key: "description",
             label: "Description",
-            render: (row: any) => row.categoryDescription || row.description || "N/A"
+            render: (row: any) => row.subCategoryDescription || row.description || "N/A"
         },
         {
             key: "status",
@@ -132,12 +135,12 @@ const Categories = () => {
                     </button>
                     <button
                         className="text-indigo-600 hover:text-indigo-900 flex items-center"
-                        onClick={() => navigate(`/categories/${row.id || row.categoryId || row._id}/subcategories`)}
+                        onClick={() => navigate(`/subcategories/${row.id || row.subCategoryId || row._id}/skus`)}
                     >
                         <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                         </svg>
-                        View Sub Categories
+                        View SKUs
                     </button>
                 </div>
             )
@@ -147,12 +150,15 @@ const Categories = () => {
     return (
         <div className="h-screen overflow-y-auto bg-gray-100 pb-10">
             <TopBar
-                title="Categories Management"
-                description="Manage SKU product categories"
+                title="Sub Categories"
+                description={`Viewing sub categories for category ${categoryId}`}
                 actionButton={
-                    <button className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                        <AddBoxIcon fontSize="small" />
-                        Add Category
+                    <button
+                        onClick={() => navigate('/categories')}
+                        className="flex items-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+                    >
+                        <ArrowBackIcon fontSize="small" />
+                        Back to Categories
                     </button>
                 }
                 logout={logout}
@@ -162,14 +168,14 @@ const Categories = () => {
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     {loading ? (
                         <div className="flex justify-center py-8">
-                            <div className="text-gray-600">Loading categories...</div>
+                            <div className="text-gray-600">Loading subcategories...</div>
                         </div>
                     ) : (
                         <CustomTable
                             columns={columns}
-                            data={categories}
+                            data={subCategories}
                             pageSize={pageSize}
-                            totalRows={categories.length}
+                            totalRows={subCategories.length}
                             currentPage={page}
                             onPageChange={(p) => setPage(p)}
                         />
@@ -182,7 +188,7 @@ const Categories = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-xl font-semibold text-gray-900">Edit Category</h3>
+                            <h3 className="text-xl font-semibold text-gray-900">Edit Subcategory</h3>
                             <button
                                 type="button"
                                 onClick={handleCloseEditModal}
@@ -196,14 +202,14 @@ const Categories = () => {
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Category Name
+                                    Subcategory Name
                                 </label>
                                 <input
                                     type="text"
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     value={editForm.name}
                                     onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
-                                    placeholder="Enter category name"
+                                    placeholder="Enter subcategory name"
                                 />
                             </div>
 
@@ -215,7 +221,7 @@ const Categories = () => {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[100px]"
                                     value={editForm.description}
                                     onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                                    placeholder="Enter category description"
+                                    placeholder="Enter subcategory description"
                                 />
                             </div>
 
@@ -257,4 +263,4 @@ const Categories = () => {
     );
 };
 
-export default Categories;
+export default SubCategories;
