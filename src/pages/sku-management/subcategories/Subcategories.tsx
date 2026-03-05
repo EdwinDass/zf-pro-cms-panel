@@ -8,9 +8,10 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { logoutUser } from "../../../redux/slices/userDataSlice";
 import { clearTokens } from "../../../redux/slices/authTokenSlice";
+import SubCategoryBulkUpload from "./SubCategoryBulkUpload";
 
 const EMPTY_ADD_FORM = { subCategoryName: "", subCategoryDescription: "" };
 
@@ -32,6 +33,9 @@ const SubCategories = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [addForm, setAddForm] = useState(EMPTY_ADD_FORM);
     const [isAddSubmitting, setIsAddSubmitting] = useState(false);
+
+    // Bulk Upload state
+    const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -199,6 +203,15 @@ const SubCategories = () => {
                 description={`Viewing sub categories for category ${categoryId}`}
                 actionButton={
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setIsBulkUploadOpen(true)}
+                            className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            Bulk Upload
+                        </button>
                         <button
                             onClick={handleOpenAddModal}
                             className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
@@ -387,6 +400,14 @@ const SubCategories = () => {
                     </div>
                 </div>
             )}
+
+            <SubCategoryBulkUpload
+                isOpen={isBulkUploadOpen}
+                onClose={() => setIsBulkUploadOpen(false)}
+                onUpload={() => {
+                    if (categoryId) fetchSubCategories(categoryId, page);
+                }}
+            />
         </div>
     );
 };

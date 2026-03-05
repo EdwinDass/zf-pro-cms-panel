@@ -208,6 +208,10 @@ export const addSubcategory = async (payload: {
     return api.post(`sku/subcategories`, payload).then((res) => res);
 };
 
+export const addBulkSubcategories = async (payload: any[]) => {
+    return api.post(`sku/subcategories/bulk`, payload).then((res) => res);
+};
+
 export const editSku = async (skuId: number, payload: { skuName: string; skuDescription: string; isActive: boolean }) => {
     return api.put(`sku/skus/${skuId}`, payload).then((res) => res);
 };
