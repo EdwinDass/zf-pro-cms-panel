@@ -188,6 +188,18 @@ export const editSku = async (skuId: number, payload: { skuName: string; skuDesc
     return api.put(`sku/skus/${skuId}`, payload).then((res) => res);
 };
 
+export const addSku = async (payload: {
+    skuName: string;
+    skuCode: string;
+    skuDescription: string;
+    productValue: string;
+    points: string;
+    categoryId: number;
+    subCategoryId: number;
+}[]) => {
+    return api.post(`sku/skus`, payload).then((res) => res);
+};
+
 export const getSkusBySubcategory = async (subCategoryId: number) => {
     return api.get(`sku/subcategories/${subCategoryId}/skus/all`).then((res) => res);
 };

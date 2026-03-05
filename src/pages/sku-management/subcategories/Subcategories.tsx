@@ -135,7 +135,7 @@ const SubCategories = () => {
                     </button>
                     <button
                         className="text-indigo-600 hover:text-indigo-900 flex items-center"
-                        onClick={() => navigate(`/subcategories/${row.id || row.subCategoryId || row._id}/skus`)}
+                        onClick={() => navigate(`/subcategories/${row.id || row.subCategoryId || row._id}/skus`, { state: { categoryId: Number(categoryId) } })}
                     >
                         <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
