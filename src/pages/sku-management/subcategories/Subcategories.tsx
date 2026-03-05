@@ -19,6 +19,8 @@ const SubCategories = () => {
     const [subCategories, setSubCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
+    const [totalRows, setTotalRows] = useState(0);
+    const pageSize = 10;
 
     // Edit state
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -31,21 +33,21 @@ const SubCategories = () => {
     const [addForm, setAddForm] = useState(EMPTY_ADD_FORM);
     const [isAddSubmitting, setIsAddSubmitting] = useState(false);
 
-    const pageSize = 10;
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
         if (categoryId) {
-            fetchSubCategories(categoryId);
+            fetchSubCategories(categoryId, page);
         }
-    }, [categoryId]);
+    }, [categoryId, page]);
 
-    const fetchSubCategories = async (catId: string) => {
+    const fetchSubCategories = async (catId: string, currentPage: number = 1) => {
         setLoading(true);
         try {
-            const res = await getSubcategoriesByCategory(Number(catId));
-            setSubCategories(res?.data?.data || res?.data || []);
+            const res = await getSubcategoriesByCategory(Number(catId), currentPage, pageSize);
+            setSubCategories(res?.data?.data || []);
+            setTotalRows(res?.data?.pagination?.total ?? res?.data?.data?.length ?? 0);
         } catch (error) {
             console.error("Error fetching subcategories:", error);
             toast.error("Failed to load subcategories");
@@ -84,7 +86,7 @@ const SubCategories = () => {
             await editSubcategory(subcategoryId, payload);
             toast.success("Subcategory updated successfully");
             handleCloseEditModal();
-            if (categoryId) fetchSubCategories(categoryId);
+            if (categoryId) fetchSubCategories(categoryId, page);
         } catch (error: any) {
             console.error("Error updating subcategory:", error);
             toast.error(error?.response?.data?.message || "Failed to update subcategory");
@@ -119,7 +121,7 @@ const SubCategories = () => {
             });
             toast.success("Subcategory added successfully");
             handleCloseAddModal();
-            if (categoryId) fetchSubCategories(categoryId);
+            if (categoryId) fetchSubCategories(categoryId, page);
         } catch (error: any) {
             console.error("Error adding subcategory:", error);
             toast.error(error?.response?.data?.message || "Failed to add subcategory");
@@ -227,7 +229,7 @@ const SubCategories = () => {
                             columns={columns}
                             data={subCategories}
                             pageSize={pageSize}
-                            totalRows={subCategories.length}
+                            totalRows={totalRows}
                             currentPage={page}
                             onPageChange={(p) => setPage(p)}
                         />

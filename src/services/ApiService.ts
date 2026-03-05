@@ -168,12 +168,12 @@ export const getSubcategoriesBySku = async (skuId: number) => {
         .then((response) => response);
 };
 
-export const getCategories = async () => {
-    return api.get("sku/categories/all").then((res) => res);
+export const getCategories = async (page: number = 1, limit: number = 10) => {
+    return api.get("sku/categories/all", { params: { page, limit } }).then((res) => res);
 };
 
-export const getSubcategoriesByCategory = async (categoryId: number) => {
-    return api.get(`sku/categories/${categoryId}/subcategories/all`).then((res) => res);
+export const getSubcategoriesByCategory = async (categoryId: number, page: number = 1, limit: number = 10) => {
+    return api.get(`sku/categories/${categoryId}/subcategories/all`, { params: { page, limit } }).then((res) => res);
 };
 
 export const editCategory = async (categoryId: number, payload: any) => {
@@ -220,8 +220,8 @@ export const addSku = async (payload: {
     return api.post(`sku/skus`, payload).then((res) => res);
 };
 
-export const getSkusBySubcategory = async (subCategoryId: number) => {
-    return api.get(`sku/subcategories/${subCategoryId}/skus/all`).then((res) => res);
+export const getSkusBySubcategory = async (subCategoryId: number, page: number = 1, limit: number = 10) => {
+    return api.get(`sku/subcategories/${subCategoryId}/skus/all`, { params: { page, limit } }).then((res) => res);
 };
 
 export const getSkusByCategoryAndSubcategory = async (

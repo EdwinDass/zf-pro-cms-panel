@@ -19,6 +19,8 @@ const Categories = () => {
     const [categories, setCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
+    const [totalRows, setTotalRows] = useState(0);
+    const pageSize = 10;
 
     // Edit state
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -35,19 +37,19 @@ const Categories = () => {
     const [isCheckingShortCode, setIsCheckingShortCode] = useState(false);
     const shortCodeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const pageSize = 10;
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
-        fetchCategories();
-    }, []);
+        fetchCategories(page);
+    }, [page]);
 
-    const fetchCategories = async () => {
+    const fetchCategories = async (currentPage: number = 1) => {
         setLoading(true);
         try {
-            const res = await getCategories();
-            setCategories(res?.data?.data || res?.data || []);
+            const res = await getCategories(currentPage, pageSize);
+            setCategories(res?.data?.data || []);
+            setTotalRows(res?.data?.pagination?.total ?? res?.data?.data?.length ?? 0);
         } catch (error) {
             console.error("Error fetching categories:", error);
             toast.error("Failed to load categories");
@@ -97,7 +99,7 @@ const Categories = () => {
             await editCategory(categoryId, payload);
             toast.success("Category updated successfully");
             handleCloseEditModal();
-            fetchCategories();
+            fetchCategories(page);
         } catch (error: any) {
             console.error("Error updating category:", error);
             toast.error(error?.response?.data?.message || "Failed to update category");
@@ -170,7 +172,7 @@ const Categories = () => {
             await addCategory({ categoryName, categoryShortCode, categoryDescription });
             toast.success("Category added successfully");
             handleCloseAddModal();
-            fetchCategories();
+            fetchCategories(page);
         } catch (error: any) {
             console.error("Error adding category:", error);
             toast.error(error?.response?.data?.message || "Failed to add category");
@@ -262,7 +264,7 @@ const Categories = () => {
                             columns={columns}
                             data={categories}
                             pageSize={pageSize}
-                            totalRows={categories.length}
+                            totalRows={totalRows}
                             currentPage={page}
                             onPageChange={(p) => setPage(p)}
                         />

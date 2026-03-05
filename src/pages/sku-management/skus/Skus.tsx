@@ -28,6 +28,8 @@ const Skus = () => {
     const [skus, setSkus] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [page, setPage] = useState(1);
+    const [totalRows, setTotalRows] = useState(0);
+    const pageSize = 10;
 
     // Edit SKU state
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -40,19 +42,19 @@ const Skus = () => {
     const [addForm, setAddForm] = useState(EMPTY_ADD_FORM);
     const [isAddSubmitting, setIsAddSubmitting] = useState(false);
 
-    const pageSize = 10;
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (subcategoryId) fetchSkus(subcategoryId);
-    }, [subcategoryId]);
+        if (subcategoryId) fetchSkus(subcategoryId, page);
+    }, [subcategoryId, page]);
 
-    const fetchSkus = async (subCatId: string) => {
+    const fetchSkus = async (subCatId: string, currentPage: number = 1) => {
         setLoading(true);
         try {
-            const res = await getSkusBySubcategory(Number(subCatId));
-            setSkus(res?.data?.data || res?.data || []);
+            const res = await getSkusBySubcategory(Number(subCatId), currentPage, pageSize);
+            setSkus(res?.data?.data || []);
+            setTotalRows(res?.data?.pagination?.total ?? res?.data?.data?.length ?? 0);
         } catch (error) {
             console.error("Error fetching SKUs:", error);
             toast.error("Failed to load SKUs");
@@ -90,7 +92,7 @@ const Skus = () => {
             });
             toast.success("SKU updated successfully");
             handleCloseEditModal();
-            if (subcategoryId) fetchSkus(subcategoryId);
+            if (subcategoryId) fetchSkus(subcategoryId, page);
         } catch (error: any) {
             console.error("Error updating SKU:", error);
             toast.error(error?.response?.data?.message || "Failed to update SKU");
@@ -129,7 +131,7 @@ const Skus = () => {
             }]);
             toast.success("SKU added successfully");
             handleCloseAddModal();
-            if (subcategoryId) fetchSkus(subcategoryId);
+            if (subcategoryId) fetchSkus(subcategoryId, page);
         } catch (error: any) {
             console.error("Error adding SKU:", error);
             toast.error(error?.response?.data?.message || "Failed to add SKU");
@@ -233,7 +235,7 @@ const Skus = () => {
                             columns={columns}
                             data={skus}
                             pageSize={pageSize}
-                            totalRows={skus.length}
+                            totalRows={totalRows}
                             currentPage={page}
                             onPageChange={(p) => setPage(p)}
                         />
