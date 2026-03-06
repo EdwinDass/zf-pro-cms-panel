@@ -29,6 +29,7 @@ const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ c
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState<number>(1);
+    const [totalCount, setTotalCount] = useState<number>(0);
     const [imageModalOpen, setImageModalOpen] = useState<boolean>(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const pageSize = 10;
@@ -37,9 +38,10 @@ const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ c
         setLoading(true);
         setError(null);
         try {
-            const res = await getCampaignNotifications(campaignId);
+            const res = await getCampaignNotifications(campaignId, page, pageSize);
             if (res && res.success && Array.isArray(res.data)) {
                 setNotifications(res.data);
+                setTotalCount(res.total || 0);
             } else {
                 setError("Failed to load notifications.");
             }
@@ -49,7 +51,7 @@ const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ c
         } finally {
             setLoading(false);
         }
-    }, [campaignId]);
+    }, [campaignId, page, pageSize]);
 
     useEffect(() => {
         fetchNotifications();
@@ -192,7 +194,7 @@ const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ c
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h3 className="text-lg font-semibold text-gray-900">Notifications — {campaignName}</h3>
-                    <p className="text-sm text-gray-500">Campaign #{campaignId} · {notifications.length} notification{notifications.length !== 1 ? 's' : ''}</p>
+                    <p className="text-sm text-gray-500">Campaign #{campaignId} · {totalCount} notification{totalCount !== 1 ? 's' : ''}</p>
                 </div>
             </div>
 
@@ -211,9 +213,9 @@ const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ c
             ) : (
                 <CustomTable
                     columns={columns}
-                    data={notifications.slice((page - 1) * pageSize, page * pageSize)}
+                    data={notifications}
                     pageSize={pageSize}
-                    totalRows={notifications.length}
+                    totalRows={totalCount}
                     currentPage={page}
                     onPageChange={setPage}
                 />

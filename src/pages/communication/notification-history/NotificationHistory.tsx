@@ -64,7 +64,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
                     createdAt: item.createdAt,
                 }));
                 setNotifications(mappedData);
-                setTotalCount(response.totalCount || mappedData.length);
+                setTotalCount(response.total || mappedData.length);
             }
         } catch (error) {
             console.error("Failed to fetch notifications:", error);

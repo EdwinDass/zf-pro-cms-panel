@@ -22,6 +22,7 @@ const NotificationLogs: React.FC<NotificationLogsProps> = ({ notificationId }) =
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState<number>(1);
+    const [totalCount, setTotalCount] = useState<number>(0);
     const pageSize = 10;
 
     const fetchLogs = useCallback(async () => {
@@ -29,9 +30,10 @@ const NotificationLogs: React.FC<NotificationLogsProps> = ({ notificationId }) =
         setLoading(true);
         setError(null);
         try {
-            const res = await getNotificationLogs(notificationId);
+            const res = await getNotificationLogs(notificationId, page, pageSize);
             if (res && res.success && Array.isArray(res.data)) {
                 setLogs(res.data);
+                setTotalCount(res.total || 0);
             } else {
                 setError("Failed to load logs.");
             }
@@ -41,7 +43,7 @@ const NotificationLogs: React.FC<NotificationLogsProps> = ({ notificationId }) =
         } finally {
             setLoading(false);
         }
-    }, [notificationId]);
+    }, [notificationId, page, pageSize]);
 
     useEffect(() => {
         fetchLogs();
@@ -142,7 +144,7 @@ const NotificationLogs: React.FC<NotificationLogsProps> = ({ notificationId }) =
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h3 className="text-lg font-semibold text-gray-900">Notification Logs</h3>
-                    <p className="text-sm text-gray-500">Notification #{notificationId} · {logs.length} log entries</p>
+                    <p className="text-sm text-gray-500">Notification #{notificationId} · {totalCount} log entries</p>
                 </div>
                 <button
                     onClick={fetchLogs}
@@ -173,9 +175,9 @@ const NotificationLogs: React.FC<NotificationLogsProps> = ({ notificationId }) =
             ) : (
                 <CustomTable
                     columns={columns}
-                    data={logs.slice((page - 1) * pageSize, page * pageSize)}
+                    data={logs}
                     pageSize={pageSize}
-                    totalRows={logs.length}
+                    totalRows={totalCount}
                     currentPage={page}
                     onPageChange={setPage}
                 />

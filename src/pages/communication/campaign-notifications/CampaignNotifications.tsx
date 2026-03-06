@@ -22,15 +22,17 @@ const CampaignNotifications: React.FC<CampaignNotificationsProps> = ({ onSelectC
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState<number>(1);
+    const [totalCount, setTotalCount] = useState<number>(0);
     const pageSize = 10;
 
     const fetchCampaigns = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const res = await getCampaigns();
+            const res = await getCampaigns(page, pageSize);
             if (res && res.success && Array.isArray(res.data)) {
                 setCampaigns(res.data);
+                setTotalCount(res.total || 0);
             } else {
                 setError("Failed to load campaigns.");
             }
@@ -40,7 +42,7 @@ const CampaignNotifications: React.FC<CampaignNotificationsProps> = ({ onSelectC
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [page, pageSize]);
 
     useEffect(() => {
         fetchCampaigns();
@@ -169,9 +171,9 @@ const CampaignNotifications: React.FC<CampaignNotificationsProps> = ({ onSelectC
             ) : (
                 <CustomTable
                     columns={columns}
-                    data={campaigns.slice((page - 1) * pageSize, page * pageSize)}
+                    data={campaigns}
                     pageSize={pageSize}
-                    totalRows={campaigns.length}
+                    totalRows={totalCount}
                     currentPage={page}
                     onPageChange={setPage}
                 />

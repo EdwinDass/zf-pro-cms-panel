@@ -614,16 +614,16 @@ export const broadcastNotification = async (payload: {
     }).then((res) => res?.data);
 };
 
-export const getNotificationLogs = async (notificationId: number) => {
-    return api.get(`notifications/${notificationId}/logs`).then((res) => res?.data);
+export const getNotificationLogs = async (notificationId: number, page: number = 1, limit: number = 10) => {
+    return api.get(`notifications/${notificationId}/logs`, { params: { page, limit } }).then((res) => res?.data);
 };
 
-export const getCampaigns = async () => {
-    return api.get('notifications/campaigns').then((res) => res?.data);
+export const getCampaigns = async (page: number = 1, limit: number = 10) => {
+    return api.get('notifications/campaigns', { params: { page, limit } }).then((res) => res?.data);
 };
 
-export const getCampaignNotifications = async (campaignId: number) => {
-    return api.get(`notifications/campaigns/${campaignId}/notifications`).then((res) => res?.data);
+export const getCampaignNotifications = async (campaignId: number, page: number = 1, limit: number = 10) => {
+    return api.get(`notifications/campaigns/${campaignId}/notifications`, { params: { page, limit } }).then((res) => res?.data);
 };
 
 
