@@ -546,3 +546,9 @@ export const getNotificationDistricts = async (states: string[]) => {
     states.forEach(state => params.append("state", state));
     return api.get(`notifications/filters/districts?${params.toString()}`).then((res) => res?.data);
 };
+
+export const getNotificationCities = async (districts: string[]) => {
+    const params = new URLSearchParams();
+    districts.forEach(district => params.append("district", district));
+    return api.get(`notifications/filters/cities?${params.toString()}`).then((res) => res?.data);
+};

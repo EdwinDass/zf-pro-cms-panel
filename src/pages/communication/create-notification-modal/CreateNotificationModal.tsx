@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import { getNotificationRoles, getNotificationStates, getNotificationDistricts } from "../../../services/ApiService";
+import { getNotificationRoles, getNotificationStates, getNotificationDistricts, getNotificationCities } from "../../../services/ApiService";
 import MultiSelectDropdown from "../../../components/ui/MultiSelectDropdown";
 
 interface CreateNotificationModalProps {
@@ -23,6 +23,7 @@ interface ManualFormData {
     roleIds: string[];
     stateNames: string[];
     districtNames: string[];
+    cityNames: string[];
 }
 
 interface ScheduledFormData extends ManualFormData {
@@ -53,6 +54,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         roleIds: [],
         stateNames: [],
         districtNames: [],
+        cityNames: [],
     });
 
     const [scheduledForm, setScheduledForm] = useState<ScheduledFormData>({
@@ -67,6 +69,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         roleIds: [],
         stateNames: [],
         districtNames: [],
+        cityNames: [],
         startDate: "",
         setTime: "",
     });
@@ -83,6 +86,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         roleIds: [],
         stateNames: [],
         districtNames: [],
+        cityNames: [],
         campaignName: "",
         startDate: "",
         endDate: "",
@@ -96,6 +100,10 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
     const [manualDistricts, setManualDistricts] = useState<string[]>([]);
     const [scheduledDistricts, setScheduledDistricts] = useState<string[]>([]);
     const [campaignDistricts, setCampaignDistricts] = useState<string[]>([]);
+
+    const [manualCities, setManualCities] = useState<string[]>([]);
+    const [scheduledCities, setScheduledCities] = useState<string[]>([]);
+    const [campaignCities, setCampaignCities] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchFilters = async () => {
@@ -174,6 +182,60 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         };
         fetchDistricts();
     }, [campaignForm.stateNames]);
+
+    useEffect(() => {
+        const fetchCities = async () => {
+            if (manualForm.districtNames && manualForm.districtNames.length > 0) {
+                try {
+                    const res = await getNotificationCities(manualForm.districtNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setManualCities(res.data.filter((c: string) => c && c.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch cities for manual push:", error);
+                }
+            } else {
+                setManualCities([]);
+            }
+        };
+        fetchCities();
+    }, [manualForm.districtNames]);
+
+    useEffect(() => {
+        const fetchCities = async () => {
+            if (scheduledForm.districtNames && scheduledForm.districtNames.length > 0) {
+                try {
+                    const res = await getNotificationCities(scheduledForm.districtNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setScheduledCities(res.data.filter((c: string) => c && c.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch cities for scheduled push:", error);
+                }
+            } else {
+                setScheduledCities([]);
+            }
+        };
+        fetchCities();
+    }, [scheduledForm.districtNames]);
+
+    useEffect(() => {
+        const fetchCities = async () => {
+            if (campaignForm.districtNames && campaignForm.districtNames.length > 0) {
+                try {
+                    const res = await getNotificationCities(campaignForm.districtNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setCampaignCities(res.data.filter((c: string) => c && c.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch cities for campaign push:", error);
+                }
+            } else {
+                setCampaignCities([]);
+            }
+        };
+        fetchCities();
+    }, [campaignForm.districtNames]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: NotificationType) => {
         const file = e.target.files?.[0] || null;
@@ -391,7 +453,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         label="State Filter"
                                         options={states}
                                         selectedValues={manualForm.stateNames}
-                                        onChange={(values) => setManualForm({ ...manualForm, stateNames: values, districtNames: [] })}
+                                        onChange={(values) => setManualForm({ ...manualForm, stateNames: values, districtNames: [], cityNames: [] })}
                                     />
                                 </div>
                             </div>
@@ -402,8 +464,17 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         label="District Filter"
                                         options={manualDistricts}
                                         selectedValues={manualForm.districtNames}
-                                        onChange={(values) => setManualForm({ ...manualForm, districtNames: values })}
+                                        onChange={(values) => setManualForm({ ...manualForm, districtNames: values, cityNames: [] })}
                                         disabled={!manualForm.stateNames || manualForm.stateNames.length === 0}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="City Filter"
+                                        options={manualCities}
+                                        selectedValues={manualForm.cityNames}
+                                        onChange={(values) => setManualForm({ ...manualForm, cityNames: values })}
+                                        disabled={!manualForm.districtNames || manualForm.districtNames.length === 0}
                                     />
                                 </div>
                             </div>
@@ -581,7 +652,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         label="State Filter"
                                         options={states}
                                         selectedValues={scheduledForm.stateNames}
-                                        onChange={(values) => setScheduledForm({ ...scheduledForm, stateNames: values, districtNames: [] })}
+                                        onChange={(values) => setScheduledForm({ ...scheduledForm, stateNames: values, districtNames: [], cityNames: [] })}
                                     />
                                 </div>
                             </div>
@@ -592,8 +663,17 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         label="District Filter"
                                         options={scheduledDistricts}
                                         selectedValues={scheduledForm.districtNames}
-                                        onChange={(values) => setScheduledForm({ ...scheduledForm, districtNames: values })}
+                                        onChange={(values) => setScheduledForm({ ...scheduledForm, districtNames: values, cityNames: [] })}
                                         disabled={!scheduledForm.stateNames || scheduledForm.stateNames.length === 0}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="City Filter"
+                                        options={scheduledCities}
+                                        selectedValues={scheduledForm.cityNames}
+                                        onChange={(values) => setScheduledForm({ ...scheduledForm, cityNames: values })}
+                                        disabled={!scheduledForm.districtNames || scheduledForm.districtNames.length === 0}
                                     />
                                 </div>
                             </div>
@@ -855,7 +935,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         label="State Filter"
                                         options={states}
                                         selectedValues={campaignForm.stateNames}
-                                        onChange={(values) => setCampaignForm({ ...campaignForm, stateNames: values, districtNames: [] })}
+                                        onChange={(values) => setCampaignForm({ ...campaignForm, stateNames: values, districtNames: [], cityNames: [] })}
                                     />
                                 </div>
                             </div>
@@ -866,8 +946,17 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         label="District Filter"
                                         options={campaignDistricts}
                                         selectedValues={campaignForm.districtNames}
-                                        onChange={(values) => setCampaignForm({ ...campaignForm, districtNames: values })}
+                                        onChange={(values) => setCampaignForm({ ...campaignForm, districtNames: values, cityNames: [] })}
                                         disabled={!campaignForm.stateNames || campaignForm.stateNames.length === 0}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="City Filter"
+                                        options={campaignCities}
+                                        selectedValues={campaignForm.cityNames}
+                                        onChange={(values) => setCampaignForm({ ...campaignForm, cityNames: values })}
+                                        disabled={!campaignForm.districtNames || campaignForm.districtNames.length === 0}
                                     />
                                 </div>
                             </div>
