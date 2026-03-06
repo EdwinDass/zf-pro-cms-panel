@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
+import { getNotificationRoles } from "../../../services/ApiService";
 
 interface CreateNotificationModalProps {
     isOpen: boolean;
@@ -18,6 +19,7 @@ interface ManualFormData {
     userType: string;
     userMobile: string;
     country: string;
+    roleId: string;
 }
 
 interface ScheduledFormData extends ManualFormData {
@@ -45,6 +47,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         userType: "",
         userMobile: "",
         country: "",
+        roleId: "",
     });
 
     const [scheduledForm, setScheduledForm] = useState<ScheduledFormData>({
@@ -56,6 +59,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         userType: "",
         userMobile: "",
         country: "",
+        roleId: "",
         startDate: "",
         setTime: "",
     });
@@ -69,6 +73,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         userType: "",
         userMobile: "",
         country: "",
+        roleId: "",
         campaignName: "",
         startDate: "",
         endDate: "",
@@ -76,6 +81,22 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         recurrence: "daily",
         weekday: "",
     });
+
+    const [roles, setRoles] = useState<{ roleId: number; roleName: string }[]>([]);
+
+    useEffect(() => {
+        const fetchFilters = async () => {
+            try {
+                const res = await getNotificationRoles();
+                if (res && res.success) {
+                    setRoles(res.data || []);
+                }
+            } catch (error) {
+                console.error("Failed to fetch notification roles:", error);
+            }
+        };
+        fetchFilters();
+    }, []);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: NotificationType) => {
         const file = e.target.files?.[0] || null;
@@ -275,6 +296,30 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                     </select>
                                 </div>
                             </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label htmlFor="manualRole" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Role Filter
+                                    </label>
+                                    <select
+                                        id="manualRole"
+                                        title="Select Role"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                        value={manualForm.roleId}
+                                        onChange={(e) =>
+                                            setManualForm({ ...manualForm, roleId: e.target.value })
+                                        }
+                                    >
+                                        <option value="">All Roles</option>
+                                        {roles.map((r) => (
+                                            <option key={r.roleId} value={String(r.roleId)}>
+                                                {r.roleName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -428,6 +473,30 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         <option value="">Select User Mobile</option>
                                         <option value="+1-555-0101">+1-555-0101</option>
                                         <option value="+1-555-0102">+1-555-0102</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label htmlFor="scheduledRole" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Role Filter
+                                    </label>
+                                    <select
+                                        id="scheduledRole"
+                                        title="Select Role"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                        value={scheduledForm.roleId}
+                                        onChange={(e) =>
+                                            setScheduledForm({ ...scheduledForm, roleId: e.target.value })
+                                        }
+                                    >
+                                        <option value="">All Roles</option>
+                                        {roles.map((r) => (
+                                            <option key={r.roleId} value={String(r.roleId)}>
+                                                {r.roleName}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
                             </div>
@@ -668,6 +737,30 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         <option value="">Select User Mobile</option>
                                         <option value="+1-555-0101">+1-555-0101</option>
                                         <option value="+1-555-0102">+1-555-0102</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label htmlFor="campaignRole" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Role Filter
+                                    </label>
+                                    <select
+                                        id="campaignRole"
+                                        title="Select Role"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                        value={campaignForm.roleId}
+                                        onChange={(e) =>
+                                            setCampaignForm({ ...campaignForm, roleId: e.target.value })
+                                        }
+                                    >
+                                        <option value="">All Roles</option>
+                                        {roles.map((r) => (
+                                            <option key={r.roleId} value={String(r.roleId)}>
+                                                {r.roleName}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
                             </div>

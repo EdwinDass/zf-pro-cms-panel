@@ -532,3 +532,7 @@ export const updateDeliveryStatus = async (payload: { status: string; redemption
 export const getNotifications = async (params?: any) => {
     return api.get("notifications", { params }).then((res) => res?.data);
 };
+
+export const getNotificationRoles = async () => {
+    return api.get("notifications/filters/roles").then((res) => res?.data);
+};
