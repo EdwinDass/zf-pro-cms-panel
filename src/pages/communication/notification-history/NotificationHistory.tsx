@@ -41,6 +41,8 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
     const [typeFilter, setTypeFilter] = useState<string>("");
     const [dateFromFilter, setDateFromFilter] = useState<string>("");
     const [dateToFilter, setDateToFilter] = useState<string>("");
+    const [scheduledFromFilter, setScheduledFromFilter] = useState<string>("");
+    const [scheduledToFilter, setScheduledToFilter] = useState<string>("");
 
     const [page, setPage] = useState<number>(1);
     const [loading, setLoading] = useState<boolean>(false);
@@ -63,6 +65,8 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
             if (typeFilter) params.type = typeFilter;
             if (dateFromFilter) params.dateFrom = dateFromFilter;
             if (dateToFilter) params.dateTo = dateToFilter;
+            if (scheduledFromFilter) params.scheduledFrom = scheduledFromFilter;
+            if (scheduledToFilter) params.scheduledTo = scheduledToFilter;
 
             const response = await getNotifications(params);
             if (response && response.success) {
@@ -87,7 +91,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
         } finally {
             setLoading(false);
         }
-    }, [page, pageSize, searchFilter, statusFilter, typeFilter, dateFromFilter, dateToFilter]);
+    }, [page, pageSize, searchFilter, statusFilter, typeFilter, dateFromFilter, dateToFilter, scheduledFromFilter, scheduledToFilter]);
 
     useEffect(() => {
         fetchNotifications();
@@ -99,6 +103,8 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
     const handleTypeChange = (val: string) => { setTypeFilter(val); setPage(1); };
     const handleDateFromChange = (val: string) => { setDateFromFilter(val); setPage(1); };
     const handleDateToChange = (val: string) => { setDateToFilter(val); setPage(1); };
+    const handleScheduledFromChange = (val: string) => { setScheduledFromFilter(val); setPage(1); };
+    const handleScheduledToChange = (val: string) => { setScheduledToFilter(val); setPage(1); };
 
     const handleClearFilters = () => {
         setSearchFilter("");
@@ -106,10 +112,12 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
         setTypeFilter("");
         setDateFromFilter("");
         setDateToFilter("");
+        setScheduledFromFilter("");
+        setScheduledToFilter("");
         setPage(1);
     };
 
-    const hasActiveFilters = searchFilter || statusFilter || typeFilter || dateFromFilter || dateToFilter;
+    const hasActiveFilters = searchFilter || statusFilter || typeFilter || dateFromFilter || dateToFilter || scheduledFromFilter || scheduledToFilter;
 
     const formatDate = (dateString: string | null): string => {
         if (!dateString) return "N/A";
@@ -315,6 +323,34 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
                             className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             value={dateToFilter}
                             onChange={(e) => handleDateToChange(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Scheduled From */}
+                    <div className="flex-1 min-w-[160px]">
+                        <label htmlFor="scheduledFromFilter" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Scheduled From
+                        </label>
+                        <input
+                            id="scheduledFromFilter"
+                            type="date"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={scheduledFromFilter}
+                            onChange={(e) => handleScheduledFromChange(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Scheduled To */}
+                    <div className="flex-1 min-w-[160px]">
+                        <label htmlFor="scheduledToFilter" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Scheduled To
+                        </label>
+                        <input
+                            id="scheduledToFilter"
+                            type="date"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={scheduledToFilter}
+                            onChange={(e) => handleScheduledToChange(e.target.value)}
                         />
                     </div>
 
