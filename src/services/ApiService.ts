@@ -559,3 +559,8 @@ export const getNotificationPincodes = async (cities: string[]) => {
     return api.get(`notifications/filters/pincodes?${params.toString()}`).then((res) => res?.data);
 };
 
+export const getNotificationBlockStatuses = async () => {
+    return api.get(`notifications/filters/block-statuses`).then((res) => res?.data);
+};
+
+

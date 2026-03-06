@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import { getNotificationRoles, getNotificationStates, getNotificationDistricts, getNotificationCities, getNotificationPincodes } from "../../../services/ApiService";
+import { getNotificationRoles, getNotificationStates, getNotificationDistricts, getNotificationCities, getNotificationPincodes, getNotificationBlockStatuses } from "../../../services/ApiService";
 import MultiSelectDropdown from "../../../components/ui/MultiSelectDropdown";
 
 interface CreateNotificationModalProps {
@@ -25,6 +25,7 @@ interface ManualFormData {
     districtNames: string[];
     cityNames: string[];
     pincodes: string[];
+    blockStatuses: string[];
 }
 
 interface ScheduledFormData extends ManualFormData {
@@ -57,6 +58,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         districtNames: [],
         cityNames: [],
         pincodes: [],
+        blockStatuses: [],
     });
 
     const [scheduledForm, setScheduledForm] = useState<ScheduledFormData>({
@@ -73,6 +75,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         districtNames: [],
         cityNames: [],
         pincodes: [],
+        blockStatuses: [],
         startDate: "",
         setTime: "",
     });
@@ -91,6 +94,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         districtNames: [],
         cityNames: [],
         pincodes: [],
+        blockStatuses: [],
         campaignName: "",
         startDate: "",
         endDate: "",
@@ -113,12 +117,15 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
     const [scheduledPincodes, setScheduledPincodes] = useState<string[]>([]);
     const [campaignPincodes, setCampaignPincodes] = useState<string[]>([]);
 
+    const [blockStatusOptions, setBlockStatusOptions] = useState<string[]>([]);
+
     useEffect(() => {
         const fetchFilters = async () => {
             try {
-                const [rolesRes, statesRes] = await Promise.all([
+                const [rolesRes, statesRes, blockStatusesRes] = await Promise.all([
                     getNotificationRoles(),
-                    getNotificationStates()
+                    getNotificationStates(),
+                    getNotificationBlockStatuses()
                 ]);
 
                 if (rolesRes && rolesRes.success) {
@@ -129,6 +136,10 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                     const validStates = statesRes.data.filter((s: string) => s && s.trim() !== '');
                     const uniqueStates = Array.from(new Set(validStates)) as string[];
                     setStates(uniqueStates);
+                }
+
+                if (blockStatusesRes && blockStatusesRes.success && Array.isArray(blockStatusesRes.data)) {
+                    setBlockStatusOptions(blockStatusesRes.data);
                 }
             } catch (error) {
                 console.error("Failed to fetch notification filters:", error);
@@ -551,6 +562,14 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         disabled={!manualForm.cityNames || manualForm.cityNames.length === 0}
                                     />
                                 </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="Block Status Filter"
+                                        options={blockStatusOptions}
+                                        selectedValues={manualForm.blockStatuses}
+                                        onChange={(values) => setManualForm({ ...manualForm, blockStatuses: values })}
+                                    />
+                                </div>
                             </div>
                         </div>
                     )}
@@ -760,6 +779,14 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         selectedValues={scheduledForm.pincodes}
                                         onChange={(values) => setScheduledForm({ ...scheduledForm, pincodes: values })}
                                         disabled={!scheduledForm.cityNames || scheduledForm.cityNames.length === 0}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="Block Status Filter"
+                                        options={blockStatusOptions}
+                                        selectedValues={scheduledForm.blockStatuses}
+                                        onChange={(values) => setScheduledForm({ ...scheduledForm, blockStatuses: values })}
                                     />
                                 </div>
                             </div>
@@ -1055,6 +1082,14 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         selectedValues={campaignForm.pincodes}
                                         onChange={(values) => setCampaignForm({ ...campaignForm, pincodes: values })}
                                         disabled={!campaignForm.cityNames || campaignForm.cityNames.length === 0}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="Block Status Filter"
+                                        options={blockStatusOptions}
+                                        selectedValues={campaignForm.blockStatuses}
+                                        onChange={(values) => setCampaignForm({ ...campaignForm, blockStatuses: values })}
                                     />
                                 </div>
                             </div>
