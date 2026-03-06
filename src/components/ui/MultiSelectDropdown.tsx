@@ -88,14 +88,15 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
             >
                 {/* Selected Pills */}
                 {selectedValues.map(val => (
-                    <div key={val} className="flex items-center px-3 py-1 bg-[#005bd3] rounded-full text-[13px] font-medium text-white border border-[#005bd3]">
-                        {val}
+                    <div key={val} className="flex items-center gap-1.5 pl-2 pr-1.5 py-0.5 bg-blue-50 border border-blue-200 rounded-lg text-[12px] font-medium text-blue-700">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0"></div>
+                        <span className="max-w-[140px] truncate">{val}</span>
                         <button
                             type="button"
                             onClick={(e) => removeOption(e, val)}
-                            className="ml-1.5 text-white hover:text-gray-200 focus:outline-none flex items-center justify-center p-0.5"
+                            className="ml-0.5 text-blue-400 hover:text-blue-700 focus:outline-none flex items-center justify-center transition-colors"
                         >
-                            <CloseIcon style={{ fontSize: '14px' }} />
+                            <CloseIcon style={{ fontSize: '13px' }} />
                         </button>
                     </div>
                 ))}
