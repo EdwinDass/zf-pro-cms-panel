@@ -440,7 +440,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                     endDate: campaignForm.endDate || undefined,
                     scheduledTime: campaignForm.setTime || undefined,
                     recurrence: campaignForm.recurrence || undefined,
-                    type: 'CAMPAIGN',
+                    type: 'campaign',
                 });
             }
 
