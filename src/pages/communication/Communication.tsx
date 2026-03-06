@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import NotificationHistory from "./notification-history/NotificationHistory";
 import CampaignNotifications from "./campaign-notifications/CampaignNotifications";
+import CampaignNotificationsList from "./campaign-notifications/CampaignNotificationsList";
 import NotificationLogs from "./notification-logs/NotificationLogs";
 import CreateNotificationModal from "./create-notification-modal/CreateNotificationModal";
 import { useDispatch } from "react-redux";
@@ -14,6 +15,7 @@ import AddIcon from "@mui/icons-material/Add";
 const Communication = () => {
     const [activeTab, setActiveTab] = useState("notification-history");
     const [selectedNotificationId, setSelectedNotificationId] = useState<number | null>(null);
+    const [selectedCampaign, setSelectedCampaign] = useState<{ id: number; name: string } | null>(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -37,6 +39,11 @@ const Communication = () => {
         { id: "notification-history", label: "Notification History" },
         { id: "campaign-notifications", label: "Campaign Notifications" },
     ];
+
+    // Determine what sub-page is active
+    const isInNotificationLogs = !!selectedNotificationId;
+    const isInCampaignNotifications = !!selectedCampaign;
+    const isInSubPage = isInNotificationLogs || isInCampaignNotifications;
 
     return (
         <>
@@ -76,6 +83,7 @@ const Communication = () => {
                                 onClick={() => {
                                     setActiveTab(tab.id);
                                     setSelectedNotificationId(null);
+                                    setSelectedCampaign(null);
                                 }}
                                 className={`
                                     pb-2
@@ -95,27 +103,51 @@ const Communication = () => {
                 </div>
 
                 <div className="mt-6 px-8">
-                    {!selectedNotificationId ? (
-                        <>
-                            {activeTab === "notification-history" && (
-                                <NotificationHistory
-                                    onSelectNotification={(id) => {
-                                        setSelectedNotificationId(id);
-                                    }}
+                    {/* Notification History tab */}
+                    {activeTab === "notification-history" && (
+                        isInNotificationLogs ? (
+                            <div>
+                                <button
+                                    onClick={() => setSelectedNotificationId(null)}
+                                    className="mb-4 flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-medium transition-colors"
+                                >
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                    </svg>
+                                    Back to Notification History
+                                </button>
+                                <NotificationLogs notificationId={selectedNotificationId} />
+                            </div>
+                        ) : (
+                            <NotificationHistory
+                                onSelectNotification={(id) => setSelectedNotificationId(id)}
+                            />
+                        )
+                    )}
+
+                    {/* Campaign Notifications tab */}
+                    {activeTab === "campaign-notifications" && (
+                        isInCampaignNotifications && selectedCampaign ? (
+                            <div>
+                                <button
+                                    onClick={() => setSelectedCampaign(null)}
+                                    className="mb-4 flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-medium transition-colors"
+                                >
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                    </svg>
+                                    Back to Campaigns
+                                </button>
+                                <CampaignNotificationsList
+                                    campaignId={selectedCampaign.id}
+                                    campaignName={selectedCampaign.name}
                                 />
-                            )}
-                            {activeTab === "campaign-notifications" && <CampaignNotifications />}
-                        </>
-                    ) : (
-                        <div>
-                            <button
-                                onClick={() => setSelectedNotificationId(null)}
-                                className="mb-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-                            >
-                                ← Back to Notification History
-                            </button>
-                            <NotificationLogs notificationId={selectedNotificationId} />
-                        </div>
+                            </div>
+                        ) : (
+                            <CampaignNotifications
+                                onSelectCampaign={(id, name) => setSelectedCampaign({ id, name })}
+                            />
+                        )
                     )}
                 </div>
             </div>

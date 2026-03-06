@@ -622,6 +622,11 @@ export const getCampaigns = async () => {
     return api.get('notifications/campaigns').then((res) => res?.data);
 };
 
+export const getCampaignNotifications = async (campaignId: number) => {
+    return api.get(`notifications/campaigns/${campaignId}/notifications`).then((res) => res?.data);
+};
+
+
 
 
 
