@@ -15,6 +15,7 @@ interface Notification {
     description: string;
     image: string | null;
     redirection: string | null;
+    scheduledAt: string | null;
     sentAt: string | null;
     status: string;
     createdAt: string;
@@ -57,7 +58,8 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
                     description: item.body,
                     image: item.imageUrl || null,
                     redirection: item.redirectionLink || null,
-                    sentAt: item.scheduledAt || item.processedAt || null,
+                    scheduledAt: item.scheduledAt || null,
+                    sentAt: item.processedAt || null,
                     status: item.status || "Unknown",
                     createdAt: item.createdAt,
                 }));
@@ -155,6 +157,13 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
             label: "Redirection",
             render: (notification: Notification) => (
                 <div className="text-gray-600">{notification.redirection}</div>
+            ),
+        },
+        {
+            key: "scheduledAt",
+            label: "Scheduled At",
+            render: (notification: Notification) => (
+                <div className="text-gray-600">{formatDate(notification.scheduledAt)}</div>
             ),
         },
         {
