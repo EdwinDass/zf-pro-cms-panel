@@ -618,6 +618,11 @@ export const getNotificationLogs = async (notificationId: number) => {
     return api.get(`notifications/${notificationId}/logs`).then((res) => res?.data);
 };
 
+export const getCampaigns = async () => {
+    return api.get('notifications/campaigns').then((res) => res?.data);
+};
+
+
 
 
 

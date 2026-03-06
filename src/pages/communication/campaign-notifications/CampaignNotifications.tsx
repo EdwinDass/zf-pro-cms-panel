@@ -1,354 +1,163 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import CustomTable, { Column } from "../../../components/CustomTable";
-import ViewImageModal from "../components/ViewImageModal";
+import { getCampaigns } from "../../../services/ApiService";
 
-interface CampaignNotification {
-    id: string;
-    campaignName: string;
-    app: string;
-    title: string;
-    description: string;
-    image: string;
-    redirection: string;
+interface Campaign {
+    id: number;
+    name: string;
     startDate: string;
     endDate: string;
-    sendTime: string;
-    recurrenceType: "daily" | "weekly" | "monthly";
-    weekDays?: string[];
-    isActive: boolean;
+    scheduledTime: string;
+    recurrence: string;
+    status: string;
     createdAt: string;
-    errorMessage: string | null;
 }
 
 const CampaignNotifications: React.FC = () => {
-    const [campaigns, setCampaigns] = useState<CampaignNotification[]>([
-        {
-            id: "1",
-            campaignName: "Summer Sale 2026",
-            app: "Mobile App",
-            title: "Exclusive Summer Deals",
-            description: "Get up to 50% off on all items",
-            image: "summer-sale.jpg",
-            redirection: "https://example.com/summer-sale",
-            startDate: "2026-06-01",
-            endDate: "2026-08-31",
-            sendTime: "09:00",
-            recurrenceType: "daily",
-            weekDays: [],
-            isActive: true,
-            createdAt: "2026-02-01",
-            errorMessage: null,
-        },
-        {
-            id: "2",
-            campaignName: "Weekly Updates",
-            app: "Web App",
-            title: "New Features Available",
-            description: "Check out our latest updates",
-            image: "updates.jpg",
-            redirection: "https://example.com/updates",
-            startDate: "2026-02-09",
-            endDate: "2026-12-31",
-            sendTime: "10:00",
-            recurrenceType: "weekly",
-            weekDays: ["Monday", "Wednesday", "Friday"],
-            isActive: true,
-            createdAt: "2026-01-15",
-            errorMessage: null,
-        },
-        {
-            id: "3",
-            campaignName: "Monthly Newsletter",
-            app: "Email",
-            title: "February Newsletter",
-            description: "Monthly digest of updates",
-            image: "newsletter.jpg",
-            redirection: "https://example.com/newsletter",
-            startDate: "2026-02-01",
-            endDate: "2026-02-28",
-            sendTime: "08:00",
-            recurrenceType: "monthly",
-            weekDays: [],
-            isActive: false,
-            createdAt: "2026-01-20",
-            errorMessage: "Image upload failed",
-        },
-    ]);
-
-    // Filter states
-    const [campaignNameFilter, setCampaignNameFilter] = useState<string>("");
-    const [titleFilter, setTitleFilter] = useState<string>("");
-    const [fromDateFilter, setFromDateFilter] = useState<string>("");
-    const [toDateFilter, setToDateFilter] = useState<string>("");
-    const [recurrenceTypeFilter, setRecurrenceTypeFilter] = useState<string>("");
+    const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState<number>(1);
-    const [imageModalOpen, setImageModalOpen] = useState<boolean>(false);
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const pageSize = 10;
 
-    // Filtered data
-    const filteredCampaigns = useMemo(() => {
-        return campaigns.filter((campaign) => {
-            const matchCampaignName = campaign.campaignName
-                .toLowerCase()
-                .includes(campaignNameFilter.toLowerCase());
-            const matchTitle = campaign.title.toLowerCase().includes(titleFilter.toLowerCase());
+    const fetchCampaigns = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await getCampaigns();
+            if (res && res.success && Array.isArray(res.data)) {
+                setCampaigns(res.data);
+            } else {
+                setError("Failed to load campaigns.");
+            }
+        } catch (err) {
+            console.error("Failed to fetch campaigns:", err);
+            setError("An error occurred while fetching campaigns.");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
-            const matchFromDate =
-                !fromDateFilter || new Date(campaign.startDate) >= new Date(fromDateFilter);
-            const matchToDate = !toDateFilter || new Date(campaign.endDate) <= new Date(toDateFilter);
+    useEffect(() => {
+        fetchCampaigns();
+    }, [fetchCampaigns]);
 
-            const matchRecurrence = !recurrenceTypeFilter || campaign.recurrenceType === recurrenceTypeFilter;
-
-            return matchCampaignName && matchTitle && matchFromDate && matchToDate && matchRecurrence;
-        });
-    }, [campaigns, campaignNameFilter, titleFilter, fromDateFilter, toDateFilter, recurrenceTypeFilter]);
-
-    const formatDate = (dateString: string): string => {
+    const formatDate = (dateString: string | null): string => {
         if (!dateString) return "N/A";
-        const date = new Date(dateString);
-        return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+        return new Date(dateString).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+        });
+    };
+
+    const getStatusColor = (status: string): string => {
+        const colorMap: Record<string, string> = {
+            active: "bg-green-100 text-green-700",
+            inactive: "bg-gray-100 text-gray-600",
+            paused: "bg-yellow-100 text-yellow-700",
+            completed: "bg-blue-100 text-blue-700",
+        };
+        return colorMap[status.toLowerCase()] || "bg-gray-100 text-gray-600";
+    };
+
+    const getRecurrenceColor = (recurrence: string): string => {
+        const colorMap: Record<string, string> = {
+            daily: "bg-purple-100 text-purple-700",
+            weekly: "bg-orange-100 text-orange-700",
+            monthly: "bg-teal-100 text-teal-700",
+        };
+        return colorMap[recurrence.toLowerCase()] || "bg-gray-100 text-gray-600";
     };
 
     const columns: Column[] = [
         {
-            key: "campaignName",
+            key: "id",
+            label: "ID",
+            render: (campaign: Campaign) => (
+                <div className="text-gray-400 text-sm font-mono">#{campaign.id}</div>
+            ),
+        },
+        {
+            key: "name",
             label: "Campaign Name",
-            render: (campaign: CampaignNotification) => (
-                <div className="text-gray-900">{campaign.campaignName}</div>
+            render: (campaign: Campaign) => (
+                <div className="font-semibold text-gray-900">{campaign.name}</div>
             ),
         },
         {
-            key: "app",
-            label: "App",
-            render: (campaign: CampaignNotification) => (
-                <div className="text-gray-600">{campaign.app}</div>
+            key: "recurrence",
+            label: "Recurrence",
+            render: (campaign: Campaign) => (
+                <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${getRecurrenceColor(campaign.recurrence)}`}>
+                    {campaign.recurrence}
+                </span>
             ),
         },
         {
-            key: "title",
-            label: "Title",
-            render: (campaign: CampaignNotification) => (
-                <div className="text-gray-900">{campaign.title}</div>
-            ),
-        },
-        {
-            key: "description",
-            label: "Description",
-            render: (campaign: CampaignNotification) => (
-                <div className="text-gray-600 text-sm">{campaign.description}</div>
-            ),
-        },
-        {
-            key: "image",
-            label: "Image",
-            render: (campaign: CampaignNotification) => (
-                campaign.image ? (
-                    <button
-                        className="px-3 py-1 border border-blue-600 text-blue-600 bg-white hover:bg-blue-50 rounded-md text-xs font-medium transition-colors"
-                        onClick={() => {
-                            setSelectedImage(campaign.image);
-                            setImageModalOpen(true);
-                        }}
-                    >
-                        View Image
-                    </button>
-                ) : (
-                    <span className="text-gray-400 text-xs">No Image</span>
-                )
-            ),
-        },
-        {
-            key: "redirection",
-            label: "Redirection",
-            render: (campaign: CampaignNotification) => (
-                <div className="text-gray-600 text-sm truncate max-w-xs">{campaign.redirection}</div>
+            key: "scheduledTime",
+            label: "Scheduled Time",
+            render: (campaign: Campaign) => (
+                <div className="text-gray-700 font-mono text-sm">{campaign.scheduledTime}</div>
             ),
         },
         {
             key: "startDate",
             label: "Start Date",
-            render: (campaign: CampaignNotification) => (
+            render: (campaign: Campaign) => (
                 <div className="text-gray-600 text-sm">{formatDate(campaign.startDate)}</div>
             ),
         },
         {
             key: "endDate",
             label: "End Date",
-            render: (campaign: CampaignNotification) => (
+            render: (campaign: Campaign) => (
                 <div className="text-gray-600 text-sm">{formatDate(campaign.endDate)}</div>
             ),
         },
         {
-            key: "sendTime",
-            label: "Send Time",
-            render: (campaign: CampaignNotification) => (
-                <div className="text-gray-600 text-sm">{campaign.sendTime}</div>
-            ),
-        },
-        {
-            key: "recurrenceType",
-            label: "Recurrence Type",
-            render: (campaign: CampaignNotification) => (
-                <div className="text-gray-600 capitalize">{campaign.recurrenceType}</div>
-            ),
-        },
-        {
-            key: "weekDays",
-            label: "Weekdays",
-            render: (campaign: CampaignNotification) => (
-                <div className="text-gray-600 text-sm">
-                    {campaign.weekDays && campaign.weekDays.length > 0 ? campaign.weekDays.join(", ") : "-"}
-                </div>
-            ),
-        },
-        {
-            key: "isActive",
-            label: "Active",
-            render: (campaign: CampaignNotification) => (
-                <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${campaign.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                        }`}
-                >
-                    {campaign.isActive ? "Active" : "Inactive"}
+            key: "status",
+            label: "Status",
+            render: (campaign: Campaign) => (
+                <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(campaign.status)}`}>
+                    {campaign.status}
                 </span>
             ),
         },
         {
             key: "createdAt",
             label: "Created At",
-            render: (campaign: CampaignNotification) => (
+            render: (campaign: Campaign) => (
                 <div className="text-gray-600 text-sm">{formatDate(campaign.createdAt)}</div>
-            ),
-        },
-        {
-            key: "errorMessage",
-            label: "Error Message",
-            render: (campaign: CampaignNotification) => (
-                <div className="text-red-600 text-sm">{campaign.errorMessage || "N/A"}</div>
             ),
         },
     ];
 
-    const onPageChange = (newPage: number) => {
-        setPage(newPage);
-    };
-
-    // Export handler (dummy for now)
-    const handleExport = () => {
-        // Export functionality will be integrated later
-        console.log("Export button clicked");
-    };
-
     return (
         <div>
-            {/* Filter Section */}
-            <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-100 transition-transform transform hover:scale-[1.01] hover:shadow-lg">
-                <div className="flex flex-wrap gap-4">
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="campaignNameFilter" className="block mb-2 text-sm font-medium text-gray-700">
-                            Campaign Name
-                        </label>
-                        <input
-                            id="campaignNameFilter"
-                            type="text"
-                            title="Filter by campaign name"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            placeholder="Filter by campaign name..."
-                            value={campaignNameFilter}
-                            onChange={(e) => setCampaignNameFilter(e.target.value)}
-                        />
-                    </div>
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="titleFilter" className="block mb-2 text-sm font-medium text-gray-700">
-                            Title
-                        </label>
-                        <input
-                            id="titleFilter"
-                            type="text"
-                            title="Filter by title"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            placeholder="Filter by title..."
-                            value={titleFilter}
-                            onChange={(e) => setTitleFilter(e.target.value)}
-                        />
-                    </div>
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="recurrenceTypeFilter" className="block mb-2 text-sm font-medium text-gray-700">
-                            Recurrence Type
-                        </label>
-                        <select
-                            id="recurrenceTypeFilter"
-                            title="Filter by recurrence type"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            value={recurrenceTypeFilter}
-                            onChange={(e) => setRecurrenceTypeFilter(e.target.value)}
-                        >
-                            <option value="">All Types</option>
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly">Monthly</option>
-                        </select>
-                    </div>
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="fromDateFilter" className="block mb-2 text-sm font-medium text-gray-700">
-                            From Date
-                        </label>
-                        <input
-                            id="fromDateFilter"
-                            type="date"
-                            title="Filter by start date"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            value={fromDateFilter}
-                            onChange={(e) => setFromDateFilter(e.target.value)}
-                        />
-                    </div>
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="toDateFilter" className="block mb-2 text-sm font-medium text-gray-700">
-                            To Date
-                        </label>
-                        <input
-                            id="toDateFilter"
-                            type="date"
-                            title="Filter by end date"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            value={toDateFilter}
-                            onChange={(e) => setToDateFilter(e.target.value)}
-                        />
+            {/* Table */}
+            {loading ? (
+                <div className="flex justify-center items-center py-16">
+                    <div className="flex items-center gap-3 text-gray-500">
+                        <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                        </svg>
+                        Loading campaigns...
                     </div>
                 </div>
-            </div>
-
-            {/* Export Button */}
-            <div className="flex justify-end mb-6">
-                <button
-                    className="flex items-center gap-2 px-4 py-2 border border-green-600 text-green-700 bg-white hover:bg-green-50 rounded-lg text-sm font-medium transition-all active:scale-95 shadow-sm"
-                    onClick={handleExport}
-                    title="Export to Excel"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 12l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3" />
-                    </svg>
-                    Export
-                </button>
-            </div>
-
-            {/* Table */}
-            <CustomTable
-                columns={columns}
-                data={filteredCampaigns}
-                pageSize={pageSize}
-                totalRows={filteredCampaigns.length}
-                currentPage={page}
-                onPageChange={onPageChange}
-            />
-
-            {/* View Image Modal */}
-            <ViewImageModal
-                isOpen={imageModalOpen}
-                onClose={() => setImageModalOpen(false)}
-                imageUrl={selectedImage}
-            />
+            ) : error ? (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center text-red-600">{error}</div>
+            ) : (
+                <CustomTable
+                    columns={columns}
+                    data={campaigns.slice((page - 1) * pageSize, page * pageSize)}
+                    pageSize={pageSize}
+                    totalRows={campaigns.length}
+                    currentPage={page}
+                    onPageChange={setPage}
+                />
+            )}
         </div>
     );
 };
