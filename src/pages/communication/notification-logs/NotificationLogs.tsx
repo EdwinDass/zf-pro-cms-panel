@@ -1,27 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import CustomTable, { Column } from "../../../components/CustomTable";
-import ViewImageModal from "../components/ViewImageModal";
+import { getNotificationLogs } from "../../../services/ApiService";
 
 interface NotificationLog {
     id: number;
-    userName: string;
-    userMobile: string;
-    userRole: string;
-    country: string;
-    app: string;
-    notificationType: string;
-    title: string;
-    description: string;
-    image: string | null;
-    redirection: string;
-    scheduledTime: string;
-    sentAt: string | null;
-    deliveredAt: string | null;
-    readAt: string | null;
-    clickCount: number;
-    status: "Send" | "Failed" | "Read";
+    notificationId: number;
+    userId: number;
+    status: string;
+    failureReason: string | null;
+    scheduledAt: string | null;
+    processedAt: string | null;
     createdAt: string;
-    error: string | null;
 }
 
 interface NotificationLogsProps {
@@ -29,139 +18,38 @@ interface NotificationLogsProps {
 }
 
 const NotificationLogs: React.FC<NotificationLogsProps> = ({ notificationId }) => {
-    const [userNameFilter, setUserNameFilter] = useState<string>("");
-    const [userMobileFilter, setUserMobileFilter] = useState<string>("");
-    const [statusFilter, setStatusFilter] = useState<string>("");
-    const [page, setPage] = useState<number>(1);
+    const [logs, setLogs] = useState<NotificationLog[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    const [imageModalOpen, setImageModalOpen] = useState<boolean>(false);
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState<number>(1);
     const pageSize = 10;
 
-    // Dummy data for notification logs
-    const dummyLogs: NotificationLog[] = [
-        {
-            id: 1,
-            userName: "John Doe",
-            userMobile: "+1-555-0101",
-            userRole: "Admin",
-            country: "United States",
-            app: "iOS",
-            notificationType: "Campaign",
-            title: "Special Offer",
-            description: "Get 20% off on all products this week",
-            image: "https://via.placeholder.com/150",
-            redirection: "/products",
-            scheduledTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-            sentAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            deliveredAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            readAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-            clickCount: 2,
-            status: "Read",
-            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-            error: null,
-        },
-        {
-            id: 2,
-            userName: "Jane Smith",
-            userMobile: "+1-555-0102",
-            userRole: "Manager",
-            country: "Canada",
-            app: "Android",
-            notificationType: "Manual",
-            title: "System Update",
-            description: "New features have been added",
-            image: null,
-            redirection: "/update-logs",
-            scheduledTime: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            sentAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-            deliveredAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-            readAt: null,
-            clickCount: 0,
-            status: "Send",
-            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            error: null,
-        },
-        {
-            id: 3,
-            userName: "Alice Johnson",
-            userMobile: "+1-555-0103",
-            userRole: "Agent",
-            country: "United Kingdom",
-            app: "Web",
-            notificationType: "Scheduled",
-            title: "Account Alert",
-            description: "Unusual activity detected",
-            image: "https://via.placeholder.com/150",
-            redirection: "/security",
-            scheduledTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-            sentAt: null,
-            deliveredAt: null,
-            readAt: null,
-            clickCount: 0,
-            status: "Failed",
-            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-            error: "Network timeout",
-        },
-        {
-            id: 4,
-            userName: "Bob Wilson",
-            userMobile: "+1-555-0104",
-            userRole: "User",
-            country: "Australia",
-            app: "iOS",
-            notificationType: "Campaign",
-            title: "Bonus Points",
-            description: "You have earned 500 bonus points",
-            image: "https://via.placeholder.com/150",
-            redirection: "/rewards",
-            scheduledTime: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-            sentAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-            deliveredAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-            readAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-            clickCount: 1,
-            status: "Read",
-            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-            error: null,
-        },
-        {
-            id: 5,
-            userName: "Carol Davis",
-            userMobile: "+1-555-0105",
-            userRole: "Manager",
-            country: "Germany",
-            app: "Android",
-            notificationType: "Manual",
-            title: "Event Available",
-            description: "Join our upcoming webinar",
-            image: "https://via.placeholder.com/150",
-            redirection: "/events",
-            scheduledTime: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-            sentAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-            deliveredAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-            readAt: null,
-            clickCount: 0,
-            status: "Send",
-            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-            error: null,
-        },
-    ];
+    const fetchLogs = useCallback(async () => {
+        if (!notificationId) return;
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await getNotificationLogs(notificationId);
+            if (res && res.success && Array.isArray(res.data)) {
+                setLogs(res.data);
+            } else {
+                setError("Failed to load logs.");
+            }
+        } catch (err) {
+            console.error("Failed to fetch notification logs:", err);
+            setError("An error occurred while fetching logs.");
+        } finally {
+            setLoading(false);
+        }
+    }, [notificationId]);
 
-    const [logs, setLogs] = useState<NotificationLog[]>(dummyLogs);
-    const [totalCount, setTotalCount] = useState<number>(dummyLogs.length);
-
-    // Filtered logs with status filter
-    const filteredLogs = logs.filter((log) => {
-        const matchUserName = log.userName.toLowerCase().includes(userNameFilter.toLowerCase());
-        const matchUserMobile = log.userMobile.toLowerCase().includes(userMobileFilter.toLowerCase());
-        const matchStatus = !statusFilter || log.status.toLowerCase() === statusFilter.toLowerCase();
-        return matchUserName && matchUserMobile && matchStatus;
-    });
+    useEffect(() => {
+        fetchLogs();
+    }, [fetchLogs]);
 
     const formatDate = (dateString: string | null): string => {
         if (!dateString) return "N/A";
-        const date = new Date(dateString);
-        return date.toLocaleDateString("en-US", {
+        return new Date(dateString).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
             year: "numeric",
@@ -172,129 +60,26 @@ const NotificationLogs: React.FC<NotificationLogsProps> = ({ notificationId }) =
 
     const getStatusColor = (status: string): string => {
         const colorMap: Record<string, string> = {
-            send: "bg-green-100 text-green-600",
+            sent: "bg-green-100 text-green-600",
             failed: "bg-red-100 text-red-600",
-            read: "bg-blue-100 text-blue-600",
+            pending: "bg-yellow-100 text-yellow-600",
         };
-        return colorMap[status.toLowerCase()];
+        return colorMap[status.toLowerCase()] || "bg-gray-100 text-gray-600";
     };
 
     const columns: Column[] = [
         {
-            key: "userName",
-            label: "User Name",
+            key: "id",
+            label: "Log ID",
             render: (log: NotificationLog) => (
-                <div className="font-medium text-gray-900">{log.userName}</div>
+                <div className="text-gray-500 text-sm font-mono">#{log.id}</div>
             ),
         },
         {
-            key: "userMobile",
-            label: "User Mobile",
+            key: "userId",
+            label: "User ID",
             render: (log: NotificationLog) => (
-                <div className="text-gray-600">{log.userMobile}</div>
-            ),
-        },
-        {
-            key: "userRole",
-            label: "User Role",
-            render: (log: NotificationLog) => (
-                <div className="text-gray-600">{log.userRole}</div>
-            ),
-        },
-        {
-            key: "country",
-            label: "Country",
-            render: (log: NotificationLog) => (
-                <div className="text-gray-600">{log.country}</div>
-            ),
-        },
-        {
-            key: "app",
-            label: "App",
-            render: (log: NotificationLog) => (
-                <div className="text-gray-600">{log.app}</div>
-            ),
-        },
-        {
-            key: "notificationType",
-            label: "Notification Type",
-            render: (log: NotificationLog) => (
-                <div className="text-gray-600">{log.notificationType}</div>
-            ),
-        },
-        {
-            key: "title",
-            label: "Title",
-            render: (log: NotificationLog) => (
-                <div className="font-medium text-gray-900">{log.title}</div>
-            ),
-        },
-        {
-            key: "description",
-            label: "Description",
-            render: (log: NotificationLog) => (
-                <div className="text-gray-600 text-sm">{log.description}</div>
-            ),
-        },
-        {
-            key: "image",
-            label: "Image",
-            render: (log: NotificationLog) => (
-                log.image ? (
-                    <button
-                        className="px-3 py-1 border border-blue-600 text-blue-600 bg-white hover:bg-blue-50 rounded-md text-xs font-medium transition-colors"
-                        onClick={() => {
-                            setSelectedImage(log.image);
-                            setImageModalOpen(true);
-                        }}
-                    >
-                        View Image
-                    </button>
-                ) : (
-                    <span className="text-gray-400 text-xs">No Image</span>
-                )
-            ),
-        },
-        {
-            key: "redirection",
-            label: "Redirection",
-            render: (log: NotificationLog) => (
-                <div className="text-gray-600">{log.redirection}</div>
-            ),
-        },
-        {
-            key: "scheduledTime",
-            label: "Scheduled Time",
-            render: (log: NotificationLog) => (
-                <div className="text-gray-600 text-sm">{formatDate(log.scheduledTime)}</div>
-            ),
-        },
-        {
-            key: "sentAt",
-            label: "Sent At",
-            render: (log: NotificationLog) => (
-                <div className="text-gray-600 text-sm">{formatDate(log.sentAt)}</div>
-            ),
-        },
-        {
-            key: "deliveredAt",
-            label: "Delivered At",
-            render: (log: NotificationLog) => (
-                <div className="text-gray-600 text-sm">{formatDate(log.deliveredAt)}</div>
-            ),
-        },
-        {
-            key: "readAt",
-            label: "Read At",
-            render: (log: NotificationLog) => (
-                <div className="text-gray-600 text-sm">{formatDate(log.readAt)}</div>
-            ),
-        },
-        {
-            key: "clickCount",
-            label: "Click Count",
-            render: (log: NotificationLog) => (
-                <div className="text-gray-600">{log.clickCount}</div>
+                <div className="font-medium text-gray-900">{log.userId}</div>
             ),
         },
         {
@@ -307,129 +92,94 @@ const NotificationLogs: React.FC<NotificationLogsProps> = ({ notificationId }) =
             ),
         },
         {
+            key: "failureReason",
+            label: "Failure Reason",
+            render: (log: NotificationLog) => (
+                <div className="text-red-500 text-sm">
+                    {log.failureReason || <span className="text-gray-400">—</span>}
+                </div>
+            ),
+        },
+        {
+            key: "processedAt",
+            label: "Processed At",
+            render: (log: NotificationLog) => (
+                <div className="text-gray-600 text-sm">{formatDate(log.processedAt)}</div>
+            ),
+        },
+        {
+            key: "scheduledAt",
+            label: "Scheduled At",
+            render: (log: NotificationLog) => (
+                <div className="text-gray-600 text-sm">{formatDate(log.scheduledAt)}</div>
+            ),
+        },
+        {
             key: "createdAt",
             label: "Created At",
             render: (log: NotificationLog) => (
                 <div className="text-gray-600 text-sm">{formatDate(log.createdAt)}</div>
             ),
         },
-        {
-            key: "error",
-            label: "Error",
-            render: (log: NotificationLog) => (
-                <div className="text-red-600 text-sm">{log.error || "N/A"}</div>
-            ),
-        },
     ];
-
-    const onPageChange = (newPage: number) => {
-        setPage(newPage);
-    };
 
     if (!notificationId) {
         return (
-            <div className="bg-white rounded-xl shadow p-6 border border-gray-100 text-center">
-                <p className="text-gray-600">Select a notification from history to view logs</p>
+            <div className="bg-white rounded-xl shadow p-12 border border-gray-100 text-center">
+                <div className="text-gray-400 mb-2">
+                    <svg className="w-12 h-12 mx-auto mb-4 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                </div>
+                <p className="text-gray-500 font-medium">Select a notification from history to view its logs</p>
             </div>
         );
     }
 
-    // Export handler (dummy for now)
-    const handleExport = () => {
-        // Export functionality will be integrated later
-        console.log("Export button clicked");
-    };
-
     return (
         <div>
-
-            {/* Filter Section */}
-            <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-100 transition-transform transform hover:scale-[1.01] hover:shadow-lg">
-                <div className="flex flex-wrap gap-4">
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="userNameFilter" className="block mb-2 text-sm font-medium text-gray-700">
-                            User Name
-                        </label>
-                        <input
-                            id="userNameFilter"
-                            type="text"
-                            title="Filter by user name"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            placeholder="Filter by user name..."
-                            value={userNameFilter}
-                            onChange={(e) => setUserNameFilter(e.target.value)}
-                        />
-                    </div>
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="userMobileFilter" className="block mb-2 text-sm font-medium text-gray-700">
-                            User Mobile
-                        </label>
-                        <input
-                            id="userMobileFilter"
-                            type="text"
-                            title="Filter by user mobile"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            placeholder="Filter by user mobile..."
-                            value={userMobileFilter}
-                            onChange={(e) => setUserMobileFilter(e.target.value)}
-                        />
-                    </div>
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="statusFilter" className="block mb-2 text-sm font-medium text-gray-700">
-                            Status
-                        </label>
-                        <select
-                            id="statusFilter"
-                            title="Filter by status"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                        >
-                            <option value="">All Statuses</option>
-                            <option value="Send">Send</option>
-                            <option value="Failed">Failed</option>
-                            <option value="Read">Read</option>
-                        </select>
-                    </div>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+                <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Notification Logs</h3>
+                    <p className="text-sm text-gray-500">Notification #{notificationId} · {logs.length} log entries</p>
                 </div>
-            </div>
-
-            {/* Export Button */}
-            <div className="flex justify-end mb-6">
                 <button
-                    className="flex items-center gap-2 px-4 py-2 border border-green-600 text-green-700 bg-white hover:bg-green-50 rounded-lg text-sm font-medium transition-all active:scale-95 shadow-sm"
-                    onClick={handleExport}
-                    title="Export to Excel"
+                    onClick={fetchLogs}
+                    className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 12l4.5 4.5m0 0l4.5-4.5m-4.5 4.5V3" />
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    Export
+                    Refresh
                 </button>
             </div>
 
             {/* Table */}
             {loading ? (
-                <div className="flex justify-center items-center py-8">
-                    <div className="text-gray-600">Loading notification logs...</div>
+                <div className="flex justify-center items-center py-16">
+                    <div className="flex items-center gap-3 text-gray-500">
+                        <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                        </svg>
+                        Loading notification logs...
+                    </div>
+                </div>
+            ) : error ? (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center text-red-600">
+                    {error}
                 </div>
             ) : (
                 <CustomTable
                     columns={columns}
-                    data={filteredLogs}
+                    data={logs.slice((page - 1) * pageSize, page * pageSize)}
                     pageSize={pageSize}
-                    totalRows={filteredLogs.length}
+                    totalRows={logs.length}
                     currentPage={page}
-                    onPageChange={onPageChange}
+                    onPageChange={setPage}
                 />
             )}
-
-            {/* View Image Modal */}
-            <ViewImageModal
-                isOpen={imageModalOpen}
-                onClose={() => setImageModalOpen(false)}
-                imageUrl={selectedImage}
-            />
         </div>
     );
 };

@@ -180,7 +180,6 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
                 <div className="text-gray-600">{formatDate(notification.createdAt)}</div>
             ),
         },
-        /* View Logs button — commented out for now
         {
             key: "actions",
             label: "Actions",
@@ -193,7 +192,6 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
                 </button>
             ),
         },
-        */
     ];
 
     const onPageChange = (newPage: number) => {

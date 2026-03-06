@@ -614,6 +614,11 @@ export const broadcastNotification = async (payload: {
     }).then((res) => res?.data);
 };
 
+export const getNotificationLogs = async (notificationId: number) => {
+    return api.get(`notifications/${notificationId}/logs`).then((res) => res?.data);
+};
+
+
 
 
 
