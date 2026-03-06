@@ -574,5 +574,46 @@ export const getNotificationUserCount = async (payload: {
     return api.post(`notifications/users/count`, payload).then((res) => res?.data);
 };
 
+export const broadcastNotification = async (payload: {
+    title: string;
+    body: string;
+    file?: File | null;
+    redirectionLink?: string;
+    roleFilter?: string;       // comma-separated IDs e.g. "1,2"
+    stateFilter?: string;      // comma-separated state names
+    districtFilter?: string;
+    cityFilter?: string;
+    pincodeFilter?: string;    // comma-separated pincodes
+    blockStatusFilter?: string;
+    scheduledAt?: string;      // ISO string
+    type?: string;
+    startDate?: string;
+    endDate?: string;
+    scheduledTime?: string;
+    recurrence?: string;
+}) => {
+    const form = new FormData();
+    form.append('title', payload.title);
+    form.append('body', payload.body);
+    if (payload.file) form.append('file', payload.file);
+    if (payload.redirectionLink) form.append('redirectionLink', payload.redirectionLink);
+    if (payload.roleFilter) form.append('roleFilter', payload.roleFilter);
+    if (payload.stateFilter) form.append('stateFilter', payload.stateFilter);
+    if (payload.districtFilter) form.append('districtFilter', payload.districtFilter);
+    if (payload.cityFilter) form.append('cityFilter', payload.cityFilter);
+    if (payload.pincodeFilter) form.append('pincodeFilter', payload.pincodeFilter);
+    if (payload.blockStatusFilter) form.append('blockStatusFilter', payload.blockStatusFilter);
+    if (payload.scheduledAt) form.append('scheduledAt', payload.scheduledAt);
+    if (payload.type) form.append('type', payload.type);
+    if (payload.startDate) form.append('startDate', payload.startDate);
+    if (payload.endDate) form.append('endDate', payload.endDate);
+    if (payload.scheduledTime) form.append('scheduledTime', payload.scheduledTime);
+    if (payload.recurrence) form.append('recurrence', payload.recurrence);
+    return api.post('notifications/broadcast', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((res) => res?.data);
+};
+
+
 
 

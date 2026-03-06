@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import { getNotificationRoles, getNotificationStates, getNotificationDistricts, getNotificationCities, getNotificationPincodes, getNotificationBlockStatuses, getNotificationUserCount } from "../../../services/ApiService";
+import { getNotificationRoles, getNotificationStates, getNotificationDistricts, getNotificationCities, getNotificationPincodes, getNotificationBlockStatuses, getNotificationUserCount, broadcastNotification } from "../../../services/ApiService";
 import MultiSelectDropdown from "../../../components/ui/MultiSelectDropdown";
 
 interface CreateNotificationModalProps {
@@ -122,6 +122,10 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
     const [manualUserCount, setManualUserCount] = useState<number | null>(null);
     const [scheduledUserCount, setScheduledUserCount] = useState<number | null>(null);
     const [campaignUserCount, setCampaignUserCount] = useState<number | null>(null);
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
+    const [submitSuccess, setSubmitSuccess] = useState(false);
 
 
     useEffect(() => {
@@ -382,15 +386,78 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         }
     };
 
-    const handleCreate = () => {
-        if (activeTab === "manual") {
-            console.log("Creating manual notification:", manualForm);
-        } else if (activeTab === "scheduled") {
-            console.log("Creating scheduled notification:", scheduledForm);
-        } else {
-            console.log("Creating campaign notification:", campaignForm);
+    const handleCreate = async () => {
+        setSubmitError(null);
+        setIsSubmitting(true);
+        try {
+            let res;
+            if (activeTab === "manual") {
+                res = await broadcastNotification({
+                    title: manualForm.title,
+                    body: manualForm.description,
+                    file: manualForm.image,
+                    redirectionLink: manualForm.redirectionLink || undefined,
+                    roleFilter: manualForm.roleIds.length ? manualForm.roleIds.join(',') : undefined,
+                    stateFilter: manualForm.stateNames.length ? manualForm.stateNames.join(',') : undefined,
+                    districtFilter: manualForm.districtNames.length ? manualForm.districtNames.join(',') : undefined,
+                    cityFilter: manualForm.cityNames.length ? manualForm.cityNames.join(',') : undefined,
+                    pincodeFilter: manualForm.pincodes.length ? manualForm.pincodes.join(',') : undefined,
+                    blockStatusFilter: manualForm.blockStatuses.length ? manualForm.blockStatuses.join(',') : undefined,
+                    type: 'REGULAR',
+                });
+            } else if (activeTab === "scheduled") {
+                // Build ISO scheduledAt from startDate + setTime
+                const scheduledAt = scheduledForm.startDate && scheduledForm.setTime
+                    ? new Date(`${scheduledForm.startDate}T${scheduledForm.setTime}`).toISOString()
+                    : undefined;
+                res = await broadcastNotification({
+                    title: scheduledForm.title,
+                    body: scheduledForm.description,
+                    file: scheduledForm.image,
+                    redirectionLink: scheduledForm.redirectionLink || undefined,
+                    roleFilter: scheduledForm.roleIds.length ? scheduledForm.roleIds.join(',') : undefined,
+                    stateFilter: scheduledForm.stateNames.length ? scheduledForm.stateNames.join(',') : undefined,
+                    districtFilter: scheduledForm.districtNames.length ? scheduledForm.districtNames.join(',') : undefined,
+                    cityFilter: scheduledForm.cityNames.length ? scheduledForm.cityNames.join(',') : undefined,
+                    pincodeFilter: scheduledForm.pincodes.length ? scheduledForm.pincodes.join(',') : undefined,
+                    blockStatusFilter: scheduledForm.blockStatuses.length ? scheduledForm.blockStatuses.join(',') : undefined,
+                    scheduledAt,
+                    type: 'SCHEDULED',
+                });
+            } else {
+                res = await broadcastNotification({
+                    title: campaignForm.title,
+                    body: campaignForm.description,
+                    file: campaignForm.image,
+                    redirectionLink: campaignForm.redirectionLink || undefined,
+                    roleFilter: campaignForm.roleIds.length ? campaignForm.roleIds.join(',') : undefined,
+                    stateFilter: campaignForm.stateNames.length ? campaignForm.stateNames.join(',') : undefined,
+                    districtFilter: campaignForm.districtNames.length ? campaignForm.districtNames.join(',') : undefined,
+                    cityFilter: campaignForm.cityNames.length ? campaignForm.cityNames.join(',') : undefined,
+                    pincodeFilter: campaignForm.pincodes.length ? campaignForm.pincodes.join(',') : undefined,
+                    blockStatusFilter: campaignForm.blockStatuses.length ? campaignForm.blockStatuses.join(',') : undefined,
+                    startDate: campaignForm.startDate || undefined,
+                    endDate: campaignForm.endDate || undefined,
+                    scheduledTime: campaignForm.setTime || undefined,
+                    recurrence: campaignForm.recurrence || undefined,
+                    type: 'CAMPAIGN',
+                });
+            }
+
+            if (res && res.success) {
+                setSubmitSuccess(true);
+                setTimeout(() => {
+                    setSubmitSuccess(false);
+                    onClose();
+                }, 1500);
+            } else {
+                setSubmitError(res?.message || 'Failed to create notification. Please try again.');
+            }
+        } catch (err: any) {
+            setSubmitError(err?.response?.data?.message || 'An unexpected error occurred. Please try again.');
+        } finally {
+            setIsSubmitting(false);
         }
-        onClose();
     };
 
     if (!isOpen) return null;
@@ -1163,8 +1230,8 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
 
                 {/* Footer */}
                 <div className="flex items-center justify-between gap-4 p-6 border-t border-gray-200 bg-gray-50 sticky bottom-0">
-                    {/* User Count Badge */}
-                    <div className="flex items-center gap-2">
+                    {/* Left — user count + feedback */}
+                    <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
                             <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
                             <span className="text-sm font-medium text-blue-700">
@@ -1175,21 +1242,54 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                 })()}
                             </span>
                         </div>
+                        {submitError && (
+                            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-2 text-sm text-red-600">
+                                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M4.93 4.93l14.14 14.14M12 3a9 9 0 100 18A9 9 0 0012 3z" />
+                                </svg>
+                                {submitError}
+                            </div>
+                        )}
+                        {submitSuccess && (
+                            <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-2 text-sm text-green-700 font-medium">
+                                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Notification queued successfully!
+                            </div>
+                        )}
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex gap-4 flex-shrink-0">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors"
+                            disabled={isSubmitting}
+                            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Cancel
                         </button>
                         <button
                             type="button"
                             onClick={handleCreate}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                            disabled={isSubmitting || submitSuccess}
+                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 min-w-[100px] justify-center"
                         >
-                            Create
+                            {isSubmitting ? (
+                                <>
+                                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                    </svg>
+                                    Sending...
+                                </>
+                            ) : submitSuccess ? (
+                                <>
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Sent!
+                                </>
+                            ) : 'Create'}
                         </button>
                     </div>
                 </div>
