@@ -6,6 +6,7 @@ import { getCampaignNotifications } from "../../../services/ApiService";
 interface CampaignNotificationsListProps {
     campaignId: number;
     campaignName: string;
+    onSelectNotification: (id: number) => void;
 }
 
 interface CampaignNotification {
@@ -23,7 +24,7 @@ interface CampaignNotification {
     createdAt: string;
 }
 
-const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ campaignId, campaignName }) => {
+const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ campaignId, campaignName, onSelectNotification }) => {
     const [notifications, setNotifications] = useState<CampaignNotification[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -169,6 +170,18 @@ const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ c
             label: "Created At",
             render: (n: CampaignNotification) => (
                 <div className="text-gray-600 text-sm">{formatDate(n.createdAt)}</div>
+            ),
+        },
+        {
+            key: "actions",
+            label: "Actions",
+            render: (n: CampaignNotification) => (
+                <button
+                    className="px-3 py-1 border border-blue-600 text-blue-600 bg-white hover:bg-blue-50 rounded-md text-xs font-medium transition-colors"
+                    onClick={() => onSelectNotification(n.id)}
+                >
+                    View Logs
+                </button>
             ),
         },
     ];

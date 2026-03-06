@@ -16,6 +16,7 @@ const Communication = () => {
     const [activeTab, setActiveTab] = useState("notification-history");
     const [selectedNotificationId, setSelectedNotificationId] = useState<number | null>(null);
     const [selectedCampaign, setSelectedCampaign] = useState<{ id: number; name: string } | null>(null);
+    const [selectedCampaignNotificationId, setSelectedCampaignNotificationId] = useState<number | null>(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -84,6 +85,7 @@ const Communication = () => {
                                     setActiveTab(tab.id);
                                     setSelectedNotificationId(null);
                                     setSelectedCampaign(null);
+                                    setSelectedCampaignNotificationId(null);
                                 }}
                                 className={`
                                     pb-2
@@ -127,7 +129,22 @@ const Communication = () => {
 
                     {/* Campaign Notifications tab */}
                     {activeTab === "campaign-notifications" && (
-                        isInCampaignNotifications && selectedCampaign ? (
+                        selectedCampaignNotificationId ? (
+                            // Level 3: Notification logs for a specific campaign notification
+                            <div>
+                                <button
+                                    onClick={() => setSelectedCampaignNotificationId(null)}
+                                    className="mb-4 flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-medium transition-colors"
+                                >
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                    </svg>
+                                    Back to {selectedCampaign?.name} Notifications
+                                </button>
+                                <NotificationLogs notificationId={selectedCampaignNotificationId} />
+                            </div>
+                        ) : isInCampaignNotifications && selectedCampaign ? (
+                            // Level 2: Notifications for a specific campaign
                             <div>
                                 <button
                                     onClick={() => setSelectedCampaign(null)}
@@ -141,9 +158,11 @@ const Communication = () => {
                                 <CampaignNotificationsList
                                     campaignId={selectedCampaign.id}
                                     campaignName={selectedCampaign.name}
+                                    onSelectNotification={(id) => setSelectedCampaignNotificationId(id)}
                                 />
                             </div>
                         ) : (
+                            // Level 1: Campaign list
                             <CampaignNotifications
                                 onSelectCampaign={(id, name) => setSelectedCampaign({ id, name })}
                             />
