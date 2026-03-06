@@ -547,6 +547,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         Manual
                                     </div>
                                 </div>
+                                {/* User Mobile - commented out for now
                                 <div>
                                     <label htmlFor="manualMobile" className="block text-sm font-medium text-gray-700 mb-2">
                                         User Mobile
@@ -565,6 +566,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         <option value="+1-555-0102">+1-555-0102</option>
                                     </select>
                                 </div>
+                                */}
                             </div>
 
                             <div className="grid grid-cols-2 gap-6">
@@ -766,6 +768,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         Scheduled
                                     </div>
                                 </div>
+                                {/* User Mobile - commented out for now
                                 <div>
                                     <label htmlFor="scheduledMobile" className="block text-sm font-medium text-gray-700 mb-2">
                                         User Mobile
@@ -784,6 +787,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         <option value="+1-555-0102">+1-555-0102</option>
                                     </select>
                                 </div>
+                                */}
                             </div>
 
                             <div className="grid grid-cols-2 gap-6">
@@ -1069,6 +1073,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         Campaign
                                     </div>
                                 </div>
+                                {/* User Mobile - commented out for now
                                 <div>
                                     <label htmlFor="campaignMobile" className="block text-sm font-medium text-gray-700 mb-2">
                                         User Mobile
@@ -1087,6 +1092,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         <option value="+1-555-0102">+1-555-0102</option>
                                     </select>
                                 </div>
+                                */}
                             </div>
 
                             <div className="grid grid-cols-2 gap-6">
