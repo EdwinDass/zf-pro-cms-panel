@@ -618,6 +618,10 @@ export const getNotificationLogs = async (notificationId: number, page: number =
     return api.get(`notifications/${notificationId}/logs`, { params: { page, limit } }).then((res) => res?.data);
 };
 
+export const getNotificationMediaUrl = async (notificationId: number) => {
+    return api.get(`notifications/${notificationId}/media-url`).then((res) => res?.data);
+};
+
 export const getCampaigns = async (
     page: number = 1,
     limit: number = 10,

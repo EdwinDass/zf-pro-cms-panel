@@ -48,6 +48,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
     const [loading, setLoading] = useState<boolean>(false);
     const [imageModalOpen, setImageModalOpen] = useState<boolean>(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
     const pageSize = 10;
 
     const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -183,6 +184,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
                         className="px-3 py-1 border border-blue-600 text-blue-600 bg-white hover:bg-blue-50 rounded-md text-xs font-medium transition-colors"
                         onClick={() => {
                             setSelectedImage(notification.image);
+                            setSelectedImageId(notification.id);
                             setImageModalOpen(true);
                         }}
                     >
@@ -393,8 +395,9 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
             {/* View Image Modal */}
             <ViewImageModal
                 isOpen={imageModalOpen}
-                onClose={() => setImageModalOpen(false)}
+                onClose={() => { setImageModalOpen(false); setSelectedImageId(null); }}
                 imageUrl={selectedImage}
+                notificationId={selectedImageId}
             />
         </div>
     );

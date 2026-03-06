@@ -41,6 +41,7 @@ const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ c
     const [totalCount, setTotalCount] = useState<number>(0);
     const [imageModalOpen, setImageModalOpen] = useState<boolean>(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
     const pageSize = 10;
 
     // Filters
@@ -137,7 +138,7 @@ const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ c
                 n.imageUrl ? (
                     <button
                         className="px-3 py-1 border border-blue-600 text-blue-600 bg-white hover:bg-blue-50 rounded-md text-xs font-medium transition-colors"
-                        onClick={() => { setSelectedImage(n.imageUrl); setImageModalOpen(true); }}
+                        onClick={() => { setSelectedImage(n.imageUrl); setSelectedImageId(n.id); setImageModalOpen(true); }}
                     >
                         View Image
                     </button>
@@ -315,8 +316,9 @@ const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ c
 
             <ViewImageModal
                 isOpen={imageModalOpen}
-                onClose={() => setImageModalOpen(false)}
+                onClose={() => { setImageModalOpen(false); setSelectedImageId(null); }}
                 imageUrl={selectedImage}
+                notificationId={selectedImageId}
             />
         </div>
     );
