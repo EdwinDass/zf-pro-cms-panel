@@ -135,6 +135,33 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
                     <div className="absolute top-[-6px] left-6 w-3 h-3 bg-white border-l border-t border-gray-300 transform rotate-45"></div>
 
                     <div className="relative z-10 bg-white rounded-t-md">
+                        {/* Search bar inside dropdown */}
+                        <div className="px-3 pt-3 pb-2 border-b border-gray-200">
+                            <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-md px-3 py-1.5">
+                                <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                <input
+                                    type="text"
+                                    className="flex-1 bg-transparent text-sm text-gray-700 outline-none placeholder-gray-400"
+                                    placeholder={placeholder}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onClick={(e) => e.stopPropagation()}
+                                    autoFocus
+                                />
+                                {searchTerm && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setSearchTerm("")}
+                                        className="text-gray-400 hover:text-gray-600 flex items-center"
+                                    >
+                                        <CloseIcon style={{ fontSize: '14px' }} />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
                         {/* Select All */}
                         <label className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 border-b border-gray-200">
                             <input
