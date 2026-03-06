@@ -618,12 +618,45 @@ export const getNotificationLogs = async (notificationId: number, page: number =
     return api.get(`notifications/${notificationId}/logs`, { params: { page, limit } }).then((res) => res?.data);
 };
 
-export const getCampaigns = async (page: number = 1, limit: number = 10) => {
-    return api.get('notifications/campaigns', { params: { page, limit } }).then((res) => res?.data);
+export const getCampaigns = async (
+    page: number = 1,
+    limit: number = 10,
+    filters: {
+        status?: string;
+        recurrence?: string;
+        search?: string;
+        startFrom?: string;
+        startTo?: string;
+        endFrom?: string;
+        endTo?: string;
+    } = {}
+) => {
+    const params: Record<string, any> = { page, limit };
+    if (filters.status) params.status = filters.status;
+    if (filters.recurrence) params.recurrence = filters.recurrence;
+    if (filters.search) params.search = filters.search;
+    if (filters.startFrom) params.startFrom = filters.startFrom;
+    if (filters.startTo) params.startTo = filters.startTo;
+    if (filters.endFrom) params.endFrom = filters.endFrom;
+    if (filters.endTo) params.endTo = filters.endTo;
+    return api.get('notifications/campaigns', { params }).then((res) => res?.data);
 };
 
-export const getCampaignNotifications = async (campaignId: number, page: number = 1, limit: number = 10) => {
-    return api.get(`notifications/campaigns/${campaignId}/notifications`, { params: { page, limit } }).then((res) => res?.data);
+export const getCampaignNotifications = async (
+    campaignId: number,
+    page: number = 1,
+    limit: number = 10,
+    filters: {
+        status?: string;
+        scheduledFrom?: string;
+        scheduledTo?: string;
+    } = {}
+) => {
+    const params: Record<string, any> = { page, limit };
+    if (filters.status) params.status = filters.status;
+    if (filters.scheduledFrom) params.scheduledFrom = filters.scheduledFrom;
+    if (filters.scheduledTo) params.scheduledTo = filters.scheduledTo;
+    return api.get(`notifications/campaigns/${campaignId}/notifications`, { params }).then((res) => res?.data);
 };
 
 

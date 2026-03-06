@@ -24,6 +24,15 @@ interface CampaignNotification {
     createdAt: string;
 }
 
+const STATUS_OPTIONS = [
+    { value: "", label: "All Statuses" },
+    { value: "PENDING", label: "Pending" },
+    { value: "PROCESSING", label: "Processing" },
+    { value: "FANNED_OUT", label: "Fanned Out" },
+    { value: "COMPLETED", label: "Completed" },
+    { value: "FAILED", label: "Failed" },
+];
+
 const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ campaignId, campaignName, onSelectNotification }) => {
     const [notifications, setNotifications] = useState<CampaignNotification[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -34,11 +43,20 @@ const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ c
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const pageSize = 10;
 
+    // Filters
+    const [statusFilter, setStatusFilter] = useState<string>("");
+    const [scheduledFromFilter, setScheduledFromFilter] = useState<string>("");
+    const [scheduledToFilter, setScheduledToFilter] = useState<string>("");
+
     const fetchNotifications = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const res = await getCampaignNotifications(campaignId, page, pageSize);
+            const res = await getCampaignNotifications(campaignId, page, pageSize, {
+                status: statusFilter || undefined,
+                scheduledFrom: scheduledFromFilter || undefined,
+                scheduledTo: scheduledToFilter || undefined,
+            });
             if (res && res.success && Array.isArray(res.data)) {
                 setNotifications(res.data);
                 setTotalCount(res.total || 0);
@@ -51,11 +69,22 @@ const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ c
         } finally {
             setLoading(false);
         }
-    }, [campaignId, page, pageSize]);
+    }, [campaignId, page, pageSize, statusFilter, scheduledFromFilter, scheduledToFilter]);
 
     useEffect(() => {
         fetchNotifications();
     }, [fetchNotifications]);
+
+    const resetPage = () => setPage(1);
+
+    const handleClearFilters = () => {
+        setStatusFilter("");
+        setScheduledFromFilter("");
+        setScheduledToFilter("");
+        setPage(1);
+    };
+
+    const hasActiveFilters = statusFilter || scheduledFromFilter || scheduledToFilter;
 
     const formatDate = (dateString: string | null): string => {
         if (!dateString) return "N/A";
@@ -70,10 +99,11 @@ const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ c
 
     const getStatusColor = (status: string): string => {
         const colorMap: Record<string, string> = {
-            sent: "bg-green-100 text-green-600",
-            failed: "bg-red-100 text-red-600",
             completed: "bg-green-100 text-green-600",
+            failed: "bg-red-100 text-red-600",
             pending: "bg-yellow-100 text-yellow-600",
+            processing: "bg-blue-100 text-blue-600",
+            fanned_out: "bg-purple-100 text-purple-600",
         };
         return colorMap[status.toLowerCase()] || "bg-gray-100 text-gray-600";
     };
@@ -191,10 +221,72 @@ const CampaignNotificationsList: React.FC<CampaignNotificationsListProps> = ({ c
     return (
         <div>
             {/* Sub-page header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-5">
                 <div>
                     <h3 className="text-lg font-semibold text-gray-900">Notifications — {campaignName}</h3>
                     <p className="text-sm text-gray-500">Campaign #{campaignId} · {totalCount} notification{totalCount !== 1 ? 's' : ''}</p>
+                </div>
+            </div>
+
+            {/* Filter Section */}
+            <div className="bg-white rounded-xl shadow-sm p-5 mb-5 border border-gray-100">
+                <div className="flex flex-wrap gap-3">
+                    {/* Status */}
+                    <div className="flex-1 min-w-[160px]">
+                        <label htmlFor="cnlStatus" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Status
+                        </label>
+                        <select
+                            id="cnlStatus"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            value={statusFilter}
+                            onChange={(e) => { setStatusFilter(e.target.value); resetPage(); }}
+                        >
+                            {STATUS_OPTIONS.map((o) => (
+                                <option key={o.value} value={o.value}>{o.label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Scheduled From */}
+                    <div className="flex-1 min-w-[160px]">
+                        <label htmlFor="cnlScheduledFrom" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Scheduled From
+                        </label>
+                        <input
+                            id="cnlScheduledFrom"
+                            type="date"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={scheduledFromFilter}
+                            onChange={(e) => { setScheduledFromFilter(e.target.value); resetPage(); }}
+                        />
+                    </div>
+
+                    {/* Scheduled To */}
+                    <div className="flex-1 min-w-[160px]">
+                        <label htmlFor="cnlScheduledTo" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Scheduled To
+                        </label>
+                        <input
+                            id="cnlScheduledTo"
+                            type="date"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={scheduledToFilter}
+                            onChange={(e) => { setScheduledToFilter(e.target.value); resetPage(); }}
+                        />
+                    </div>
+
+                    {/* Clear */}
+                    {hasActiveFilters && (
+                        <div className="flex items-end">
+                            <button
+                                onClick={handleClearFilters}
+                                className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 

@@ -17,6 +17,27 @@ interface CampaignNotificationsProps {
     onSelectCampaign: (id: number, name: string) => void;
 }
 
+const STATUS_OPTIONS = [
+    { value: "", label: "All Statuses" },
+    { value: "ACTIVE", label: "Active" },
+    { value: "COMPLETED", label: "Completed" },
+    { value: "CANCELLED", label: "Cancelled" },
+];
+
+const RECURRENCE_OPTIONS = [
+    { value: "", label: "All Recurrences" },
+    { value: "HOURLY", label: "Hourly" },
+    { value: "DAILY", label: "Daily" },
+    { value: "WEEKLY", label: "Weekly" },
+    { value: "MONDAY", label: "Monday" },
+    { value: "TUESDAY", label: "Tuesday" },
+    { value: "WEDNESDAY", label: "Wednesday" },
+    { value: "THURSDAY", label: "Thursday" },
+    { value: "FRIDAY", label: "Friday" },
+    { value: "SATURDAY", label: "Saturday" },
+    { value: "SUNDAY", label: "Sunday" },
+];
+
 const CampaignNotifications: React.FC<CampaignNotificationsProps> = ({ onSelectCampaign }) => {
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -25,11 +46,28 @@ const CampaignNotifications: React.FC<CampaignNotificationsProps> = ({ onSelectC
     const [totalCount, setTotalCount] = useState<number>(0);
     const pageSize = 10;
 
+    // Filters
+    const [searchFilter, setSearchFilter] = useState<string>("");
+    const [statusFilter, setStatusFilter] = useState<string>("");
+    const [recurrenceFilter, setRecurrenceFilter] = useState<string>("");
+    const [startFromFilter, setStartFromFilter] = useState<string>("");
+    const [startToFilter, setStartToFilter] = useState<string>("");
+    const [endFromFilter, setEndFromFilter] = useState<string>("");
+    const [endToFilter, setEndToFilter] = useState<string>("");
+
     const fetchCampaigns = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const res = await getCampaigns(page, pageSize);
+            const res = await getCampaigns(page, pageSize, {
+                status: statusFilter || undefined,
+                recurrence: recurrenceFilter || undefined,
+                search: searchFilter || undefined,
+                startFrom: startFromFilter || undefined,
+                startTo: startToFilter || undefined,
+                endFrom: endFromFilter || undefined,
+                endTo: endToFilter || undefined,
+            });
             if (res && res.success && Array.isArray(res.data)) {
                 setCampaigns(res.data);
                 setTotalCount(res.total || 0);
@@ -42,11 +80,26 @@ const CampaignNotifications: React.FC<CampaignNotificationsProps> = ({ onSelectC
         } finally {
             setLoading(false);
         }
-    }, [page, pageSize]);
+    }, [page, pageSize, searchFilter, statusFilter, recurrenceFilter, startFromFilter, startToFilter, endFromFilter, endToFilter]);
 
     useEffect(() => {
         fetchCampaigns();
     }, [fetchCampaigns]);
+
+    const resetPage = () => setPage(1);
+
+    const handleClearFilters = () => {
+        setSearchFilter("");
+        setStatusFilter("");
+        setRecurrenceFilter("");
+        setStartFromFilter("");
+        setStartToFilter("");
+        setEndFromFilter("");
+        setEndToFilter("");
+        setPage(1);
+    };
+
+    const hasActiveFilters = searchFilter || statusFilter || recurrenceFilter || startFromFilter || startToFilter || endFromFilter || endToFilter;
 
     const formatDate = (dateString: string | null): string => {
         if (!dateString) return "N/A";
@@ -60,18 +113,25 @@ const CampaignNotifications: React.FC<CampaignNotificationsProps> = ({ onSelectC
     const getStatusColor = (status: string): string => {
         const colorMap: Record<string, string> = {
             active: "bg-green-100 text-green-700",
-            inactive: "bg-gray-100 text-gray-600",
-            paused: "bg-yellow-100 text-yellow-700",
             completed: "bg-blue-100 text-blue-700",
+            cancelled: "bg-red-100 text-red-600",
+            inactive: "bg-gray-100 text-gray-600",
         };
         return colorMap[status.toLowerCase()] || "bg-gray-100 text-gray-600";
     };
 
     const getRecurrenceColor = (recurrence: string): string => {
         const colorMap: Record<string, string> = {
+            hourly: "bg-teal-100 text-teal-700",
             daily: "bg-purple-100 text-purple-700",
             weekly: "bg-orange-100 text-orange-700",
-            monthly: "bg-teal-100 text-teal-700",
+            monday: "bg-blue-100 text-blue-700",
+            tuesday: "bg-blue-100 text-blue-700",
+            wednesday: "bg-blue-100 text-blue-700",
+            thursday: "bg-blue-100 text-blue-700",
+            friday: "bg-blue-100 text-blue-700",
+            saturday: "bg-indigo-100 text-indigo-700",
+            sunday: "bg-indigo-100 text-indigo-700",
         };
         return colorMap[recurrence.toLowerCase()] || "bg-gray-100 text-gray-600";
     };
@@ -156,6 +216,128 @@ const CampaignNotifications: React.FC<CampaignNotificationsProps> = ({ onSelectC
 
     return (
         <div>
+            {/* Filter Section */}
+            <div className="bg-white rounded-xl shadow-sm p-5 mb-5 border border-gray-100">
+                <div className="flex flex-wrap gap-3">
+                    {/* Search */}
+                    <div className="flex-1 min-w-[200px]">
+                        <label htmlFor="campaignSearch" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Search
+                        </label>
+                        <input
+                            id="campaignSearch"
+                            type="text"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Search campaign name..."
+                            value={searchFilter}
+                            onChange={(e) => { setSearchFilter(e.target.value); resetPage(); }}
+                        />
+                    </div>
+
+                    {/* Status */}
+                    <div className="flex-1 min-w-[150px]">
+                        <label htmlFor="campaignStatus" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Status
+                        </label>
+                        <select
+                            id="campaignStatus"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            value={statusFilter}
+                            onChange={(e) => { setStatusFilter(e.target.value); resetPage(); }}
+                        >
+                            {STATUS_OPTIONS.map((o) => (
+                                <option key={o.value} value={o.value}>{o.label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Recurrence */}
+                    <div className="flex-1 min-w-[160px]">
+                        <label htmlFor="campaignRecurrence" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Recurrence
+                        </label>
+                        <select
+                            id="campaignRecurrence"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            value={recurrenceFilter}
+                            onChange={(e) => { setRecurrenceFilter(e.target.value); resetPage(); }}
+                        >
+                            {RECURRENCE_OPTIONS.map((o) => (
+                                <option key={o.value} value={o.value}>{o.label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Start From */}
+                    <div className="flex-1 min-w-[150px]">
+                        <label htmlFor="startFrom" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Start From
+                        </label>
+                        <input
+                            id="startFrom"
+                            type="date"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={startFromFilter}
+                            onChange={(e) => { setStartFromFilter(e.target.value); resetPage(); }}
+                        />
+                    </div>
+
+                    {/* Start To */}
+                    <div className="flex-1 min-w-[150px]">
+                        <label htmlFor="startTo" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Start To
+                        </label>
+                        <input
+                            id="startTo"
+                            type="date"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={startToFilter}
+                            onChange={(e) => { setStartToFilter(e.target.value); resetPage(); }}
+                        />
+                    </div>
+
+                    {/* End From */}
+                    <div className="flex-1 min-w-[150px]">
+                        <label htmlFor="endFrom" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            End From
+                        </label>
+                        <input
+                            id="endFrom"
+                            type="date"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={endFromFilter}
+                            onChange={(e) => { setEndFromFilter(e.target.value); resetPage(); }}
+                        />
+                    </div>
+
+                    {/* End To */}
+                    <div className="flex-1 min-w-[150px]">
+                        <label htmlFor="endTo" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            End To
+                        </label>
+                        <input
+                            id="endTo"
+                            type="date"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={endToFilter}
+                            onChange={(e) => { setEndToFilter(e.target.value); resetPage(); }}
+                        />
+                    </div>
+
+                    {/* Clear */}
+                    {hasActiveFilters && (
+                        <div className="flex items-end">
+                            <button
+                                onClick={handleClearFilters}
+                                className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
             {loading ? (
                 <div className="flex justify-center items-center py-16">
                     <div className="flex items-center gap-3 text-gray-500">
