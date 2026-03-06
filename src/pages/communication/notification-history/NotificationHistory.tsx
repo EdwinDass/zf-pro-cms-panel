@@ -180,6 +180,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
                 <div className="text-gray-600">{formatDate(notification.createdAt)}</div>
             ),
         },
+        /* View Logs button — commented out for now
         {
             key: "actions",
             label: "Actions",
@@ -192,6 +193,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
                 </button>
             ),
         },
+        */
     ];
 
     const onPageChange = (newPage: number) => {
@@ -205,7 +207,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
 
     return (
         <div>
-            {/* Filter Section */}
+            {/* Filter Section — commented out for now
             <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-100 transition-transform transform hover:scale-[1.01] hover:shadow-lg">
                 <div className="flex flex-wrap gap-4">
                     <div className="flex-1 min-w-[200px]">
@@ -281,8 +283,9 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
                     </div>
                 </div>
             </div>
+            */}
 
-            {/* Export Button */}
+            {/* Export Button — commented out for now
             <div className="flex justify-end mb-6">
                 <button
                     className="flex items-center gap-2 px-4 py-2 border border-green-600 text-green-700 bg-white hover:bg-green-50 rounded-lg text-sm font-medium transition-all active:scale-95 shadow-sm"
@@ -293,6 +296,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
                     Export
                 </button>
             </div>
+            */}
 
             {/* Table */}
             {loading ? (
