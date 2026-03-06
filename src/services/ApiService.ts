@@ -536,3 +536,13 @@ export const getNotifications = async (params?: any) => {
 export const getNotificationRoles = async () => {
     return api.get("notifications/filters/roles").then((res) => res?.data);
 };
+
+export const getNotificationStates = async () => {
+    return api.get("notifications/filters/states").then((res) => res?.data);
+};
+
+export const getNotificationDistricts = async (states: string[]) => {
+    const params = new URLSearchParams();
+    states.forEach(state => params.append("state", state));
+    return api.get(`notifications/filters/districts?${params.toString()}`).then((res) => res?.data);
+};

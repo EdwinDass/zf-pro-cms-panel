@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import { getNotificationRoles } from "../../../services/ApiService";
+import { getNotificationRoles, getNotificationStates, getNotificationDistricts } from "../../../services/ApiService";
+import MultiSelectDropdown from "../../../components/ui/MultiSelectDropdown";
 
 interface CreateNotificationModalProps {
     isOpen: boolean;
@@ -19,7 +20,9 @@ interface ManualFormData {
     userType: string;
     userMobile: string;
     country: string;
-    roleId: string;
+    roleIds: string[];
+    stateNames: string[];
+    districtNames: string[];
 }
 
 interface ScheduledFormData extends ManualFormData {
@@ -47,7 +50,9 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         userType: "",
         userMobile: "",
         country: "",
-        roleId: "",
+        roleIds: [],
+        stateNames: [],
+        districtNames: [],
     });
 
     const [scheduledForm, setScheduledForm] = useState<ScheduledFormData>({
@@ -59,7 +64,9 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         userType: "",
         userMobile: "",
         country: "",
-        roleId: "",
+        roleIds: [],
+        stateNames: [],
+        districtNames: [],
         startDate: "",
         setTime: "",
     });
@@ -73,7 +80,9 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         userType: "",
         userMobile: "",
         country: "",
-        roleId: "",
+        roleIds: [],
+        stateNames: [],
+        districtNames: [],
         campaignName: "",
         startDate: "",
         endDate: "",
@@ -83,20 +92,88 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
     });
 
     const [roles, setRoles] = useState<{ roleId: number; roleName: string }[]>([]);
+    const [states, setStates] = useState<string[]>([]);
+    const [manualDistricts, setManualDistricts] = useState<string[]>([]);
+    const [scheduledDistricts, setScheduledDistricts] = useState<string[]>([]);
+    const [campaignDistricts, setCampaignDistricts] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchFilters = async () => {
             try {
-                const res = await getNotificationRoles();
-                if (res && res.success) {
-                    setRoles(res.data || []);
+                const [rolesRes, statesRes] = await Promise.all([
+                    getNotificationRoles(),
+                    getNotificationStates()
+                ]);
+
+                if (rolesRes && rolesRes.success) {
+                    setRoles(rolesRes.data || []);
+                }
+
+                if (statesRes && statesRes.success && Array.isArray(statesRes.data)) {
+                    const validStates = statesRes.data.filter((s: string) => s && s.trim() !== '');
+                    const uniqueStates = Array.from(new Set(validStates)) as string[];
+                    setStates(uniqueStates);
                 }
             } catch (error) {
-                console.error("Failed to fetch notification roles:", error);
+                console.error("Failed to fetch notification filters:", error);
             }
         };
         fetchFilters();
     }, []);
+
+    useEffect(() => {
+        const fetchDistricts = async () => {
+            if (manualForm.stateNames && manualForm.stateNames.length > 0) {
+                try {
+                    const res = await getNotificationDistricts(manualForm.stateNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setManualDistricts(res.data.filter((d: string) => d && d.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch districts for manual push:", error);
+                }
+            } else {
+                setManualDistricts([]);
+            }
+        };
+        fetchDistricts();
+    }, [manualForm.stateNames]);
+
+    useEffect(() => {
+        const fetchDistricts = async () => {
+            if (scheduledForm.stateNames && scheduledForm.stateNames.length > 0) {
+                try {
+                    const res = await getNotificationDistricts(scheduledForm.stateNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setScheduledDistricts(res.data.filter((d: string) => d && d.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch districts for scheduled push:", error);
+                }
+            } else {
+                setScheduledDistricts([]);
+            }
+        };
+        fetchDistricts();
+    }, [scheduledForm.stateNames]);
+
+    useEffect(() => {
+        const fetchDistricts = async () => {
+            if (campaignForm.stateNames && campaignForm.stateNames.length > 0) {
+                try {
+                    const res = await getNotificationDistricts(campaignForm.stateNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setCampaignDistricts(res.data.filter((d: string) => d && d.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch districts for campaign push:", error);
+                }
+            } else {
+                setCampaignDistricts([]);
+            }
+        };
+        fetchDistricts();
+    }, [campaignForm.stateNames]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: NotificationType) => {
         const file = e.target.files?.[0] || null;
@@ -299,25 +376,35 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
 
                             <div className="grid grid-cols-2 gap-6">
                                 <div>
-                                    <label htmlFor="manualRole" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Role Filter
-                                    </label>
-                                    <select
-                                        id="manualRole"
-                                        title="Select Role"
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                                        value={manualForm.roleId}
-                                        onChange={(e) =>
-                                            setManualForm({ ...manualForm, roleId: e.target.value })
-                                        }
-                                    >
-                                        <option value="">All Roles</option>
-                                        {roles.map((r) => (
-                                            <option key={r.roleId} value={String(r.roleId)}>
-                                                {r.roleName}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <MultiSelectDropdown
+                                        label="Role Filter"
+                                        options={roles.map((r) => r.roleName)}
+                                        selectedValues={roles.filter((r) => manualForm.roleIds.includes(String(r.roleId))).map((r) => r.roleName)}
+                                        onChange={(values) => {
+                                            const selectedIds = roles.filter((r) => values.includes(r.roleName)).map((r) => String(r.roleId));
+                                            setManualForm({ ...manualForm, roleIds: selectedIds });
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="State Filter"
+                                        options={states}
+                                        selectedValues={manualForm.stateNames}
+                                        onChange={(values) => setManualForm({ ...manualForm, stateNames: values, districtNames: [] })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="District Filter"
+                                        options={manualDistricts}
+                                        selectedValues={manualForm.districtNames}
+                                        onChange={(values) => setManualForm({ ...manualForm, districtNames: values })}
+                                        disabled={!manualForm.stateNames || manualForm.stateNames.length === 0}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -479,25 +566,35 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
 
                             <div className="grid grid-cols-2 gap-6">
                                 <div>
-                                    <label htmlFor="scheduledRole" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Role Filter
-                                    </label>
-                                    <select
-                                        id="scheduledRole"
-                                        title="Select Role"
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                                        value={scheduledForm.roleId}
-                                        onChange={(e) =>
-                                            setScheduledForm({ ...scheduledForm, roleId: e.target.value })
-                                        }
-                                    >
-                                        <option value="">All Roles</option>
-                                        {roles.map((r) => (
-                                            <option key={r.roleId} value={String(r.roleId)}>
-                                                {r.roleName}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <MultiSelectDropdown
+                                        label="Role Filter"
+                                        options={roles.map((r) => r.roleName)}
+                                        selectedValues={roles.filter((r) => scheduledForm.roleIds.includes(String(r.roleId))).map((r) => r.roleName)}
+                                        onChange={(values) => {
+                                            const selectedIds = roles.filter((r) => values.includes(r.roleName)).map((r) => String(r.roleId));
+                                            setScheduledForm({ ...scheduledForm, roleIds: selectedIds });
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="State Filter"
+                                        options={states}
+                                        selectedValues={scheduledForm.stateNames}
+                                        onChange={(values) => setScheduledForm({ ...scheduledForm, stateNames: values, districtNames: [] })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="District Filter"
+                                        options={scheduledDistricts}
+                                        selectedValues={scheduledForm.districtNames}
+                                        onChange={(values) => setScheduledForm({ ...scheduledForm, districtNames: values })}
+                                        disabled={!scheduledForm.stateNames || scheduledForm.stateNames.length === 0}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -743,25 +840,35 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
 
                             <div className="grid grid-cols-2 gap-6">
                                 <div>
-                                    <label htmlFor="campaignRole" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Role Filter
-                                    </label>
-                                    <select
-                                        id="campaignRole"
-                                        title="Select Role"
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                                        value={campaignForm.roleId}
-                                        onChange={(e) =>
-                                            setCampaignForm({ ...campaignForm, roleId: e.target.value })
-                                        }
-                                    >
-                                        <option value="">All Roles</option>
-                                        {roles.map((r) => (
-                                            <option key={r.roleId} value={String(r.roleId)}>
-                                                {r.roleName}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <MultiSelectDropdown
+                                        label="Role Filter"
+                                        options={roles.map((r) => r.roleName)}
+                                        selectedValues={roles.filter((r) => campaignForm.roleIds.includes(String(r.roleId))).map((r) => r.roleName)}
+                                        onChange={(values) => {
+                                            const selectedIds = roles.filter((r) => values.includes(r.roleName)).map((r) => String(r.roleId));
+                                            setCampaignForm({ ...campaignForm, roleIds: selectedIds });
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="State Filter"
+                                        options={states}
+                                        selectedValues={campaignForm.stateNames}
+                                        onChange={(values) => setCampaignForm({ ...campaignForm, stateNames: values, districtNames: [] })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="District Filter"
+                                        options={campaignDistricts}
+                                        selectedValues={campaignForm.districtNames}
+                                        onChange={(values) => setCampaignForm({ ...campaignForm, districtNames: values })}
+                                        disabled={!campaignForm.stateNames || campaignForm.stateNames.length === 0}
+                                    />
                                 </div>
                             </div>
                         </div>
