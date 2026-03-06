@@ -563,4 +563,16 @@ export const getNotificationBlockStatuses = async () => {
     return api.get(`notifications/filters/block-statuses`).then((res) => res?.data);
 };
 
+export const getNotificationUserCount = async (payload: {
+    roleFilter?: number[];
+    stateFilter?: string[];
+    districtFilter?: string[];
+    cityFilter?: string[];
+    pincodeFilter?: number[];
+    blockStatusFilter?: string[];
+}) => {
+    return api.post(`notifications/users/count`, payload).then((res) => res?.data);
+};
+
+
 

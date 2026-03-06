@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import { getNotificationRoles, getNotificationStates, getNotificationDistricts, getNotificationCities, getNotificationPincodes, getNotificationBlockStatuses } from "../../../services/ApiService";
+import { getNotificationRoles, getNotificationStates, getNotificationDistricts, getNotificationCities, getNotificationPincodes, getNotificationBlockStatuses, getNotificationUserCount } from "../../../services/ApiService";
 import MultiSelectDropdown from "../../../components/ui/MultiSelectDropdown";
 
 interface CreateNotificationModalProps {
@@ -118,6 +118,11 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
     const [campaignPincodes, setCampaignPincodes] = useState<string[]>([]);
 
     const [blockStatusOptions, setBlockStatusOptions] = useState<string[]>([]);
+
+    const [manualUserCount, setManualUserCount] = useState<number | null>(null);
+    const [scheduledUserCount, setScheduledUserCount] = useState<number | null>(null);
+    const [campaignUserCount, setCampaignUserCount] = useState<number | null>(null);
+
 
     useEffect(() => {
         const fetchFilters = async () => {
@@ -309,6 +314,59 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         };
         fetchPincodes();
     }, [campaignForm.cityNames]);
+
+    // User count effects - fire on every filter change
+    useEffect(() => {
+        const fetchCount = async () => {
+            try {
+                const res = await getNotificationUserCount({
+                    roleFilter: manualForm.roleIds.map(Number).filter(Boolean),
+                    stateFilter: manualForm.stateNames,
+                    districtFilter: manualForm.districtNames,
+                    cityFilter: manualForm.cityNames,
+                    pincodeFilter: manualForm.pincodes.map(Number).filter(Boolean),
+                    blockStatusFilter: manualForm.blockStatuses,
+                });
+                if (res && res.success) setManualUserCount(res.count);
+            } catch { /* silent */ }
+        };
+        fetchCount();
+    }, [manualForm.roleIds, manualForm.stateNames, manualForm.districtNames, manualForm.cityNames, manualForm.pincodes, manualForm.blockStatuses]);
+
+    useEffect(() => {
+        const fetchCount = async () => {
+            try {
+                const res = await getNotificationUserCount({
+                    roleFilter: scheduledForm.roleIds.map(Number).filter(Boolean),
+                    stateFilter: scheduledForm.stateNames,
+                    districtFilter: scheduledForm.districtNames,
+                    cityFilter: scheduledForm.cityNames,
+                    pincodeFilter: scheduledForm.pincodes.map(Number).filter(Boolean),
+                    blockStatusFilter: scheduledForm.blockStatuses,
+                });
+                if (res && res.success) setScheduledUserCount(res.count);
+            } catch { /* silent */ }
+        };
+        fetchCount();
+    }, [scheduledForm.roleIds, scheduledForm.stateNames, scheduledForm.districtNames, scheduledForm.cityNames, scheduledForm.pincodes, scheduledForm.blockStatuses]);
+
+    useEffect(() => {
+        const fetchCount = async () => {
+            try {
+                const res = await getNotificationUserCount({
+                    roleFilter: campaignForm.roleIds.map(Number).filter(Boolean),
+                    stateFilter: campaignForm.stateNames,
+                    districtFilter: campaignForm.districtNames,
+                    cityFilter: campaignForm.cityNames,
+                    pincodeFilter: campaignForm.pincodes.map(Number).filter(Boolean),
+                    blockStatusFilter: campaignForm.blockStatuses,
+                });
+                if (res && res.success) setCampaignUserCount(res.count);
+            } catch { /* silent */ }
+        };
+        fetchCount();
+    }, [campaignForm.roleIds, campaignForm.stateNames, campaignForm.districtNames, campaignForm.cityNames, campaignForm.pincodes, campaignForm.blockStatuses]);
+
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: NotificationType) => {
         const file = e.target.files?.[0] || null;
@@ -1098,21 +1156,36 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-end gap-4 p-6 border-t border-gray-200 bg-gray-50 sticky bottom-0">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleCreate}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
-                    >
-                        Create
-                    </button>
+                <div className="flex items-center justify-between gap-4 p-6 border-t border-gray-200 bg-gray-50 sticky bottom-0">
+                    {/* User Count Badge */}
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
+                            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                            <span className="text-sm font-medium text-blue-700">
+                                {(() => {
+                                    const count = activeTab === "manual" ? manualUserCount : activeTab === "scheduled" ? scheduledUserCount : campaignUserCount;
+                                    if (count === null) return "Calculating target users...";
+                                    return `${count.toLocaleString()} user${count !== 1 ? 's' : ''} will receive this notification`;
+                                })()}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="flex gap-4">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleCreate}
+                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                        >
+                            Create
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
