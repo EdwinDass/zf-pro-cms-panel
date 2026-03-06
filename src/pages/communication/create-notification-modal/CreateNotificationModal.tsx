@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import { getNotificationRoles, getNotificationStates, getNotificationDistricts, getNotificationCities } from "../../../services/ApiService";
+import { getNotificationRoles, getNotificationStates, getNotificationDistricts, getNotificationCities, getNotificationPincodes } from "../../../services/ApiService";
 import MultiSelectDropdown from "../../../components/ui/MultiSelectDropdown";
 
 interface CreateNotificationModalProps {
@@ -24,6 +24,7 @@ interface ManualFormData {
     stateNames: string[];
     districtNames: string[];
     cityNames: string[];
+    pincodes: string[];
 }
 
 interface ScheduledFormData extends ManualFormData {
@@ -55,6 +56,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         stateNames: [],
         districtNames: [],
         cityNames: [],
+        pincodes: [],
     });
 
     const [scheduledForm, setScheduledForm] = useState<ScheduledFormData>({
@@ -70,6 +72,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         stateNames: [],
         districtNames: [],
         cityNames: [],
+        pincodes: [],
         startDate: "",
         setTime: "",
     });
@@ -87,6 +90,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         stateNames: [],
         districtNames: [],
         cityNames: [],
+        pincodes: [],
         campaignName: "",
         startDate: "",
         endDate: "",
@@ -104,6 +108,10 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
     const [manualCities, setManualCities] = useState<string[]>([]);
     const [scheduledCities, setScheduledCities] = useState<string[]>([]);
     const [campaignCities, setCampaignCities] = useState<string[]>([]);
+
+    const [manualPincodes, setManualPincodes] = useState<string[]>([]);
+    const [scheduledPincodes, setScheduledPincodes] = useState<string[]>([]);
+    const [campaignPincodes, setCampaignPincodes] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchFilters = async () => {
@@ -236,6 +244,60 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         };
         fetchCities();
     }, [campaignForm.districtNames]);
+
+    useEffect(() => {
+        const fetchPincodes = async () => {
+            if (manualForm.cityNames && manualForm.cityNames.length > 0) {
+                try {
+                    const res = await getNotificationPincodes(manualForm.cityNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setManualPincodes(res.data.map(String).filter((p: string) => p && p.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch pincodes for manual push:", error);
+                }
+            } else {
+                setManualPincodes([]);
+            }
+        };
+        fetchPincodes();
+    }, [manualForm.cityNames]);
+
+    useEffect(() => {
+        const fetchPincodes = async () => {
+            if (scheduledForm.cityNames && scheduledForm.cityNames.length > 0) {
+                try {
+                    const res = await getNotificationPincodes(scheduledForm.cityNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setScheduledPincodes(res.data.map(String).filter((p: string) => p && p.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch pincodes for scheduled push:", error);
+                }
+            } else {
+                setScheduledPincodes([]);
+            }
+        };
+        fetchPincodes();
+    }, [scheduledForm.cityNames]);
+
+    useEffect(() => {
+        const fetchPincodes = async () => {
+            if (campaignForm.cityNames && campaignForm.cityNames.length > 0) {
+                try {
+                    const res = await getNotificationPincodes(campaignForm.cityNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setCampaignPincodes(res.data.map(String).filter((p: string) => p && p.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch pincodes for campaign push:", error);
+                }
+            } else {
+                setCampaignPincodes([]);
+            }
+        };
+        fetchPincodes();
+    }, [campaignForm.cityNames]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: NotificationType) => {
         const file = e.target.files?.[0] || null;
@@ -453,7 +515,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         label="State Filter"
                                         options={states}
                                         selectedValues={manualForm.stateNames}
-                                        onChange={(values) => setManualForm({ ...manualForm, stateNames: values, districtNames: [], cityNames: [] })}
+                                        onChange={(values) => setManualForm({ ...manualForm, stateNames: values, districtNames: [], cityNames: [], pincodes: [] })}
                                     />
                                 </div>
                             </div>
@@ -464,7 +526,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         label="District Filter"
                                         options={manualDistricts}
                                         selectedValues={manualForm.districtNames}
-                                        onChange={(values) => setManualForm({ ...manualForm, districtNames: values, cityNames: [] })}
+                                        onChange={(values) => setManualForm({ ...manualForm, districtNames: values, cityNames: [], pincodes: [] })}
                                         disabled={!manualForm.stateNames || manualForm.stateNames.length === 0}
                                     />
                                 </div>
@@ -473,8 +535,20 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         label="City Filter"
                                         options={manualCities}
                                         selectedValues={manualForm.cityNames}
-                                        onChange={(values) => setManualForm({ ...manualForm, cityNames: values })}
+                                        onChange={(values) => setManualForm({ ...manualForm, cityNames: values, pincodes: [] })}
                                         disabled={!manualForm.districtNames || manualForm.districtNames.length === 0}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="Pincode Filter"
+                                        options={manualPincodes}
+                                        selectedValues={manualForm.pincodes}
+                                        onChange={(values) => setManualForm({ ...manualForm, pincodes: values })}
+                                        disabled={!manualForm.cityNames || manualForm.cityNames.length === 0}
                                     />
                                 </div>
                             </div>
@@ -652,7 +726,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         label="State Filter"
                                         options={states}
                                         selectedValues={scheduledForm.stateNames}
-                                        onChange={(values) => setScheduledForm({ ...scheduledForm, stateNames: values, districtNames: [], cityNames: [] })}
+                                        onChange={(values) => setScheduledForm({ ...scheduledForm, stateNames: values, districtNames: [], cityNames: [], pincodes: [] })}
                                     />
                                 </div>
                             </div>
@@ -663,7 +737,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         label="District Filter"
                                         options={scheduledDistricts}
                                         selectedValues={scheduledForm.districtNames}
-                                        onChange={(values) => setScheduledForm({ ...scheduledForm, districtNames: values, cityNames: [] })}
+                                        onChange={(values) => setScheduledForm({ ...scheduledForm, districtNames: values, cityNames: [], pincodes: [] })}
                                         disabled={!scheduledForm.stateNames || scheduledForm.stateNames.length === 0}
                                     />
                                 </div>
@@ -672,8 +746,20 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         label="City Filter"
                                         options={scheduledCities}
                                         selectedValues={scheduledForm.cityNames}
-                                        onChange={(values) => setScheduledForm({ ...scheduledForm, cityNames: values })}
+                                        onChange={(values) => setScheduledForm({ ...scheduledForm, cityNames: values, pincodes: [] })}
                                         disabled={!scheduledForm.districtNames || scheduledForm.districtNames.length === 0}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="Pincode Filter"
+                                        options={scheduledPincodes}
+                                        selectedValues={scheduledForm.pincodes}
+                                        onChange={(values) => setScheduledForm({ ...scheduledForm, pincodes: values })}
+                                        disabled={!scheduledForm.cityNames || scheduledForm.cityNames.length === 0}
                                     />
                                 </div>
                             </div>
@@ -935,7 +1021,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         label="State Filter"
                                         options={states}
                                         selectedValues={campaignForm.stateNames}
-                                        onChange={(values) => setCampaignForm({ ...campaignForm, stateNames: values, districtNames: [], cityNames: [] })}
+                                        onChange={(values) => setCampaignForm({ ...campaignForm, stateNames: values, districtNames: [], cityNames: [], pincodes: [] })}
                                     />
                                 </div>
                             </div>
@@ -946,7 +1032,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         label="District Filter"
                                         options={campaignDistricts}
                                         selectedValues={campaignForm.districtNames}
-                                        onChange={(values) => setCampaignForm({ ...campaignForm, districtNames: values, cityNames: [] })}
+                                        onChange={(values) => setCampaignForm({ ...campaignForm, districtNames: values, cityNames: [], pincodes: [] })}
                                         disabled={!campaignForm.stateNames || campaignForm.stateNames.length === 0}
                                     />
                                 </div>
@@ -955,8 +1041,20 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         label="City Filter"
                                         options={campaignCities}
                                         selectedValues={campaignForm.cityNames}
-                                        onChange={(values) => setCampaignForm({ ...campaignForm, cityNames: values })}
+                                        onChange={(values) => setCampaignForm({ ...campaignForm, cityNames: values, pincodes: [] })}
                                         disabled={!campaignForm.districtNames || campaignForm.districtNames.length === 0}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="Pincode Filter"
+                                        options={campaignPincodes}
+                                        selectedValues={campaignForm.pincodes}
+                                        onChange={(values) => setCampaignForm({ ...campaignForm, pincodes: values })}
+                                        disabled={!campaignForm.cityNames || campaignForm.cityNames.length === 0}
                                     />
                                 </div>
                             </div>

@@ -552,3 +552,10 @@ export const getNotificationCities = async (districts: string[]) => {
     districts.forEach(district => params.append("district", district));
     return api.get(`notifications/filters/cities?${params.toString()}`).then((res) => res?.data);
 };
+
+export const getNotificationPincodes = async (cities: string[]) => {
+    const params = new URLSearchParams();
+    cities.forEach(city => params.append("city", city));
+    return api.get(`notifications/filters/pincodes?${params.toString()}`).then((res) => res?.data);
+};
+
