@@ -62,6 +62,7 @@ export const Layout: React.FC<LayoutProps> = ({
         { id: 'members', label: 'Members and KYC', icon: 'fas fa-users', path: '/members-management' },
         // { id: 'configuration', label: 'Configuration', icon: 'fas fa-sliders-h', path: '/configuration' },
         { id: 'amazon-marketplace', label: 'Amazon Marketplace', icon: 'fas fa-store', path: '/amazon-marketplace' },
+        { id: 'sku-management', label: 'SKU Management', icon: 'fas fa-boxes', path: '/categories' },
     ];
 
     const handleNavigation = (path: string) => {

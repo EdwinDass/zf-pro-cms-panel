@@ -15,6 +15,9 @@ import Reports from "../pages/mis-analytics/reports/Reports";
 import MembersManagment from "../pages/members-and-kyc/MembersManagement";
 import Communication from "../pages/communication/Communication";
 import AmazonMarketplace from "../pages/amazon-marketplace/AmazonMarketplace";
+import Categories from "../pages/sku-management/categories/Categories";
+import SubCategories from "../pages/sku-management/subcategories/Subcategories";
+import Skus from "../pages/sku-management/skus/Skus";
 
 const AppRoutes = () => {
     return (
@@ -32,6 +35,9 @@ const AppRoutes = () => {
             <Route path="/members-management" element={<PrivateRoute element={<MembersManagment />} />} />
             <Route path="/communication" element={<PrivateRoute element={<Communication />} />} />
             <Route path="/amazon-marketplace" element={<PrivateRoute element={<AmazonMarketplace />} />} />
+            <Route path="/categories" element={<PrivateRoute element={<Categories />} />} />
+            <Route path="/categories/:categoryId/subcategories" element={<PrivateRoute element={<SubCategories />} />} />
+            <Route path="/subcategories/:subcategoryId/skus" element={<PrivateRoute element={<Skus />} />} />
         </Routes>
     );
 };
