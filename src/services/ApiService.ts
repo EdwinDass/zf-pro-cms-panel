@@ -528,3 +528,144 @@ export const getDeliveryStatuses = async () => {
 export const updateDeliveryStatus = async (payload: { status: string; redemptionId: number }) => {
     return api.post("amazon-market/update-delivery-status", payload).then((res) => res?.data);
 };
+
+export const getNotifications = async (params?: any) => {
+    return api.get("notifications", { params }).then((res) => res?.data);
+};
+
+export const getNotificationRoles = async () => {
+    return api.get("notifications/filters/roles").then((res) => res?.data);
+};
+
+export const getNotificationStates = async () => {
+    return api.get("notifications/filters/states").then((res) => res?.data);
+};
+
+export const getNotificationDistricts = async (states: string[]) => {
+    const params = new URLSearchParams();
+    states.forEach(state => params.append("state", state));
+    return api.get(`notifications/filters/districts?${params.toString()}`).then((res) => res?.data);
+};
+
+export const getNotificationCities = async (districts: string[]) => {
+    const params = new URLSearchParams();
+    districts.forEach(district => params.append("district", district));
+    return api.get(`notifications/filters/cities?${params.toString()}`).then((res) => res?.data);
+};
+
+export const getNotificationPincodes = async (cities: string[]) => {
+    const params = new URLSearchParams();
+    cities.forEach(city => params.append("city", city));
+    return api.get(`notifications/filters/pincodes?${params.toString()}`).then((res) => res?.data);
+};
+
+export const getNotificationBlockStatuses = async () => {
+    return api.get(`notifications/filters/block-statuses`).then((res) => res?.data);
+};
+
+export const getNotificationUserCount = async (payload: {
+    roleFilter?: number[];
+    stateFilter?: string[];
+    districtFilter?: string[];
+    cityFilter?: string[];
+    pincodeFilter?: number[];
+    blockStatusFilter?: string[];
+}) => {
+    return api.post(`notifications/users/count`, payload).then((res) => res?.data);
+};
+
+export const broadcastNotification = async (payload: {
+    title: string;
+    body: string;
+    file?: File | null;
+    redirectionLink?: string;
+    roleFilter?: string;       // comma-separated IDs e.g. "1,2"
+    stateFilter?: string;      // comma-separated state names
+    districtFilter?: string;
+    cityFilter?: string;
+    pincodeFilter?: string;    // comma-separated pincodes
+    blockStatusFilter?: string;
+    scheduledAt?: string;      // ISO string
+    type?: string;
+    startDate?: string;
+    endDate?: string;
+    scheduledTime?: string;
+    recurrence?: string;
+}) => {
+    const form = new FormData();
+    form.append('title', payload.title);
+    form.append('body', payload.body);
+    if (payload.file) form.append('file', payload.file);
+    if (payload.redirectionLink) form.append('redirectionLink', payload.redirectionLink);
+    if (payload.roleFilter) form.append('roleFilter', payload.roleFilter);
+    if (payload.stateFilter) form.append('stateFilter', payload.stateFilter);
+    if (payload.districtFilter) form.append('districtFilter', payload.districtFilter);
+    if (payload.cityFilter) form.append('cityFilter', payload.cityFilter);
+    if (payload.pincodeFilter) form.append('pincodeFilter', payload.pincodeFilter);
+    if (payload.blockStatusFilter) form.append('blockStatusFilter', payload.blockStatusFilter);
+    if (payload.scheduledAt) form.append('scheduledAt', payload.scheduledAt);
+    if (payload.type) form.append('type', payload.type);
+    if (payload.startDate) form.append('startDate', payload.startDate);
+    if (payload.endDate) form.append('endDate', payload.endDate);
+    if (payload.scheduledTime) form.append('scheduledTime', payload.scheduledTime);
+    if (payload.recurrence) form.append('recurrence', payload.recurrence);
+    return api.post('notifications/broadcast', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    }).then((res) => res?.data);
+};
+
+export const getNotificationLogs = async (notificationId: number, page: number = 1, limit: number = 10) => {
+    return api.get(`notifications/${notificationId}/logs`, { params: { page, limit } }).then((res) => res?.data);
+};
+
+export const getNotificationMediaUrl = async (notificationId: number) => {
+    return api.get(`notifications/${notificationId}/media-url`).then((res) => res?.data);
+};
+
+export const getCampaigns = async (
+    page: number = 1,
+    limit: number = 10,
+    filters: {
+        status?: string;
+        recurrence?: string;
+        search?: string;
+        startFrom?: string;
+        startTo?: string;
+        endFrom?: string;
+        endTo?: string;
+    } = {}
+) => {
+    const params: Record<string, any> = { page, limit };
+    if (filters.status) params.status = filters.status;
+    if (filters.recurrence) params.recurrence = filters.recurrence;
+    if (filters.search) params.search = filters.search;
+    if (filters.startFrom) params.startFrom = filters.startFrom;
+    if (filters.startTo) params.startTo = filters.startTo;
+    if (filters.endFrom) params.endFrom = filters.endFrom;
+    if (filters.endTo) params.endTo = filters.endTo;
+    return api.get('notifications/campaigns', { params }).then((res) => res?.data);
+};
+
+export const getCampaignNotifications = async (
+    campaignId: number,
+    page: number = 1,
+    limit: number = 10,
+    filters: {
+        status?: string;
+        scheduledFrom?: string;
+        scheduledTo?: string;
+    } = {}
+) => {
+    const params: Record<string, any> = { page, limit };
+    if (filters.status) params.status = filters.status;
+    if (filters.scheduledFrom) params.scheduledFrom = filters.scheduledFrom;
+    if (filters.scheduledTo) params.scheduledTo = filters.scheduledTo;
+    return api.get(`notifications/campaigns/${campaignId}/notifications`, { params }).then((res) => res?.data);
+};
+
+
+
+
+
+
+

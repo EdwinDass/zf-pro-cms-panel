@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
+import { getNotificationRoles, getNotificationStates, getNotificationDistricts, getNotificationCities, getNotificationPincodes, getNotificationBlockStatuses, getNotificationUserCount, broadcastNotification } from "../../../services/ApiService";
+import MultiSelectDropdown from "../../../components/ui/MultiSelectDropdown";
 
 interface CreateNotificationModalProps {
     isOpen: boolean;
@@ -18,6 +20,12 @@ interface ManualFormData {
     userType: string;
     userMobile: string;
     country: string;
+    roleIds: string[];
+    stateNames: string[];
+    districtNames: string[];
+    cityNames: string[];
+    pincodes: string[];
+    blockStatuses: string[];
 }
 
 interface ScheduledFormData extends ManualFormData {
@@ -45,6 +53,12 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         userType: "",
         userMobile: "",
         country: "",
+        roleIds: [],
+        stateNames: [],
+        districtNames: [],
+        cityNames: [],
+        pincodes: [],
+        blockStatuses: [],
     });
 
     const [scheduledForm, setScheduledForm] = useState<ScheduledFormData>({
@@ -56,6 +70,12 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         userType: "",
         userMobile: "",
         country: "",
+        roleIds: [],
+        stateNames: [],
+        districtNames: [],
+        cityNames: [],
+        pincodes: [],
+        blockStatuses: [],
         startDate: "",
         setTime: "",
     });
@@ -69,6 +89,12 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         userType: "",
         userMobile: "",
         country: "",
+        roleIds: [],
+        stateNames: [],
+        districtNames: [],
+        cityNames: [],
+        pincodes: [],
+        blockStatuses: [],
         campaignName: "",
         startDate: "",
         endDate: "",
@@ -76,6 +102,275 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         recurrence: "daily",
         weekday: "",
     });
+
+    const [roles, setRoles] = useState<{ roleId: number; roleName: string }[]>([]);
+    const [states, setStates] = useState<string[]>([]);
+    const [manualDistricts, setManualDistricts] = useState<string[]>([]);
+    const [scheduledDistricts, setScheduledDistricts] = useState<string[]>([]);
+    const [campaignDistricts, setCampaignDistricts] = useState<string[]>([]);
+
+    const [manualCities, setManualCities] = useState<string[]>([]);
+    const [scheduledCities, setScheduledCities] = useState<string[]>([]);
+    const [campaignCities, setCampaignCities] = useState<string[]>([]);
+
+    const [manualPincodes, setManualPincodes] = useState<string[]>([]);
+    const [scheduledPincodes, setScheduledPincodes] = useState<string[]>([]);
+    const [campaignPincodes, setCampaignPincodes] = useState<string[]>([]);
+
+    const [blockStatusOptions, setBlockStatusOptions] = useState<string[]>([]);
+
+    const [manualUserCount, setManualUserCount] = useState<number | null>(null);
+    const [scheduledUserCount, setScheduledUserCount] = useState<number | null>(null);
+    const [campaignUserCount, setCampaignUserCount] = useState<number | null>(null);
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
+    const [submitSuccess, setSubmitSuccess] = useState(false);
+
+
+    useEffect(() => {
+        const fetchFilters = async () => {
+            try {
+                const [rolesRes, statesRes, blockStatusesRes] = await Promise.all([
+                    getNotificationRoles(),
+                    getNotificationStates(),
+                    getNotificationBlockStatuses()
+                ]);
+
+                if (rolesRes && rolesRes.success) {
+                    setRoles(rolesRes.data || []);
+                }
+
+                if (statesRes && statesRes.success && Array.isArray(statesRes.data)) {
+                    const validStates = statesRes.data.filter((s: string) => s && s.trim() !== '');
+                    const uniqueStates = Array.from(new Set(validStates)) as string[];
+                    setStates(uniqueStates);
+                }
+
+                if (blockStatusesRes && blockStatusesRes.success && Array.isArray(blockStatusesRes.data)) {
+                    setBlockStatusOptions(blockStatusesRes.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch notification filters:", error);
+            }
+        };
+        fetchFilters();
+    }, []);
+
+    useEffect(() => {
+        const fetchDistricts = async () => {
+            if (manualForm.stateNames && manualForm.stateNames.length > 0) {
+                try {
+                    const res = await getNotificationDistricts(manualForm.stateNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setManualDistricts(res.data.filter((d: string) => d && d.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch districts for manual push:", error);
+                }
+            } else {
+                setManualDistricts([]);
+            }
+        };
+        fetchDistricts();
+    }, [manualForm.stateNames]);
+
+    useEffect(() => {
+        const fetchDistricts = async () => {
+            if (scheduledForm.stateNames && scheduledForm.stateNames.length > 0) {
+                try {
+                    const res = await getNotificationDistricts(scheduledForm.stateNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setScheduledDistricts(res.data.filter((d: string) => d && d.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch districts for scheduled push:", error);
+                }
+            } else {
+                setScheduledDistricts([]);
+            }
+        };
+        fetchDistricts();
+    }, [scheduledForm.stateNames]);
+
+    useEffect(() => {
+        const fetchDistricts = async () => {
+            if (campaignForm.stateNames && campaignForm.stateNames.length > 0) {
+                try {
+                    const res = await getNotificationDistricts(campaignForm.stateNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setCampaignDistricts(res.data.filter((d: string) => d && d.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch districts for campaign push:", error);
+                }
+            } else {
+                setCampaignDistricts([]);
+            }
+        };
+        fetchDistricts();
+    }, [campaignForm.stateNames]);
+
+    useEffect(() => {
+        const fetchCities = async () => {
+            if (manualForm.districtNames && manualForm.districtNames.length > 0) {
+                try {
+                    const res = await getNotificationCities(manualForm.districtNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setManualCities(res.data.filter((c: string) => c && c.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch cities for manual push:", error);
+                }
+            } else {
+                setManualCities([]);
+            }
+        };
+        fetchCities();
+    }, [manualForm.districtNames]);
+
+    useEffect(() => {
+        const fetchCities = async () => {
+            if (scheduledForm.districtNames && scheduledForm.districtNames.length > 0) {
+                try {
+                    const res = await getNotificationCities(scheduledForm.districtNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setScheduledCities(res.data.filter((c: string) => c && c.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch cities for scheduled push:", error);
+                }
+            } else {
+                setScheduledCities([]);
+            }
+        };
+        fetchCities();
+    }, [scheduledForm.districtNames]);
+
+    useEffect(() => {
+        const fetchCities = async () => {
+            if (campaignForm.districtNames && campaignForm.districtNames.length > 0) {
+                try {
+                    const res = await getNotificationCities(campaignForm.districtNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setCampaignCities(res.data.filter((c: string) => c && c.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch cities for campaign push:", error);
+                }
+            } else {
+                setCampaignCities([]);
+            }
+        };
+        fetchCities();
+    }, [campaignForm.districtNames]);
+
+    useEffect(() => {
+        const fetchPincodes = async () => {
+            if (manualForm.cityNames && manualForm.cityNames.length > 0) {
+                try {
+                    const res = await getNotificationPincodes(manualForm.cityNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setManualPincodes(res.data.map(String).filter((p: string) => p && p.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch pincodes for manual push:", error);
+                }
+            } else {
+                setManualPincodes([]);
+            }
+        };
+        fetchPincodes();
+    }, [manualForm.cityNames]);
+
+    useEffect(() => {
+        const fetchPincodes = async () => {
+            if (scheduledForm.cityNames && scheduledForm.cityNames.length > 0) {
+                try {
+                    const res = await getNotificationPincodes(scheduledForm.cityNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setScheduledPincodes(res.data.map(String).filter((p: string) => p && p.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch pincodes for scheduled push:", error);
+                }
+            } else {
+                setScheduledPincodes([]);
+            }
+        };
+        fetchPincodes();
+    }, [scheduledForm.cityNames]);
+
+    useEffect(() => {
+        const fetchPincodes = async () => {
+            if (campaignForm.cityNames && campaignForm.cityNames.length > 0) {
+                try {
+                    const res = await getNotificationPincodes(campaignForm.cityNames);
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setCampaignPincodes(res.data.map(String).filter((p: string) => p && p.trim() !== ''));
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch pincodes for campaign push:", error);
+                }
+            } else {
+                setCampaignPincodes([]);
+            }
+        };
+        fetchPincodes();
+    }, [campaignForm.cityNames]);
+
+    // User count effects - fire on every filter change
+    useEffect(() => {
+        const fetchCount = async () => {
+            try {
+                const res = await getNotificationUserCount({
+                    roleFilter: manualForm.roleIds.map(Number).filter(Boolean),
+                    stateFilter: manualForm.stateNames,
+                    districtFilter: manualForm.districtNames,
+                    cityFilter: manualForm.cityNames,
+                    pincodeFilter: manualForm.pincodes.map(Number).filter(Boolean),
+                    blockStatusFilter: manualForm.blockStatuses,
+                });
+                if (res && res.success) setManualUserCount(res.count);
+            } catch { /* silent */ }
+        };
+        fetchCount();
+    }, [manualForm.roleIds, manualForm.stateNames, manualForm.districtNames, manualForm.cityNames, manualForm.pincodes, manualForm.blockStatuses]);
+
+    useEffect(() => {
+        const fetchCount = async () => {
+            try {
+                const res = await getNotificationUserCount({
+                    roleFilter: scheduledForm.roleIds.map(Number).filter(Boolean),
+                    stateFilter: scheduledForm.stateNames,
+                    districtFilter: scheduledForm.districtNames,
+                    cityFilter: scheduledForm.cityNames,
+                    pincodeFilter: scheduledForm.pincodes.map(Number).filter(Boolean),
+                    blockStatusFilter: scheduledForm.blockStatuses,
+                });
+                if (res && res.success) setScheduledUserCount(res.count);
+            } catch { /* silent */ }
+        };
+        fetchCount();
+    }, [scheduledForm.roleIds, scheduledForm.stateNames, scheduledForm.districtNames, scheduledForm.cityNames, scheduledForm.pincodes, scheduledForm.blockStatuses]);
+
+    useEffect(() => {
+        const fetchCount = async () => {
+            try {
+                const res = await getNotificationUserCount({
+                    roleFilter: campaignForm.roleIds.map(Number).filter(Boolean),
+                    stateFilter: campaignForm.stateNames,
+                    districtFilter: campaignForm.districtNames,
+                    cityFilter: campaignForm.cityNames,
+                    pincodeFilter: campaignForm.pincodes.map(Number).filter(Boolean),
+                    blockStatusFilter: campaignForm.blockStatuses,
+                });
+                if (res && res.success) setCampaignUserCount(res.count);
+            } catch { /* silent */ }
+        };
+        fetchCount();
+    }, [campaignForm.roleIds, campaignForm.stateNames, campaignForm.districtNames, campaignForm.cityNames, campaignForm.pincodes, campaignForm.blockStatuses]);
+
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: NotificationType) => {
         const file = e.target.files?.[0] || null;
@@ -91,15 +386,78 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
         }
     };
 
-    const handleCreate = () => {
-        if (activeTab === "manual") {
-            console.log("Creating manual notification:", manualForm);
-        } else if (activeTab === "scheduled") {
-            console.log("Creating scheduled notification:", scheduledForm);
-        } else {
-            console.log("Creating campaign notification:", campaignForm);
+    const handleCreate = async () => {
+        setSubmitError(null);
+        setIsSubmitting(true);
+        try {
+            let res;
+            if (activeTab === "manual") {
+                res = await broadcastNotification({
+                    title: manualForm.title,
+                    body: manualForm.description,
+                    file: manualForm.image,
+                    redirectionLink: manualForm.redirectionLink || undefined,
+                    roleFilter: manualForm.roleIds.length ? manualForm.roleIds.join(',') : undefined,
+                    stateFilter: manualForm.stateNames.length ? manualForm.stateNames.join(',') : undefined,
+                    districtFilter: manualForm.districtNames.length ? manualForm.districtNames.join(',') : undefined,
+                    cityFilter: manualForm.cityNames.length ? manualForm.cityNames.join(',') : undefined,
+                    pincodeFilter: manualForm.pincodes.length ? manualForm.pincodes.join(',') : undefined,
+                    blockStatusFilter: manualForm.blockStatuses.length ? manualForm.blockStatuses.join(',') : undefined,
+                    type: 'REGULAR',
+                });
+            } else if (activeTab === "scheduled") {
+                // Build ISO scheduledAt from startDate + setTime
+                const scheduledAt = scheduledForm.startDate && scheduledForm.setTime
+                    ? new Date(`${scheduledForm.startDate}T${scheduledForm.setTime}`).toISOString()
+                    : undefined;
+                res = await broadcastNotification({
+                    title: scheduledForm.title,
+                    body: scheduledForm.description,
+                    file: scheduledForm.image,
+                    redirectionLink: scheduledForm.redirectionLink || undefined,
+                    roleFilter: scheduledForm.roleIds.length ? scheduledForm.roleIds.join(',') : undefined,
+                    stateFilter: scheduledForm.stateNames.length ? scheduledForm.stateNames.join(',') : undefined,
+                    districtFilter: scheduledForm.districtNames.length ? scheduledForm.districtNames.join(',') : undefined,
+                    cityFilter: scheduledForm.cityNames.length ? scheduledForm.cityNames.join(',') : undefined,
+                    pincodeFilter: scheduledForm.pincodes.length ? scheduledForm.pincodes.join(',') : undefined,
+                    blockStatusFilter: scheduledForm.blockStatuses.length ? scheduledForm.blockStatuses.join(',') : undefined,
+                    scheduledAt,
+                    type: 'SCHEDULED',
+                });
+            } else {
+                res = await broadcastNotification({
+                    title: campaignForm.title,
+                    body: campaignForm.description,
+                    file: campaignForm.image,
+                    redirectionLink: campaignForm.redirectionLink || undefined,
+                    roleFilter: campaignForm.roleIds.length ? campaignForm.roleIds.join(',') : undefined,
+                    stateFilter: campaignForm.stateNames.length ? campaignForm.stateNames.join(',') : undefined,
+                    districtFilter: campaignForm.districtNames.length ? campaignForm.districtNames.join(',') : undefined,
+                    cityFilter: campaignForm.cityNames.length ? campaignForm.cityNames.join(',') : undefined,
+                    pincodeFilter: campaignForm.pincodes.length ? campaignForm.pincodes.join(',') : undefined,
+                    blockStatusFilter: campaignForm.blockStatuses.length ? campaignForm.blockStatuses.join(',') : undefined,
+                    startDate: campaignForm.startDate || undefined,
+                    endDate: campaignForm.endDate || undefined,
+                    scheduledTime: campaignForm.setTime || undefined,
+                    recurrence: campaignForm.recurrence || undefined,
+                    type: 'campaign',
+                });
+            }
+
+            if (res && res.success) {
+                setSubmitSuccess(true);
+                setTimeout(() => {
+                    setSubmitSuccess(false);
+                    onClose();
+                }, 1500);
+            } else {
+                setSubmitError(res?.message || 'Failed to create notification. Please try again.');
+            }
+        } catch (err: any) {
+            setSubmitError(err?.response?.data?.message || 'An unexpected error occurred. Please try again.');
+        } finally {
+            setIsSubmitting(false);
         }
-        onClose();
     };
 
     if (!isOpen) return null;
@@ -256,6 +614,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         Manual
                                     </div>
                                 </div>
+                                {/* User Mobile - commented out for now
                                 <div>
                                     <label htmlFor="manualMobile" className="block text-sm font-medium text-gray-700 mb-2">
                                         User Mobile
@@ -273,6 +632,70 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         <option value="+1-555-0101">+1-555-0101</option>
                                         <option value="+1-555-0102">+1-555-0102</option>
                                     </select>
+                                </div>
+                                */}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="Role Filter"
+                                        options={roles.map((r) => r.roleName)}
+                                        selectedValues={roles.filter((r) => manualForm.roleIds.includes(String(r.roleId))).map((r) => r.roleName)}
+                                        onChange={(values) => {
+                                            const selectedIds = roles.filter((r) => values.includes(r.roleName)).map((r) => String(r.roleId));
+                                            setManualForm({ ...manualForm, roleIds: selectedIds });
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="State Filter"
+                                        options={states}
+                                        selectedValues={manualForm.stateNames}
+                                        onChange={(values) => setManualForm({ ...manualForm, stateNames: values, districtNames: [], cityNames: [], pincodes: [] })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="District Filter"
+                                        options={manualDistricts}
+                                        selectedValues={manualForm.districtNames}
+                                        onChange={(values) => setManualForm({ ...manualForm, districtNames: values, cityNames: [], pincodes: [] })}
+                                        disabled={!manualForm.stateNames || manualForm.stateNames.length === 0}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="City Filter"
+                                        options={manualCities}
+                                        selectedValues={manualForm.cityNames}
+                                        onChange={(values) => setManualForm({ ...manualForm, cityNames: values, pincodes: [] })}
+                                        disabled={!manualForm.districtNames || manualForm.districtNames.length === 0}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="Pincode Filter"
+                                        options={manualPincodes}
+                                        selectedValues={manualForm.pincodes}
+                                        onChange={(values) => setManualForm({ ...manualForm, pincodes: values })}
+                                        disabled={!manualForm.cityNames || manualForm.cityNames.length === 0}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="Block Status Filter"
+                                        options={blockStatusOptions}
+                                        selectedValues={manualForm.blockStatuses}
+                                        onChange={(values) => setManualForm({ ...manualForm, blockStatuses: values })}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -412,6 +835,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         Scheduled
                                     </div>
                                 </div>
+                                {/* User Mobile - commented out for now
                                 <div>
                                     <label htmlFor="scheduledMobile" className="block text-sm font-medium text-gray-700 mb-2">
                                         User Mobile
@@ -429,6 +853,70 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         <option value="+1-555-0101">+1-555-0101</option>
                                         <option value="+1-555-0102">+1-555-0102</option>
                                     </select>
+                                </div>
+                                */}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="Role Filter"
+                                        options={roles.map((r) => r.roleName)}
+                                        selectedValues={roles.filter((r) => scheduledForm.roleIds.includes(String(r.roleId))).map((r) => r.roleName)}
+                                        onChange={(values) => {
+                                            const selectedIds = roles.filter((r) => values.includes(r.roleName)).map((r) => String(r.roleId));
+                                            setScheduledForm({ ...scheduledForm, roleIds: selectedIds });
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="State Filter"
+                                        options={states}
+                                        selectedValues={scheduledForm.stateNames}
+                                        onChange={(values) => setScheduledForm({ ...scheduledForm, stateNames: values, districtNames: [], cityNames: [], pincodes: [] })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="District Filter"
+                                        options={scheduledDistricts}
+                                        selectedValues={scheduledForm.districtNames}
+                                        onChange={(values) => setScheduledForm({ ...scheduledForm, districtNames: values, cityNames: [], pincodes: [] })}
+                                        disabled={!scheduledForm.stateNames || scheduledForm.stateNames.length === 0}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="City Filter"
+                                        options={scheduledCities}
+                                        selectedValues={scheduledForm.cityNames}
+                                        onChange={(values) => setScheduledForm({ ...scheduledForm, cityNames: values, pincodes: [] })}
+                                        disabled={!scheduledForm.districtNames || scheduledForm.districtNames.length === 0}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="Pincode Filter"
+                                        options={scheduledPincodes}
+                                        selectedValues={scheduledForm.pincodes}
+                                        onChange={(values) => setScheduledForm({ ...scheduledForm, pincodes: values })}
+                                        disabled={!scheduledForm.cityNames || scheduledForm.cityNames.length === 0}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="Block Status Filter"
+                                        options={blockStatusOptions}
+                                        selectedValues={scheduledForm.blockStatuses}
+                                        onChange={(values) => setScheduledForm({ ...scheduledForm, blockStatuses: values })}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -652,6 +1140,7 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         Campaign
                                     </div>
                                 </div>
+                                {/* User Mobile - commented out for now
                                 <div>
                                     <label htmlFor="campaignMobile" className="block text-sm font-medium text-gray-700 mb-2">
                                         User Mobile
@@ -670,27 +1159,139 @@ const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpe
                                         <option value="+1-555-0102">+1-555-0102</option>
                                     </select>
                                 </div>
+                                */}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="Role Filter"
+                                        options={roles.map((r) => r.roleName)}
+                                        selectedValues={roles.filter((r) => campaignForm.roleIds.includes(String(r.roleId))).map((r) => r.roleName)}
+                                        onChange={(values) => {
+                                            const selectedIds = roles.filter((r) => values.includes(r.roleName)).map((r) => String(r.roleId));
+                                            setCampaignForm({ ...campaignForm, roleIds: selectedIds });
+                                        }}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="State Filter"
+                                        options={states}
+                                        selectedValues={campaignForm.stateNames}
+                                        onChange={(values) => setCampaignForm({ ...campaignForm, stateNames: values, districtNames: [], cityNames: [], pincodes: [] })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="District Filter"
+                                        options={campaignDistricts}
+                                        selectedValues={campaignForm.districtNames}
+                                        onChange={(values) => setCampaignForm({ ...campaignForm, districtNames: values, cityNames: [], pincodes: [] })}
+                                        disabled={!campaignForm.stateNames || campaignForm.stateNames.length === 0}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="City Filter"
+                                        options={campaignCities}
+                                        selectedValues={campaignForm.cityNames}
+                                        onChange={(values) => setCampaignForm({ ...campaignForm, cityNames: values, pincodes: [] })}
+                                        disabled={!campaignForm.districtNames || campaignForm.districtNames.length === 0}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="Pincode Filter"
+                                        options={campaignPincodes}
+                                        selectedValues={campaignForm.pincodes}
+                                        onChange={(values) => setCampaignForm({ ...campaignForm, pincodes: values })}
+                                        disabled={!campaignForm.cityNames || campaignForm.cityNames.length === 0}
+                                    />
+                                </div>
+                                <div>
+                                    <MultiSelectDropdown
+                                        label="Block Status Filter"
+                                        options={blockStatusOptions}
+                                        selectedValues={campaignForm.blockStatuses}
+                                        onChange={(values) => setCampaignForm({ ...campaignForm, blockStatuses: values })}
+                                    />
+                                </div>
                             </div>
                         </div>
                     )}
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-end gap-4 p-6 border-t border-gray-200 bg-gray-50 sticky bottom-0">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleCreate}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
-                    >
-                        Create
-                    </button>
+                <div className="flex items-center justify-between gap-4 p-6 border-t border-gray-200 bg-gray-50 sticky bottom-0">
+                    {/* Left — user count + feedback */}
+                    <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
+                            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                            <span className="text-sm font-medium text-blue-700">
+                                {(() => {
+                                    const count = activeTab === "manual" ? manualUserCount : activeTab === "scheduled" ? scheduledUserCount : campaignUserCount;
+                                    if (count === null) return "Calculating target users...";
+                                    return `${count.toLocaleString()} user${count !== 1 ? 's' : ''} will receive this notification`;
+                                })()}
+                            </span>
+                        </div>
+                        {submitError && (
+                            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-2 text-sm text-red-600">
+                                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M4.93 4.93l14.14 14.14M12 3a9 9 0 100 18A9 9 0 0012 3z" />
+                                </svg>
+                                {submitError}
+                            </div>
+                        )}
+                        {submitSuccess && (
+                            <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-2 text-sm text-green-700 font-medium">
+                                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Notification queued successfully!
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex gap-4 flex-shrink-0">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            disabled={isSubmitting}
+                            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleCreate}
+                            disabled={isSubmitting || submitSuccess}
+                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 min-w-[100px] justify-center"
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                    </svg>
+                                    Sending...
+                                </>
+                            ) : submitSuccess ? (
+                                <>
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Sent!
+                                </>
+                            ) : 'Create'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
