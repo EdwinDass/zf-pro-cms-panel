@@ -51,7 +51,7 @@ export const Layout: React.FC<LayoutProps> = ({
         // { id: 'masters-config', label: 'Masters & Config', icon: 'fas fa-cogs', path: '/masters-config' },
         // { id: 'schemes-campaigns', label: 'Schemes & Campaigns', icon: 'fas fa-bullhorn', path: '/schemes-campaigns' },
         { id: 'qr-management', label: 'QR Management', icon: 'fas fa-qrcode', path: '/qr' },
-        // { id: 'communication', label: 'Communication', icon: 'fas fa-broadcast-tower', path: '/communication' },
+        { id: 'communication', label: 'Communication', icon: 'fas fa-broadcast-tower', path: '/communication' },
         // { id: 'finance-compliance', label: 'Finance & Compliance', icon: 'fas fa-coins', path: '/finance-compliance' },
         // { id: 'fraud-detection', label: 'Fraud Detection', icon: 'fas fa-shield-alt', path: '/fraud-detection' },
         { id: 'mis-analytics', label: 'MIS & Analytics', icon: 'fas fa-chart-line', path: '/mis-analytics' },
@@ -62,6 +62,7 @@ export const Layout: React.FC<LayoutProps> = ({
         { id: 'members', label: 'Members and KYC', icon: 'fas fa-users', path: '/members-management' },
         // { id: 'configuration', label: 'Configuration', icon: 'fas fa-sliders-h', path: '/configuration' },
         { id: 'amazon-marketplace', label: 'Amazon Marketplace', icon: 'fas fa-store', path: '/amazon-marketplace' },
+        { id: 'sku-management', label: 'SKU Management', icon: 'fas fa-boxes', path: '/categories' },
     ];
 
     const handleNavigation = (path: string) => {

@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import DownloadIcon from "@mui/icons-material/Download";
+import React, { useState, useEffect, useCallback } from "react";
 import CustomTable, { Column } from "../../../components/CustomTable";
 import ViewImageModal from "../components/ViewImageModal";
+import { getNotifications } from "../../../services/ApiService";
 
 interface NotificationHistoryProps {
     onSelectNotification?: (id: number) => void;
@@ -13,140 +13,112 @@ interface Notification {
     title: string;
     description: string;
     image: string | null;
-    redirection: string;
-    sentAt: string;
+    redirection: string | null;
+    scheduledAt: string | null;
+    sentAt: string | null;
     status: string;
     createdAt: string;
 }
 
+const STATUS_OPTIONS = [
+    { value: "", label: "All Statuses" },
+    { value: "PENDING", label: "Pending" },
+    { value: "PROCESSING", label: "Processing" },
+    { value: "FANNED_OUT", label: "Fanned Out" },
+    { value: "COMPLETED", label: "Completed" },
+    { value: "FAILED", label: "Failed" },
+];
+
+const TYPE_OPTIONS = [
+    { value: "", label: "All Types" },
+    { value: "REGULAR", label: "Regular" },
+    { value: "CAMPAIGN", label: "Campaign" },
+];
+
 const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotification }) => {
-    const [titleFilter, setTitleFilter] = useState<string>("");
-    const [descriptionFilter, setDescriptionFilter] = useState<string>("");
-    const [fromDateFilter, setFromDateFilter] = useState<string>("");
-    const [toDateFilter, setToDateFilter] = useState<string>("");
-    const [notificationTypeFilter, setNotificationTypeFilter] = useState<string>("");
+    const [searchFilter, setSearchFilter] = useState<string>("");
+    const [statusFilter, setStatusFilter] = useState<string>("");
+    const [typeFilter, setTypeFilter] = useState<string>("");
+    const [dateFromFilter, setDateFromFilter] = useState<string>("");
+    const [dateToFilter, setDateToFilter] = useState<string>("");
+    const [scheduledFromFilter, setScheduledFromFilter] = useState<string>("");
+    const [scheduledToFilter, setScheduledToFilter] = useState<string>("");
+
     const [page, setPage] = useState<number>(1);
     const [loading, setLoading] = useState<boolean>(false);
     const [imageModalOpen, setImageModalOpen] = useState<boolean>(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
     const pageSize = 10;
 
-    // Dummy data
-    const dummyNotifications: Notification[] = [
-        {
-            id: 1,
-            notificationType: "Campaign",
-            title: "Special Offer",
-            description: "Get 20% off on all products this week",
-            image: "https://via.placeholder.com/150",
-            redirection: "/products",
-            sentAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            status: "Send",
-            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 2,
-            notificationType: "Manual",
-            title: "System Update",
-            description: "New features have been added to the platform",
-            image: null,
-            redirection: "/update-logs",
-            sentAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-            status: "Send",
-            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 3,
-            notificationType: "Scheduled",
-            title: "Account Alert",
-            description: "Unusual activity detected on your account",
-            image: "https://via.placeholder.com/150",
-            redirection: "/security",
-            sentAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-            status: "Send",
-            createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 4,
-            notificationType: "Campaign",
-            title: "Bonus Points Awarded",
-            description: "You have earned 500 bonus points",
-            image: "https://via.placeholder.com/150",
-            redirection: "/rewards",
-            sentAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-            status: "Failed",
-            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 5,
-            notificationType: "Manual",
-            title: "New Event Available",
-            description: "Join our upcoming webinar on digital marketing",
-            image: "https://via.placeholder.com/150",
-            redirection: "/events",
-            sentAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-            status: "Send",
-            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 6,
-            notificationType: "Scheduled",
-            title: "Flash Sale",
-            description: "Limited time offer: Buy one get one free",
-            image: "https://via.placeholder.com/150",
-            redirection: "/sales",
-            sentAt: new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString(),
-            status: "Send",
-            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 7,
-            notificationType: "Campaign",
-            title: "Maintenance Notice",
-            description: "Server maintenance scheduled for tonight",
-            image: null,
-            redirection: "/maintenance",
-            sentAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-            status: "Send",
-            createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 8,
-            notificationType: "Manual",
-            title: "Expiry Warning",
-            description: "Your membership expires in 7 days",
-            image: null,
-            redirection: "/membership",
-            sentAt: new Date(Date.now() - 60 * 60 * 60 * 1000).toISOString(),
-            status: "Failed",
-            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 9,
-            notificationType: "Scheduled",
-            title: "Referral Bonus",
-            description: "Earn rewards by referring friends",
-            image: "https://via.placeholder.com/150",
-            redirection: "/referral",
-            sentAt: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
-            status: "Send",
-            createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-            id: 10,
-            notificationType: "Campaign",
-            title: "Workshop Registration",
-            description: "Register now for our exclusive workshop",
-            image: "https://via.placeholder.com/150",
-            redirection: "/workshops",
-            sentAt: new Date(Date.now() - 84 * 60 * 60 * 1000).toISOString(),
-            status: "Failed",
-            createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-    ];
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [totalCount, setTotalCount] = useState<number>(0);
 
-    const [notifications, setNotifications] = useState<Notification[]>(dummyNotifications);
-    const [totalCount, setTotalCount] = useState<number>(dummyNotifications.length);
+    const fetchNotifications = useCallback(async () => {
+        setLoading(true);
+        try {
+            const params: Record<string, any> = {
+                page,
+                limit: pageSize,
+            };
+            if (searchFilter) params.search = searchFilter;
+            if (statusFilter) params.status = statusFilter;
+            if (typeFilter) params.type = typeFilter;
+            if (dateFromFilter) params.dateFrom = dateFromFilter;
+            if (dateToFilter) params.dateTo = dateToFilter;
+            if (scheduledFromFilter) params.scheduledFrom = scheduledFromFilter;
+            if (scheduledToFilter) params.scheduledTo = scheduledToFilter;
+
+            const response = await getNotifications(params);
+            if (response && response.success) {
+                const apiData = response.data || [];
+                const mappedData: Notification[] = apiData.map((item: any) => ({
+                    id: item.id,
+                    notificationType: item.type || "Unknown",
+                    title: item.title,
+                    description: item.body,
+                    image: item.imageUrl || null,
+                    redirection: item.redirectionLink || null,
+                    scheduledAt: item.scheduledAt || null,
+                    sentAt: item.processedAt || null,
+                    status: item.status || "Unknown",
+                    createdAt: item.createdAt,
+                }));
+                setNotifications(mappedData);
+                setTotalCount(response.total || mappedData.length);
+            }
+        } catch (error) {
+            console.error("Failed to fetch notifications:", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [page, pageSize, searchFilter, statusFilter, typeFilter, dateFromFilter, dateToFilter, scheduledFromFilter, scheduledToFilter]);
+
+    useEffect(() => {
+        fetchNotifications();
+    }, [fetchNotifications]);
+
+    // Reset to page 1 when any filter changes
+    const handleSearchChange = (val: string) => { setSearchFilter(val); setPage(1); };
+    const handleStatusChange = (val: string) => { setStatusFilter(val); setPage(1); };
+    const handleTypeChange = (val: string) => { setTypeFilter(val); setPage(1); };
+    const handleDateFromChange = (val: string) => { setDateFromFilter(val); setPage(1); };
+    const handleDateToChange = (val: string) => { setDateToFilter(val); setPage(1); };
+    const handleScheduledFromChange = (val: string) => { setScheduledFromFilter(val); setPage(1); };
+    const handleScheduledToChange = (val: string) => { setScheduledToFilter(val); setPage(1); };
+
+    const handleClearFilters = () => {
+        setSearchFilter("");
+        setStatusFilter("");
+        setTypeFilter("");
+        setDateFromFilter("");
+        setDateToFilter("");
+        setScheduledFromFilter("");
+        setScheduledToFilter("");
+        setPage(1);
+    };
+
+    const hasActiveFilters = searchFilter || statusFilter || typeFilter || dateFromFilter || dateToFilter || scheduledFromFilter || scheduledToFilter;
 
     const formatDate = (dateString: string | null): string => {
         if (!dateString) return "N/A";
@@ -162,25 +134,27 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
 
     const getStatusColor = (status: string): string => {
         const colorMap: Record<string, string> = {
-            send: "bg-green-100 text-green-600",
+            completed: "bg-green-100 text-green-600",
             failed: "bg-red-100 text-red-600",
+            pending: "bg-yellow-100 text-yellow-600",
+            processing: "bg-blue-100 text-blue-600",
+            fanned_out: "bg-purple-100 text-purple-600",
         };
-        return colorMap[status.toLowerCase()];
+        return colorMap[status.toLowerCase()] || "bg-gray-100 text-gray-600";
     };
 
     const getTypeColor = (type: string): string => {
         const colorMap: Record<string, string> = {
-            manual: "bg-blue-100 text-blue-600",
+            regular: "bg-blue-100 text-blue-600",
             campaign: "bg-purple-100 text-purple-600",
-            scheduled: "bg-orange-100 text-orange-600",
         };
-        return colorMap[type.toLowerCase()];
+        return colorMap[type.toLowerCase()] || "bg-gray-100 text-gray-600";
     };
 
     const columns: Column[] = [
         {
             key: "notificationType",
-            label: "Notification Type",
+            label: "Type",
             render: (notification: Notification) => (
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(notification.notificationType)}`}>
                     {notification.notificationType}
@@ -198,7 +172,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
             key: "description",
             label: "Description",
             render: (notification: Notification) => (
-                <div className="text-gray-600">{notification.description}</div>
+                <div className="text-gray-600 text-sm max-w-xs truncate">{notification.description}</div>
             ),
         },
         {
@@ -210,6 +184,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
                         className="px-3 py-1 border border-blue-600 text-blue-600 bg-white hover:bg-blue-50 rounded-md text-xs font-medium transition-colors"
                         onClick={() => {
                             setSelectedImage(notification.image);
+                            setSelectedImageId(notification.id);
                             setImageModalOpen(true);
                         }}
                     >
@@ -224,14 +199,21 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
             key: "redirection",
             label: "Redirection",
             render: (notification: Notification) => (
-                <div className="text-gray-600">{notification.redirection}</div>
+                <div className="text-gray-600 text-sm truncate max-w-xs">{notification.redirection || "—"}</div>
+            ),
+        },
+        {
+            key: "scheduledAt",
+            label: "Scheduled At",
+            render: (notification: Notification) => (
+                <div className="text-gray-600 text-sm">{formatDate(notification.scheduledAt)}</div>
             ),
         },
         {
             key: "sentAt",
             label: "Sent At",
             render: (notification: Notification) => (
-                <div className="text-gray-600">{formatDate(notification.sentAt)}</div>
+                <div className="text-gray-600 text-sm">{formatDate(notification.sentAt)}</div>
             ),
         },
         {
@@ -247,7 +229,7 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
             key: "createdAt",
             label: "Created At",
             render: (notification: Notification) => (
-                <div className="text-gray-600">{formatDate(notification.createdAt)}</div>
+                <div className="text-gray-600 text-sm">{formatDate(notification.createdAt)}</div>
             ),
         },
         {
@@ -264,110 +246,140 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
         },
     ];
 
-    const onPageChange = (newPage: number) => {
-        setPage(newPage);
-    };
-
-    const handleExport = () => {
-        // Export functionality will be integrated later
-        console.log("Export button clicked");
-    };
-
     return (
         <div>
             {/* Filter Section */}
-            <div className="bg-white rounded-xl shadow p-6 mb-6 border border-gray-100 transition-transform transform hover:scale-[1.01] hover:shadow-lg">
-                <div className="flex flex-wrap gap-4">
+            <div className="bg-white rounded-xl shadow-sm p-5 mb-5 border border-gray-100">
+                <div className="flex flex-wrap gap-3">
+                    {/* Search */}
                     <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="titleFilter" className="block mb-2 text-sm font-medium text-gray-700">
-                            Title
+                        <label htmlFor="searchFilter" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Search
                         </label>
                         <input
-                            id="titleFilter"
+                            id="searchFilter"
                             type="text"
-                            title="Filter by notification title"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            placeholder="Filter by title..."
-                            value={titleFilter}
-                            onChange={(e) => setTitleFilter(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Search title or body..."
+                            value={searchFilter}
+                            onChange={(e) => handleSearchChange(e.target.value)}
                         />
                     </div>
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="descriptionFilter" className="block mb-2 text-sm font-medium text-gray-700">
-                            Description
+
+                    {/* Status */}
+                    <div className="flex-1 min-w-[160px]">
+                        <label htmlFor="statusFilter" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Status
                         </label>
-                        <input
-                            id="descriptionFilter"
-                            type="text"
-                            title="Filter by notification description"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            placeholder="Filter by description..."
-                            value={descriptionFilter}
-                            onChange={(e) => setDescriptionFilter(e.target.value)}
-                        />
+                        <select
+                            id="statusFilter"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            value={statusFilter}
+                            onChange={(e) => handleStatusChange(e.target.value)}
+                        >
+                            {STATUS_OPTIONS.map((o) => (
+                                <option key={o.value} value={o.value}>{o.label}</option>
+                            ))}
+                        </select>
                     </div>
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="fromDateFilter" className="block mb-2 text-sm font-medium text-gray-700">
+
+                    {/* Type */}
+                    <div className="flex-1 min-w-[140px]">
+                        <label htmlFor="typeFilter" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Type
+                        </label>
+                        <select
+                            id="typeFilter"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            value={typeFilter}
+                            onChange={(e) => handleTypeChange(e.target.value)}
+                        >
+                            {TYPE_OPTIONS.map((o) => (
+                                <option key={o.value} value={o.value}>{o.label}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Date From */}
+                    <div className="flex-1 min-w-[160px]">
+                        <label htmlFor="dateFromFilter" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                             From Date
                         </label>
                         <input
-                            id="fromDateFilter"
+                            id="dateFromFilter"
                             type="date"
-                            title="Select start date for filtering"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            value={fromDateFilter}
-                            onChange={(e) => setFromDateFilter(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={dateFromFilter}
+                            onChange={(e) => handleDateFromChange(e.target.value)}
                         />
                     </div>
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="toDateFilter" className="block mb-2 text-sm font-medium text-gray-700">
+
+                    {/* Date To */}
+                    <div className="flex-1 min-w-[160px]">
+                        <label htmlFor="dateToFilter" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                             To Date
                         </label>
                         <input
-                            id="toDateFilter"
+                            id="dateToFilter"
                             type="date"
-                            title="Select end date for filtering"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            value={toDateFilter}
-                            onChange={(e) => setToDateFilter(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={dateToFilter}
+                            onChange={(e) => handleDateToChange(e.target.value)}
                         />
                     </div>
-                    <div className="flex-1 min-w-[200px]">
-                        <label htmlFor="notificationTypeFilter" className="block mb-2 text-sm font-medium text-gray-700">
-                            Notification Type
-                        </label>
-                        <select
-                            id="notificationTypeFilter"
-                            title="Filter by notification type"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                            value={notificationTypeFilter}
-                            onChange={(e) => setNotificationTypeFilter(e.target.value)}
-                        >
-                            <option value="">All Types</option>
-                            <option value="manual">Manual</option>
-                            <option value="campaign">Campaign</option>
-                            <option value="scheduled">Scheduled</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
 
-            {/* Export Button */}
-            <div className="flex justify-end mb-6">
-                <button
-                    className="flex items-center gap-2 px-4 py-2 border border-green-600 text-green-700 bg-white hover:bg-green-50 rounded-lg text-sm font-medium transition-all active:scale-95 shadow-sm"
-                    onClick={handleExport}
-                    title="Export to Excel"
-                >
-                    <DownloadIcon fontSize="small" />
-                    Export
-                </button>
+                    {/* Scheduled From */}
+                    <div className="flex-1 min-w-[160px]">
+                        <label htmlFor="scheduledFromFilter" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Scheduled From
+                        </label>
+                        <input
+                            id="scheduledFromFilter"
+                            type="date"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={scheduledFromFilter}
+                            onChange={(e) => handleScheduledFromChange(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Scheduled To */}
+                    <div className="flex-1 min-w-[160px]">
+                        <label htmlFor="scheduledToFilter" className="block mb-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Scheduled To
+                        </label>
+                        <input
+                            id="scheduledToFilter"
+                            type="date"
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={scheduledToFilter}
+                            onChange={(e) => handleScheduledToChange(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Clear button */}
+                    {hasActiveFilters && (
+                        <div className="flex items-end">
+                            <button
+                                onClick={handleClearFilters}
+                                className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Table */}
             {loading ? (
                 <div className="flex justify-center items-center py-8">
-                    <div className="text-gray-600">Loading notifications...</div>
+                    <div className="flex items-center gap-3 text-gray-500">
+                        <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                        </svg>
+                        Loading notifications...
+                    </div>
                 </div>
             ) : (
                 <CustomTable
@@ -376,15 +388,16 @@ const NotificationHistory: React.FC<NotificationHistoryProps> = ({ onSelectNotif
                     pageSize={pageSize}
                     totalRows={totalCount}
                     currentPage={page}
-                    onPageChange={onPageChange}
+                    onPageChange={setPage}
                 />
             )}
 
             {/* View Image Modal */}
             <ViewImageModal
                 isOpen={imageModalOpen}
-                onClose={() => setImageModalOpen(false)}
+                onClose={() => { setImageModalOpen(false); setSelectedImageId(null); }}
                 imageUrl={selectedImage}
+                notificationId={selectedImageId}
             />
         </div>
     );
