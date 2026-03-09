@@ -190,7 +190,7 @@ const Reports = () => {
                         </button>
 
                         {/* Notification Report */}
-                        <button
+                        {/* <button
                             onClick={() => setActiveReport("notification")}
                             className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-2
                                 ${activeReport === "notification"
@@ -199,7 +199,7 @@ const Reports = () => {
                         >
                             <NotificationsIcon fontSize="small" />
                             <span className="text-[14px]">Notification Report</span>
-                        </button>
+                        </button> */}
 
                         {/* Blocked Member Report */}
                         <button
