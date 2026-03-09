@@ -123,3 +123,141 @@ export const AmazonMarketplaceKeys: any = {
     amazonProductDescription: "Description"
 };
 
+export const BankDetailsReportKeys: any = {
+    userId: "User ID",
+    uniqueCode: "Unique Code",
+    name: "Name",
+    roleName: "Role Name",
+    mobileNumber: "Mobile Number",
+    bankName: "Bank Name",
+    accountNumber: "Account Number",
+    ifscCode: "IFSC Code",
+    accountType: "Account Type",
+    branchName: "Branch Name",
+    bankAddress: "Bank Address",
+    upiId: "UPI ID"
+};
+
+export const KycReportKeys: any = {
+    userId: "User ID",
+    uniqueCode: "Unique Code",
+    name: "Name",
+    roleName: "Role Name",
+    mobileNumber: "Mobile Number",
+    emailId: "Email ID",
+    status: "Status",
+    kycVerified: "KYC Verified",
+    dob: "Date of Birth",
+    createdAt: "Created At",
+    aadhaarNumber: "Aadhaar Number"
+};
+
+export const ProductWiseReportKeys: any = {
+    userId: "User ID",
+    memberName: "Member Name",
+    productCode: "Product Code",
+    productCategory: "Product Category",
+    productType: "Product Type",
+    productDescription: "Product Description",
+    userType: "User Type",
+    district: "District",
+    state: "State",
+    scanDate: "Scan Date",
+    pointsEarned: "Points Earned"
+};
+
+export const CategoryReportKeys: any = {
+    categoryName: "Category Name",
+    userType: "User Type",
+    productsInCategory: "Products in this Category",
+    bonusPoints: "Bonus Points",
+    bonusPointsActive: "Bonus Points Active"
+};
+
+export const ErrorTransactionReportKeys: any = {
+    userName: "User Name",
+    userMobile: "User Mobile Number",
+    dateOfJoining: "Date of Joining",
+    userType: "User Type",
+    district: "District",
+    state: "State",
+    scanDate: "Scan Date",
+    qrDetails: "QR Details",
+    productCode: "Product Code",
+    productDescription: "Product Description",
+    message: "Message",
+    productStatus: "Product Status",
+    actionTaken: "Action Taken"
+};
+
+export const NotificationReportKeys: any = {
+    notificationTitle: "Notification Title",
+    notificationMessage: "Notification Message",
+    userMobile: "User Mobile Number",
+    userName: "User Name",
+    userType: "User Type",
+    sentVia: "Sent Via",
+    deliveredDate: "Delivered Date",
+    sentDate: "Sent Date"
+};
+
+export const BlockedMemberReportKeys: any = {
+    userName: "User Name",
+    mobileNumber: "Mobile Number",
+    userType: "User Type",
+    district: "District",
+    state: "State",
+    dateOfJoining: "Date of Joining",
+    totalEarnedPoints: "Total Earned Points",
+    redeemedPoints: "Redeemed Points",
+    redemptionRequestDate: "Redemption Request Date",
+    redemptionProcessedDate: "Redemption Processed Date",
+    redemptionDetails: "Redemption Details",
+    upiId: "UPI ID",
+    accountNumber: "Account Number",
+    accountHolderName: "Account Holder Name",
+    ifscCode: "IFSC Code",
+    bankName: "Bank Name",
+    status: "Status"
+};
+
+export const BlockedMemberScanReportKeys: any = {
+    userName: "User Name",
+    mobileNumber: "Mobile Number",
+    district: "District",
+    state: "State",
+    dateOfJoining: "Date of Joining",
+    scanId: "Scan ID",
+    dateOfScan: "Date of Scan",
+    productCategory: "Product Category",
+    productCode: "Product Code",
+    productName: "Product Name",
+    productDescription: "Product Description",
+    qrDetails: "QR Details",
+    basePoint: "Base Point",
+    extraBonusPoint: "Extra Bonus Point",
+    totalPoints: "Total Points",
+    scanStatus: "Scan Status"
+};
+
+export const AnomalyTransactionsReportKeys: any = {
+    referenceId: "Reference ID",
+    district: "District",
+    state: "State",
+    influencerName: "Influencer Name",
+    userMobile: "User Mobile Number",
+    dateOfJoining: "Date of Joining",
+    productQr: "Product QR",
+    productCategoryScanned: "Product Category Scanned",
+    dateOfScan: "Date of Scan",
+    frequencyOfAnomaly: "Frequency of Anomaly",
+    anomalyValueScanned: "Anomaly Value Scanned",
+    totalPointsEarned: "Total Points Earned",
+    totalPointsRedeemed: "Total Points Redeemed",
+    totalPointsScanned: "Total Points Scanned",
+    firstScanDate: "First Scan Date",
+    lastScanDate: "Last Scan Date",
+    lastScanId: "Last Scan ID",
+    updatedAt: "Updated At",
+    actionTaken: "Action Taken"
+};
