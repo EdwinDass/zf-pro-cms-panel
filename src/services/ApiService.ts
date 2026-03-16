@@ -176,6 +176,14 @@ export const getSubcategoriesByCategory = async (categoryId: number, page: numbe
     return api.get(`sku/categories/${categoryId}/subcategories/all`, { params: { page, limit } }).then((res) => res);
 };
 
+export const getCategoryHistory = async (categoryId: number, page: number = 1, limit: number = 10) => {
+    return api.get(`sku/categories/${categoryId}/history`, { params: { page, limit } }).then((res) => res);
+};
+
+export const getSubCategoryHistory = async (subCategoryId: number, page: number = 1, limit: number = 10) => {
+    return api.get(`sku/subcategories/${subCategoryId}/history`, { params: { page, limit } }).then((res) => res);
+};
+
 export const getAllSubcategories = async (page: number = 1, limit: number = 10) => {
     return api.get(`sku/subcategories/all`, { params: { page, limit } }).then((res) => res);
 };
@@ -238,6 +246,10 @@ export const addBulkSkus = async (payload: any[]) => {
 
 export const getSkusBySubcategory = async (subCategoryId: number, page: number = 1, limit: number = 10) => {
     return api.get(`sku/subcategories/${subCategoryId}/skus/all`, { params: { page, limit } }).then((res) => res);
+};
+
+export const getSkuHistory = async (skuId: number, page: number = 1, limit: number = 10) => {
+    return api.get(`sku/skus/${skuId}/history`, { params: { page, limit } }).then((res) => res);
 };
 
 export const getSkusByCategoryAndSubcategory = async (
