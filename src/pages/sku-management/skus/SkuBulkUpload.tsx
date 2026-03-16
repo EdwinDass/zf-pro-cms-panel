@@ -32,14 +32,14 @@ const SkuBulkUpload: React.FC<SkuBulkUploadProps> = ({ isOpen, onClose, onUpload
                 skuName: "iPhone 15",
                 skuCode: "IP15",
                 productValue: "999.00",
-                points: "50.00"
+                points: "50"
             },
             {
                 subCategoryId: 2,
                 skuName: "Standing Desk",
                 skuCode: "SD01",
                 productValue: "299.99",
-                points: "15.00"
+                points: "15"
             }
         ];
 
@@ -95,7 +95,9 @@ const SkuBulkUpload: React.FC<SkuBulkUploadProps> = ({ isOpen, onClose, onUpload
                     REQUIRED_HEADERS_KEYS.forEach(key => {
                         const actualKey = Object.keys(row).find(k => k.toLowerCase() === key.toLowerCase());
                         if (actualKey && row[actualKey] !== undefined && row[actualKey] !== null) {
-                            newRow[key] = String(row[actualKey]).trim();
+                            const rawVal = String(row[actualKey]).trim();
+                            // Strip decimals for the points field
+                            newRow[key] = key === 'points' ? String(Math.floor(Number(rawVal))) : rawVal;
                         } else {
                             newRow[key] = "";
                         }

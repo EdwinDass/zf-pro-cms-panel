@@ -36,7 +36,7 @@ const Skus = () => {
     // Edit SKU state
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingSku, setEditingSku] = useState<any>(null);
-    const [editForm, setEditForm] = useState({ skuName: "", skuDescription: "", isActive: true });
+    const [editForm, setEditForm] = useState({ skuName: "", skuDescription: "", isActive: true, points: "" });
     const [isEditSubmitting, setIsEditSubmitting] = useState(false);
 
     // Add SKU state
@@ -83,6 +83,7 @@ const Skus = () => {
             skuName: sku.skuName || sku.name || sku.title || "",
             skuDescription: sku.skuDescription || sku.description || "",
             isActive: sku.isActive !== undefined ? sku.isActive : true,
+            points: sku.points !== undefined && sku.points !== null ? String(sku.points) : "",
         });
         setIsEditModalOpen(true);
     };
@@ -90,7 +91,7 @@ const Skus = () => {
     const handleCloseEditModal = () => {
         setIsEditModalOpen(false);
         setEditingSku(null);
-        setEditForm({ skuName: "", skuDescription: "", isActive: true });
+        setEditForm({ skuName: "", skuDescription: "", isActive: true, points: "" });
     };
 
     const handleEditSubmit = async () => {
@@ -102,6 +103,7 @@ const Skus = () => {
                 skuName: editForm.skuName,
                 skuDescription: editForm.skuDescription,
                 isActive: editForm.isActive,
+                ...(editForm.points !== "" && { points: editForm.points }),
             });
             toast.success("SKU updated successfully");
             handleCloseEditModal();
@@ -339,6 +341,22 @@ const Skus = () => {
                                     placeholder="Enter SKU description"
                                 />
                             </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Points</label>
+                                <input
+                                    type="number"
+                                    step="1"
+                                    min="0"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    value={editForm.points}
+                                    onChange={(e) => {
+                                        const v = e.target.value;
+                                        setEditForm(prev => ({ ...prev, points: v === '' ? '' : String(Math.floor(Number(v))) }));
+                                    }}
+                                    onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
+                                    placeholder="e.g. 30"
+                                />
+                            </div>
                             <div className="flex items-center">
                                 <label className="flex items-center cursor-pointer">
                                     <input
@@ -416,11 +434,16 @@ const Skus = () => {
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Points <span className="text-red-500">*</span></label>
                                 <input
                                     type="number"
-                                    step="0.01"
+                                    step="1"
+                                    min="0"
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     value={addForm.points}
-                                    onChange={(e) => setAddForm(prev => ({ ...prev, points: e.target.value }))}
-                                    placeholder="e.g. 30.00"
+                                    onChange={(e) => {
+                                        const v = e.target.value;
+                                        setAddForm(prev => ({ ...prev, points: v === '' ? '' : String(Math.floor(Number(v))) }));
+                                    }}
+                                    onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
+                                    placeholder="e.g. 30"
                                 />
                             </div>
                             {/* Read-only context fields */}
