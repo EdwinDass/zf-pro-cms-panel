@@ -479,18 +479,26 @@ const Skus = () => {
                                 <div className="space-y-6">
                                     {historyData.map((item, idx) => (
                                         <div key={item.historyId || idx} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                                            <div className="px-4 py-3 bg-gray-100 border-b border-gray-200 flex justify-between items-center flex-wrap gap-2">
-                                                <div className="flex items-center gap-3">
-                                                    <span className={`px-2 py-1 text-xs font-bold rounded ${item.action === 'CREATE' ? 'bg-green-100 text-green-700' : item.action === 'UPDATE' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'}`}>
-                                                        {item.action}
-                                                    </span>
-                                                    <span className="text-sm text-gray-600">
-                                                        Modified By: <strong>{item.modifiedBy || 'System'}</strong>
+                                            <div className="px-4 py-3 bg-gray-100 border-b border-gray-200 flex flex-col gap-1">
+                                                <div className="flex justify-between items-center flex-wrap gap-2">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className={`px-2 py-1 text-xs font-bold rounded ${item.action === 'CREATE' ? 'bg-green-100 text-green-700' : item.action === 'UPDATE' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'}`}>
+                                                            {item.action}
+                                                        </span>
+                                                        <span className="text-sm text-gray-600">
+                                                            Modified By: <strong>{item.modifiedBy || 'System'}</strong>
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-xs text-gray-500 font-mono">
+                                                        {new Date(item.createdAt).toLocaleString()}
                                                     </span>
                                                 </div>
-                                                <span className="text-xs text-gray-500 font-mono">
-                                                    {new Date(item.createdAt).toLocaleString()}
-                                                </span>
+                                                {item.remarks && (
+                                                    <div className="mt-1 pt-2 border-t border-gray-200 flex items-start gap-2">
+                                                        <span className="text-xs font-semibold text-amber-700 bg-amber-100 px-2 py-0.5 rounded whitespace-nowrap">Remarks</span>
+                                                        <span className="text-xs text-gray-700">{item.remarks}</span>
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 {item.action !== 'CREATE' && (
