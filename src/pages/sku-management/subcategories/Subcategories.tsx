@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CustomTable, { Column } from "../../../components/CustomTable";
 import TopBar from "../../../layouts/top-bar";
-import { getSubcategoriesByCategory, userLogout, editSubcategory, addSubcategory } from "../../../services/ApiService";
+import { getSubcategoriesByCategory, getAllSubcategories, userLogout, editSubcategory, addSubcategory } from "../../../services/ApiService";
 import { toast } from "react-toastify";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
@@ -12,6 +12,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { logoutUser } from "../../../redux/slices/userDataSlice";
 import { clearTokens } from "../../../redux/slices/authTokenSlice";
 import SubCategoryBulkUpload from "./SubCategoryBulkUpload";
+import ExportButton from "../../../components/ExportButton";
 
 const EMPTY_ADD_FORM = { subCategoryName: "", subCategoryDescription: "" };
 
@@ -57,6 +58,17 @@ const SubCategories = () => {
             toast.error("Failed to load subcategories");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const exportSubcategories = async () => {
+        try {
+            const res = await getAllSubcategories(1, 10000);
+            return res?.data?.data || [];
+        } catch (error) {
+            console.error("Error exporting subcategories:", error);
+            toast.error("Failed to export subcategories");
+            return [];
         }
     };
 
@@ -203,6 +215,7 @@ const SubCategories = () => {
                 description={`Viewing sub categories for category ${categoryId}`}
                 actionButton={
                     <div className="flex items-center gap-3">
+                        <ExportButton exporter={exportSubcategories} reportName="Subcategories List" />
                         <button
                             onClick={() => setIsBulkUploadOpen(true)}
                             className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"

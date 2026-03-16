@@ -176,6 +176,10 @@ export const getSubcategoriesByCategory = async (categoryId: number, page: numbe
     return api.get(`sku/categories/${categoryId}/subcategories/all`, { params: { page, limit } }).then((res) => res);
 };
 
+export const getAllSubcategories = async (page: number = 1, limit: number = 10) => {
+    return api.get(`sku/subcategories/all`, { params: { page, limit } }).then((res) => res);
+};
+
 export const editCategory = async (categoryId: number, payload: any) => {
     return api.put(`sku/categories/${categoryId}`, payload).then((res) => res);
 };

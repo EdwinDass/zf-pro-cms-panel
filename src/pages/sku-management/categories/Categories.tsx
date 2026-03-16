@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../../redux/slices/userDataSlice";
 import { clearTokens } from "../../../redux/slices/authTokenSlice";
 import CategoryBulkUpload from "./CategoryBulkUpload";
+import ExportButton from "../../../components/ExportButton";
 
 const EMPTY_ADD_FORM = { categoryName: "", categoryShortCode: "", categoryDescription: "" };
 
@@ -71,6 +72,17 @@ const Categories = () => {
         dispatch(logoutUser());
         dispatch(clearTokens());
         navigate("/");
+    };
+
+    const exportCategories = async () => {
+        try {
+            const res = await getCategories(1, 10000);
+            return res?.data?.data || [];
+        } catch (error) {
+            console.error("Error exporting categories:", error);
+            toast.error("Failed to export categories");
+            return [];
+        }
     };
 
     // ── Edit handlers ─────────────────────────────────────────────────────────
@@ -247,6 +259,7 @@ const Categories = () => {
                 description="Manage SKU product categories"
                 actionButton={
                     <div className="flex items-center gap-3">
+                        <ExportButton exporter={exportCategories} reportName="Categories List" />
                         <button
                             onClick={() => setIsBulkUploadOpen(true)}
                             className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"

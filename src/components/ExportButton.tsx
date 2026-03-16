@@ -15,6 +15,8 @@ import {
     BlockedMemberReportKeys,
     BlockedMemberScanReportKeys,
     AnomalyTransactionsReportKeys,
+    CategoriesListKeys,
+    SubCategoriesListKeys,
 } from "../utils/ExportKeyMappings";
 import * as XLSX from "xlsx";
 import { ExporterType } from "../types/Export";
@@ -84,6 +86,12 @@ const ExporterButton = ({
                     break;
                 case "Anomaly Transactions Report":
                     mappings = AnomalyTransactionsReportKeys;
+                    break;
+                case "Categories List":
+                    mappings = CategoriesListKeys;
+                    break;
+                case "Subcategories List":
+                    mappings = SubCategoriesListKeys;
                     break;
 
                 default:
