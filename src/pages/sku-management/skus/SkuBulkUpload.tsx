@@ -21,21 +21,21 @@ const SkuBulkUpload: React.FC<SkuBulkUploadProps> = ({ isOpen, onClose, onUpload
     if (!isOpen) return null;
 
     const REQUIRED_HEADERS_KEYS = [
-        "subCategoryName", "skuName", "skuCode", "productValue", "points"
+        "subCategoryId", "skuName", "skuCode", "productValue", "points"
     ];
     const REQUIRED_HEADERS_LOWER = REQUIRED_HEADERS_KEYS.map(h => h.toLowerCase());
 
     const handleDownloadSample = () => {
         const sampleData = [
             {
-                subCategoryName: "Phones",
+                subCategoryId: 1,
                 skuName: "iPhone 15",
                 skuCode: "IP15",
                 productValue: "999.00",
                 points: "50.00"
             },
             {
-                subCategoryName: "Desks",
+                subCategoryId: 2,
                 skuName: "Standing Desk",
                 skuCode: "SD01",
                 productValue: "299.99",
@@ -76,8 +76,8 @@ const SkuBulkUpload: React.FC<SkuBulkUploadProps> = ({ isOpen, onClose, onUpload
 
                 const missingHeaders = REQUIRED_HEADERS_LOWER.filter((required) => !fileHeadersLower.includes(required));
 
-                // Must have at least subCategoryName, skuName, and skuCode
-                const criticalHeaders = ["subcategoryname", "skuname", "skucode"];
+                // Must have at least subCategoryId, skuName, and skuCode
+                const criticalHeaders = ["subcategoryid", "skuname", "skucode"];
                 const missingCritical = criticalHeaders.filter(h => !fileHeadersLower.includes(h));
 
                 if (missingCritical.length > 0) {
