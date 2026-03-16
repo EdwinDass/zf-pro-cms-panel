@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import CustomTable, { Column } from "../../../components/CustomTable";
 import TopBar from "../../../layouts/top-bar";
-import { getSkusBySubcategory, userLogout, editSku, addSku } from "../../../services/ApiService";
+import { getSkusBySubcategory, userLogout, editSku, addSku, getSkuHistory } from "../../../services/ApiService";
 import { toast } from "react-toastify";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
+import HistoryIcon from "@mui/icons-material/History";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { logoutUser } from "../../../redux/slices/userDataSlice";
@@ -35,7 +36,7 @@ const Skus = () => {
     // Edit SKU state
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingSku, setEditingSku] = useState<any>(null);
-    const [editForm, setEditForm] = useState({ skuName: "", skuDescription: "", isActive: true });
+    const [editForm, setEditForm] = useState({ skuName: "", skuDescription: "", isActive: true, points: "" });
     const [isEditSubmitting, setIsEditSubmitting] = useState(false);
 
     // Add SKU state
@@ -45,6 +46,14 @@ const Skus = () => {
 
     // Bulk Upload state
     const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
+
+    // History state
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+    const [historyData, setHistoryData] = useState<any[]>([]);
+    const [historyLoading, setHistoryLoading] = useState(false);
+    const [historyPage, setHistoryPage] = useState(1);
+    const [historyTotalRows, setHistoryTotalRows] = useState(0);
+    const [selectedSkuForHistory, setSelectedSkuForHistory] = useState<any>(null);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -74,6 +83,7 @@ const Skus = () => {
             skuName: sku.skuName || sku.name || sku.title || "",
             skuDescription: sku.skuDescription || sku.description || "",
             isActive: sku.isActive !== undefined ? sku.isActive : true,
+            points: sku.points !== undefined && sku.points !== null ? String(sku.points) : "",
         });
         setIsEditModalOpen(true);
     };
@@ -81,7 +91,7 @@ const Skus = () => {
     const handleCloseEditModal = () => {
         setIsEditModalOpen(false);
         setEditingSku(null);
-        setEditForm({ skuName: "", skuDescription: "", isActive: true });
+        setEditForm({ skuName: "", skuDescription: "", isActive: true, points: "" });
     };
 
     const handleEditSubmit = async () => {
@@ -93,6 +103,7 @@ const Skus = () => {
                 skuName: editForm.skuName,
                 skuDescription: editForm.skuDescription,
                 isActive: editForm.isActive,
+                ...(editForm.points !== "" && { points: editForm.points }),
             });
             toast.success("SKU updated successfully");
             handleCloseEditModal();
@@ -144,6 +155,40 @@ const Skus = () => {
         }
     };
 
+    // ── History helpers ───────────────────────────────────────────────────────
+    const handleOpenHistoryModal = (sku: any) => {
+        setSelectedSkuForHistory(sku);
+        setHistoryPage(1);
+        setIsHistoryModalOpen(true);
+        fetchHistory(sku.id || sku.skuId || sku._id, 1);
+    };
+
+    const handleCloseHistoryModal = () => {
+        setIsHistoryModalOpen(false);
+        setSelectedSkuForHistory(null);
+        setHistoryData([]);
+    };
+
+    const fetchHistory = async (skuId: number, currentPage: number = 1) => {
+        setHistoryLoading(true);
+        try {
+            const res = await getSkuHistory(skuId, currentPage, 10);
+            setHistoryData(res?.data?.data || []);
+            setHistoryTotalRows(res?.data?.pagination?.total ?? res?.data?.data?.length ?? 0);
+        } catch (error) {
+            console.error("Error fetching SKU history:", error);
+            toast.error("Failed to load SKU history");
+        } finally {
+            setHistoryLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (isHistoryModalOpen && selectedSkuForHistory) {
+            fetchHistory(selectedSkuForHistory.id || selectedSkuForHistory.skuId || selectedSkuForHistory._id, historyPage);
+        }
+    }, [historyPage]);
+
     // ── Logout ────────────────────────────────────────────────────────────────
     const logout = async () => {
         try { await userLogout(); } catch (err) { console.error("Logout API failed:", err); }
@@ -192,12 +237,22 @@ const Skus = () => {
             key: "actions",
             label: "Actions",
             render: (row: any) => (
-                <button
-                    className="text-blue-600 hover:text-blue-900 flex items-center"
-                    onClick={() => handleEditClick(row)}
-                >
-                    <EditIcon fontSize="small" className="mr-1" /> Edit
-                </button>
+                <div className="flex items-center space-x-4">
+                    <button
+                        className="text-blue-600 hover:text-blue-900 flex items-center"
+                        onClick={() => handleEditClick(row)}
+                        title="Edit"
+                    >
+                        <EditIcon fontSize="small" />
+                    </button>
+                    <button
+                        className="text-gray-600 hover:text-gray-900 flex items-center"
+                        onClick={() => handleOpenHistoryModal(row)}
+                        title="View History"
+                    >
+                        <HistoryIcon fontSize="small" />
+                    </button>
+                </div>
             ),
         },
     ];
@@ -286,6 +341,22 @@ const Skus = () => {
                                     placeholder="Enter SKU description"
                                 />
                             </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Points</label>
+                                <input
+                                    type="number"
+                                    step="1"
+                                    min="0"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    value={editForm.points}
+                                    onChange={(e) => {
+                                        const v = e.target.value;
+                                        setEditForm(prev => ({ ...prev, points: v === '' ? '' : String(Math.floor(Number(v))) }));
+                                    }}
+                                    onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
+                                    placeholder="e.g. 30"
+                                />
+                            </div>
                             <div className="flex items-center">
                                 <label className="flex items-center cursor-pointer">
                                     <input
@@ -363,11 +434,16 @@ const Skus = () => {
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Points <span className="text-red-500">*</span></label>
                                 <input
                                     type="number"
-                                    step="0.01"
+                                    step="1"
+                                    min="0"
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     value={addForm.points}
-                                    onChange={(e) => setAddForm(prev => ({ ...prev, points: e.target.value }))}
-                                    placeholder="e.g. 30.00"
+                                    onChange={(e) => {
+                                        const v = e.target.value;
+                                        setAddForm(prev => ({ ...prev, points: v === '' ? '' : String(Math.floor(Number(v))) }));
+                                    }}
+                                    onKeyDown={(e) => { if (e.key === '.' || e.key === ',') e.preventDefault(); }}
+                                    placeholder="e.g. 30"
                                 />
                             </div>
                             {/* Read-only context fields */}
@@ -395,6 +471,99 @@ const Skus = () => {
                                 <button onClick={handleCloseAddModal} className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors" disabled={isAddSubmitting}>Cancel</button>
                                 <button onClick={handleAddSubmit} className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-400" disabled={isAddSubmitting}>
                                     {isAddSubmitting ? "Adding..." : "Add SKU"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── SKU History Modal ────────────────────────────────────────────── */}
+            {isHistoryModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 flex-shrink-0">
+                            <div>
+                                <h3 className="text-xl font-semibold text-gray-900">SKU History</h3>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    {selectedSkuForHistory?.skuName || selectedSkuForHistory?.name} ({selectedSkuForHistory?.skuCode || selectedSkuForHistory?.code})
+                                </p>
+                            </div>
+                            <button type="button" onClick={handleCloseHistoryModal} className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-200 transition">
+                                <CloseIcon />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                            {historyLoading && historyData.length === 0 ? (
+                                <div className="flex justify-center py-8 text-gray-500">Loading history...</div>
+                            ) : historyData.length === 0 ? (
+                                <div className="text-center py-8 text-gray-500">No history records found for this SKU.</div>
+                            ) : (
+                                <div className="space-y-6">
+                                    {historyData.map((item, idx) => (
+                                        <div key={item.historyId || idx} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                                            <div className="px-4 py-3 bg-gray-100 border-b border-gray-200 flex flex-col gap-1">
+                                                <div className="flex justify-between items-center flex-wrap gap-2">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className={`px-2 py-1 text-xs font-bold rounded ${item.action === 'CREATE' ? 'bg-green-100 text-green-700' : item.action === 'UPDATE' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'}`}>
+                                                            {item.action}
+                                                        </span>
+                                                        <span className="text-sm text-gray-600">
+                                                            Modified By: <strong>{item.modifiedBy || 'System'}</strong>
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-xs text-gray-500 font-mono">
+                                                        {new Date(item.createdAt).toLocaleString()}
+                                                    </span>
+                                                </div>
+                                                {item.remarks && (
+                                                    <div className="mt-1 pt-2 border-t border-gray-200 flex items-start gap-2">
+                                                        <span className="text-xs font-semibold text-amber-700 bg-amber-100 px-2 py-0.5 rounded whitespace-nowrap">Remarks</span>
+                                                        <span className="text-xs text-gray-700">{item.remarks}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {item.action !== 'CREATE' && (
+                                                    <div className="bg-red-50 p-3 rounded border border-red-100 overflow-x-auto">
+                                                        <h4 className="text-xs font-semibold text-red-800 mb-2 uppercase tracking-wide">Previous Data</h4>
+                                                        <pre className="text-xs text-red-900 whitespace-pre-wrap font-mono">
+                                                            {JSON.stringify(item.previousData, null, 2)}
+                                                        </pre>
+                                                    </div>
+                                                )}
+                                                {item.action !== 'DELETE' && (
+                                                    <div className={`${item.action === 'CREATE' ? 'col-span-1 md:col-span-2' : ''} bg-green-50 p-3 rounded border border-green-100 overflow-x-auto`}>
+                                                        <h4 className="text-xs font-semibold text-green-800 mb-2 uppercase tracking-wide">New Data</h4>
+                                                        <pre className="text-xs text-green-900 whitespace-pre-wrap font-mono">
+                                                            {JSON.stringify(item.newData, null, 2)}
+                                                        </pre>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <div className="px-6 py-4 border-t border-gray-200 flex justify-between items-center bg-white flex-shrink-0">
+                            <span className="text-sm text-gray-600">
+                                Showing {((historyPage - 1) * 10) + 1} to {Math.min(historyPage * 10, historyTotalRows)} of {historyTotalRows} records
+                            </span>
+                            <div className="flex space-x-2">
+                                <button
+                                    onClick={() => setHistoryPage(p => Math.max(1, p - 1))}
+                                    disabled={historyPage === 1 || historyLoading}
+                                    className="px-3 py-1 rounded bg-gray-100 text-gray-700 disabled:opacity-50 hover:bg-gray-200 transition"
+                                >
+                                    Previous
+                                </button>
+                                <button
+                                    onClick={() => setHistoryPage(p => p + 1)}
+                                    disabled={historyPage * 10 >= historyTotalRows || historyLoading}
+                                    className="px-3 py-1 rounded bg-gray-100 text-gray-700 disabled:opacity-50 hover:bg-gray-200 transition"
+                                >
+                                    Next
                                 </button>
                             </div>
                         </div>

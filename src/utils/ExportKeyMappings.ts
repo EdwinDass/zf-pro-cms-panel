@@ -261,3 +261,19 @@ export const AnomalyTransactionsReportKeys: any = {
     updatedAt: "Updated At",
     actionTaken: "Action Taken"
 };
+
+export const CategoriesListKeys: any = {
+    categoryId: "Category ID",
+    categoryName: "Category Name",
+    categoryShortCode: "Short Code",
+    categoryDescription: "Description",
+    isActive: "Status"
+};
+
+export const SubCategoriesListKeys: any = {
+    subCategoryId: "SubCategory ID",
+    categoryId: "Category ID",
+    subCategoryName: "SubCategory Name",
+    subCategoryDescription: "Description",
+    isActive: "Status"
+};

@@ -21,19 +21,19 @@ const SubCategoryBulkUpload: React.FC<SubCategoryBulkUploadProps> = ({ isOpen, o
     if (!isOpen) return null;
 
     const REQUIRED_HEADERS_KEYS = [
-        "categoryName", "subCategoryName", "subCategoryDescription"
+        "categoryId", "subCategoryName", "subCategoryDescription"
     ];
     const REQUIRED_HEADERS_LOWER = REQUIRED_HEADERS_KEYS.map(h => h.toLowerCase());
 
     const handleDownloadSample = () => {
         const sampleData = [
             {
-                categoryName: "Electronics",
+                categoryId: 1,
                 subCategoryName: "Phones",
                 subCategoryDescription: "Mobile connectivity devices"
             },
             {
-                categoryName: "Furniture",
+                categoryId: 2,
                 subCategoryName: "Desks",
                 subCategoryDescription: "Office desks"
             }
@@ -72,9 +72,9 @@ const SubCategoryBulkUpload: React.FC<SubCategoryBulkUploadProps> = ({ isOpen, o
 
                 const missingHeaders = REQUIRED_HEADERS_LOWER.filter((required) => !fileHeadersLower.includes(required));
 
-                // Must have at least categoryName & subCategoryName for mapping
-                if (!fileHeadersLower.includes("categoryname") || !fileHeadersLower.includes("subcategoryname")) {
-                    toast.error(`Missing required headers: categoryName, subCategoryName`);
+                // Must have at least categoryId & subCategoryName for mapping
+                if (!fileHeadersLower.includes("categoryid") || !fileHeadersLower.includes("subcategoryname")) {
+                    toast.error(`Missing required headers: categoryId, subCategoryName`);
                     setIsProcessing(false);
                     return;
                 }
@@ -290,7 +290,7 @@ const SubCategoryBulkUpload: React.FC<SubCategoryBulkUploadProps> = ({ isOpen, o
                                             <table className="min-w-full divide-y divide-gray-200 border border-gray-200">
                                                 <thead className="bg-gray-50 sticky top-0">
                                                     <tr>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Category Name</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Category ID</th>
                                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Subcategory Name</th>
                                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Subcategory ID</th>
                                                     </tr>
@@ -298,7 +298,7 @@ const SubCategoryBulkUpload: React.FC<SubCategoryBulkUploadProps> = ({ isOpen, o
                                                 <tbody className="bg-white divide-y divide-gray-200">
                                                     {successRecords.map((item: any, idx: number) => (
                                                         <tr key={idx} className="hover:bg-gray-50">
-                                                            <td className="px-4 py-3 text-sm text-gray-900">{item.data?.categoryName || item.categoryName || '-'}</td>
+                                                            <td className="px-4 py-3 text-sm text-gray-900">{item.data?.categoryId || item.categoryId || '-'}</td>
                                                             <td className="px-4 py-3 text-sm text-gray-600 font-mono">{item.subCategoryName || item.data?.subCategoryName}</td>
                                                             <td className="px-4 py-3 text-sm text-gray-500 font-mono">{item.data?.subCategoryId || item.data?.id || '-'}</td>
                                                         </tr>
@@ -318,7 +318,7 @@ const SubCategoryBulkUpload: React.FC<SubCategoryBulkUploadProps> = ({ isOpen, o
                                                 <thead className="bg-gray-50 sticky top-0">
                                                     <tr>
                                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase max-w-xs">Error Message</th>
-                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Category Name</th>
+                                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Category ID</th>
                                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase">Subcategory Name</th>
                                                     </tr>
                                                 </thead>
@@ -326,7 +326,7 @@ const SubCategoryBulkUpload: React.FC<SubCategoryBulkUploadProps> = ({ isOpen, o
                                                     {failedRecords.map((item: any, idx: number) => (
                                                         <tr key={idx} className="hover:bg-red-50">
                                                             <td className="px-4 py-3 text-sm text-red-600 font-medium whitespace-normal max-w-xs">{item.error}</td>
-                                                            <td className="px-4 py-3 text-sm text-gray-900">{item.categoryName || "N/A"}</td>
+                                                            <td className="px-4 py-3 text-sm text-gray-900">{item.categoryId || "N/A"}</td>
                                                             <td className="px-4 py-3 text-sm text-gray-600 font-mono">{item.subCategoryName || "N/A"}</td>
                                                         </tr>
                                                     ))}
