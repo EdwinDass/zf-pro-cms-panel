@@ -9,4 +9,15 @@ export interface ExporterType {
     | "Process Redemption"
     | "OTP Report"
     | "Amazon Marketplace"
+    | "Bank Details Report"
+    | "KYC Report"
+    | "Product Wise Report"
+    | "Category Report"
+    | "Error Transaction Report"
+    | "Notification Report"
+    | "Blocked Member Report"
+    | "Blocked Member Scan Report"
+    | "Anomaly Transactions Report"
+    | "Categories List"
+    | "Subcategories List";
 }

@@ -19,7 +19,10 @@ import Faqs from "../pages/faqs/Faqs";
 // import Communication from "../pages/communication/Communication";
 // import AmazonMarketplace from "../pages/amazon-marketplace/AmazonMarketplace";
 import SurveyQuestions from "../pages/surveys/SurveyQuestions";
-import SurveyResponses from "../pages/surveys/SurveyResponses";
+import SurveyResponses from "../pages/surveys/SurveyResponses"; import Categories from "../pages/sku-management/categories/Categories";
+import SubCategories from "../pages/sku-management/subcategories/Subcategories";
+import Skus from "../pages/sku-management/skus/Skus";
+
 const AppRoutes = () => {
     return (
         <Routes>
@@ -41,6 +44,9 @@ const AppRoutes = () => {
             <Route path="/amazon-marketplace" element={<PrivateRoute element={<AmazonMarketplace />} />} />
             <Route path="/survey-questions" element={<PrivateRoute element={<SurveyQuestions />} />} />
             <Route path="/survey-responses" element={<PrivateRoute element={<SurveyResponses />} />} />
+            <Route path="/categories" element={<PrivateRoute element={<Categories />} />} />
+            <Route path="/categories/:categoryId/subcategories" element={<PrivateRoute element={<SubCategories />} />} />
+            <Route path="/subcategories/:subcategoryId/skus" element={<PrivateRoute element={<Skus />} />} />
         </Routes>
     );
 };
