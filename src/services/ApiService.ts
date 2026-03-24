@@ -147,6 +147,33 @@ export const getRecentTransactions = async (count: number) => {
         .then((response) => response);
 };
 
+export const getAssets = async () => {
+    return api
+        .get("masters/assets")
+        .then((response) => response)
+        .catch((error) => { throw error });
+};
+
+export const addAsset = async (payload: { name: string; link: string }) => {
+    return api
+        .post("masters/assets", payload)
+        .then((response) => response)
+        .catch((error) => { throw error });
+};
+
+export const editAsset = async (assetId: number, payload: { name: string; link: string; isActive?: boolean }) => {
+    return api
+        .put(`masters/assets/${assetId}`, payload)
+        .then((response) => response)
+        .catch((error) => { throw error });
+};
+
+export const deleteAsset = async (assetId: number) => {
+    return api
+        .delete(`masters/assets/${assetId}`)
+        .then((response) => response);
+};
+
 // Get top performers
 export const getTopPerformers = async (count: number) => {
     return api

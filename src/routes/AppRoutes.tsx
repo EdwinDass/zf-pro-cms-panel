@@ -22,6 +22,7 @@ import SurveyQuestions from "../pages/surveys/SurveyQuestions";
 import SurveyResponses from "../pages/surveys/SurveyResponses"; import Categories from "../pages/sku-management/categories/Categories";
 import SubCategories from "../pages/sku-management/subcategories/Subcategories";
 import Skus from "../pages/sku-management/skus/Skus";
+import Assets from "../pages/assets/Assets";
 
 const AppRoutes = () => {
     return (
@@ -40,6 +41,7 @@ const AppRoutes = () => {
             <Route path="/communication" element={<PrivateRoute element={<Communication />} />} />
             <Route path="/amazon-marketplace" element={<PrivateRoute element={<AmazonMarketplace />} />} />
             <Route path="/faqs" element={<PrivateRoute element={<Faqs />} />} />
+            <Route path="/assets" element={<PrivateRoute element={<Assets />} />} />
             <Route path="/communication" element={<PrivateRoute element={<Communication />} />} />
             <Route path="/amazon-marketplace" element={<PrivateRoute element={<AmazonMarketplace />} />} />
             <Route path="/survey-questions" element={<PrivateRoute element={<SurveyQuestions />} />} />
