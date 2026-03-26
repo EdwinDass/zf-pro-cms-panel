@@ -39,7 +39,7 @@ interface QRBatch {
     batchId: number;
     skuCode: string;
     quantity: number;
-    fileUrl: string;
+    fileUrl: string | null;
     createdAt: string;
     isActive: boolean;
 }

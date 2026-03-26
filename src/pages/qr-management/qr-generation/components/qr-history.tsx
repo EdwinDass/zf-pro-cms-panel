@@ -142,11 +142,11 @@
 
 import React, { FC, useState } from "react";
 
-interface QRBatch {
+export interface QRBatch {
     batchId: number;
     skuCode: string;
     quantity: number;
-    fileUrl: string;
+    fileUrl: string | null;
     createdAt: string;
     isActive: boolean;
 }
@@ -270,12 +270,18 @@ const QRBatchTable: FC<QRBatchTableProps> = ({
 
                                     {/* DOWNLOAD ONLY */}
                                     <td className="py-3 px-4">
-                                        <button
-                                            onClick={() => onDownload(row)}
-                                            className="text-indigo-600 hover:underline"
-                                        >
-                                            Download
-                                        </button>
+                                        {row.fileUrl ? (
+                                            <button
+                                                onClick={() => onDownload(row)}
+                                                className="text-indigo-600 font-medium hover:underline hover:text-indigo-800 transition-colors"
+                                            >
+                                                Download
+                                            </button>
+                                        ) : (
+                                            <span className="text-gray-400 italic text-sm">
+                                                In progress...
+                                            </span>
+                                        )}
                                     </td>
                                 </tr>
                             ))
