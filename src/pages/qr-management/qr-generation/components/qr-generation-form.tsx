@@ -153,6 +153,10 @@ interface GenerateQRCodesProps {
   categories: string[];          // Category names
   subCategories: string[];       // Subcategory names based on selected category
   skuList: string[];             // SKU names based on selected subcategory
+  isSubCategoriesLoading?: boolean;
+  isSkusLoading?: boolean;
+  hasSelectedCategory?: boolean;
+  hasSelectedSubCategory?: boolean;
 
   onCategoryChange: (categoryName: string) => void;
   onSubCategoryChange: (subCategoryName: string) => void;
@@ -164,6 +168,10 @@ const GenerateQRCodes: FC<GenerateQRCodesProps> = ({
   categories,
   subCategories,
   skuList,
+  isSubCategoriesLoading = false,
+  isSkusLoading = false,
+  hasSelectedCategory = false,
+  hasSelectedSubCategory = false,
 
   onCategoryChange,
   onSubCategoryChange,
@@ -233,12 +241,16 @@ const GenerateQRCodes: FC<GenerateQRCodesProps> = ({
             name="subCategory"
             className="border rounded-lg p-2"
             required
-            disabled={subCategories.length === 0}
+            disabled={subCategories.length === 0 || isSubCategoriesLoading}
             onChange={(e) => onSubCategoryChange(e.target.value)}
             defaultValue=""
           >
             <option value="">
-              {subCategories.length === 0 ? "Select Category First" : "-- Select Subcategory --"}
+              {isSubCategoriesLoading
+                ? "Loading..."
+                : subCategories.length === 0
+                  ? (hasSelectedCategory ? "No Options Available" : "Select Category First")
+                  : "-- Select Subcategory --"}
             </option>
 
             {subCategories.map((sub) => (
@@ -256,11 +268,15 @@ const GenerateQRCodes: FC<GenerateQRCodesProps> = ({
             name="sku"
             className="border rounded-lg p-2"
             required
-            disabled={skuList.length === 0}
+            disabled={skuList.length === 0 || isSkusLoading}
             defaultValue=""
           >
             <option value="">
-              {skuList.length === 0 ? "Select Subcategory First" : "-- Select SKU --"}
+              {isSkusLoading
+                ? "Loading..."
+                : skuList.length === 0
+                  ? (hasSelectedSubCategory ? "No Options Available" : "Select Subcategory First")
+                  : "-- Select SKU --"}
             </option>
 
             {skuList.map((sku) => (

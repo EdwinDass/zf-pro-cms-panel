@@ -56,6 +56,9 @@ const QrGeneration: FC = () => {
     const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
     const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<number | null>(null);
 
+    const [isSubCategoriesLoading, setIsSubCategoriesLoading] = useState<boolean>(false);
+    const [isSkusLoading, setIsSkusLoading] = useState<boolean>(false);
+
     const [totalGenerated, setTotalGenerated] = useState<number>(0);
     const [totalScanned, setTotalScanned] = useState<number>(0);
 
@@ -113,12 +116,19 @@ const QrGeneration: FC = () => {
     // When category is selected
     const handleCategoryChange = async (categoryName: string) => {
         const selected = categories.find(c => c.categoryName === categoryName);
-        if (!selected) return;
+        if (!selected) {
+            setSelectedCategoryId(null);
+            setSubCategories([]);
+            setSkus([]);
+            setSelectedSubCategoryId(null);
+            return;
+        }
 
         setSelectedCategoryId(selected.categoryId);
         setSubCategories([]);
         setSkus([]);
         setSelectedSubCategoryId(null);
+        setIsSubCategoriesLoading(true);
 
         try {
             const response = await getSubcategoriesByCategory(selected.categoryId);
@@ -126,16 +136,23 @@ const QrGeneration: FC = () => {
         } catch (err) {
             console.error("Error fetching subcategories:", err);
             toast.error("Failed to load subcategories");
+        } finally {
+            setIsSubCategoriesLoading(false);
         }
     };
 
     // When subcategory is selected
     const handleSubCategoryChange = async (subCategoryName: string) => {
         const selected = subCategories.find(s => s.subCategoryName === subCategoryName);
-        if (!selected || !selectedCategoryId) return;
+        if (!selected || !selectedCategoryId) {
+            setSelectedSubCategoryId(null);
+            setSkus([]);
+            return;
+        }
 
         setSelectedSubCategoryId(selected.subCategoryId);
         setSkus([]);
+        setIsSkusLoading(true);
 
         try {
             const response = await getSkusByCategoryAndSubcategory(
@@ -146,6 +163,8 @@ const QrGeneration: FC = () => {
         } catch (err) {
             console.error("Error fetching SKUs:", err);
             toast.error("Failed to load SKUs");
+        } finally {
+            setIsSkusLoading(false);
         }
     };
 
@@ -213,6 +232,10 @@ const QrGeneration: FC = () => {
                 onSubCategoryChange={handleSubCategoryChange}
                 onSubmit={handleGenerate}
                 onCancel={handleCancel}
+                isSubCategoriesLoading={isSubCategoriesLoading}
+                isSkusLoading={isSkusLoading}
+                hasSelectedCategory={!!selectedCategoryId}
+                hasSelectedSubCategory={!!selectedSubCategoryId}
             />
 
             {/* QR Batch Table */}
