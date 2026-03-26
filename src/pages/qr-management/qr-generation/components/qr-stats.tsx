@@ -11,7 +11,7 @@ interface QRStatsProps {
 const QRStats: FC<QRStatsProps> = ({ generated, scanned }) => {
   const chartRef = useRef<HTMLDivElement | null>(null);
   const scanRate =
-    generated > 0 ? ((scanned / generated) * 100).toFixed(1) : "0.0";
+    generated > 0 ? ((scanned / generated) * 100).toFixed(5) : "0.0";
   useEffect(() => {
     if (!chartRef.current) return;
 
