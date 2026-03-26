@@ -59,6 +59,14 @@ const QrGeneration: FC = () => {
     const [isSubCategoriesLoading, setIsSubCategoriesLoading] = useState<boolean>(false);
     const [isSkusLoading, setIsSkusLoading] = useState<boolean>(false);
 
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [historyFilters, setHistoryFilters] = useState({
+        skuCode: "",
+        fromDate: "",
+        toDate: ""
+    });
+
     const [totalGenerated, setTotalGenerated] = useState<number>(0);
     const [totalScanned, setTotalScanned] = useState<number>(0);
 
@@ -70,9 +78,12 @@ const QrGeneration: FC = () => {
     // Load categories & batch history
     useEffect(() => {
         fetchCategories();
-        fetchQRHistory();
         fetchStatistics();
     }, []);
+
+    useEffect(() => {
+        fetchQRHistory(page, historyFilters);
+    }, [page]);
 
     // Fetch categories
     const fetchCategories = async () => {
@@ -86,10 +97,19 @@ const QrGeneration: FC = () => {
     };
 
     // Fetch QR Batch History
-    const fetchQRHistory = async () => {
+    const fetchQRHistory = async (currentPage = page, filters = historyFilters) => {
         try {
-            const response = await getQRHistory();
-            setQrHistory(response.data.qrHistory);
+            const params: any = {
+                page: currentPage,
+                limit: 5
+            };
+            if (filters.skuCode) params.skuCode = filters.skuCode;
+            if (filters.fromDate) params.fromDate = filters.fromDate;
+            if (filters.toDate) params.toDate = filters.toDate;
+
+            const response = await getQRHistory(params);
+            setQrHistory(response.data.qrHistory || []);
+            setTotalPages(response.data.totalPages || 1);
         } catch (err) {
             console.error("Error fetching QR history:", err);
             toast.error("Failed to load QR history");
@@ -183,8 +203,9 @@ const QrGeneration: FC = () => {
 
             toast.success("QR code generation in progress. Please check later.");
 
-            // Refresh history
-            fetchQRHistory();
+            // Refresh history explicitly
+            fetchQRHistory(1, historyFilters);
+            setPage(1);
 
         } catch (error) {
             console.error("Error generating QR Codes:", error);
@@ -243,6 +264,25 @@ const QrGeneration: FC = () => {
                 <QRBatchTable
                     data={qrHistory}
                     onDownload={handleDownload}
+                    page={page}
+                    totalPages={totalPages}
+                    filters={historyFilters}
+                    onPageChange={(p) => setPage(p)}
+                    onFilterChange={(name, value) => setHistoryFilters(prev => ({ ...prev, [name]: value }))}
+                    onApplyFilters={() => {
+                        setPage(1);
+                        fetchQRHistory(1, historyFilters);
+                    }}
+                    onClearFilters={() => {
+                        const cleared = {
+                            skuCode: "",
+                            fromDate: "",
+                            toDate: ""
+                        };
+                        setHistoryFilters(cleared);
+                        setPage(1);
+                        fetchQRHistory(1, cleared);
+                    }}
                 />
             </div>
 

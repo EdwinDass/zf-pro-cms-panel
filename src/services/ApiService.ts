@@ -295,9 +295,9 @@ export const generateQRCodes = async (quantity: number, skuCode: string) => {
     });
 };
 
-export const getQRHistory = async () => {
+export const getQRHistory = async (params: any = {}) => {
     return api
-        .get("qr/qrs/history")
+        .get("qr/qrs/history", { params })
         .then((response) => response);
 };
 
