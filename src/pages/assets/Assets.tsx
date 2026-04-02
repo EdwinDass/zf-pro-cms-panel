@@ -39,6 +39,8 @@ const Assets = () => {
     const [assetType, setAssetType] = useState("");
     const [assetDescription, setAssetDescription] = useState("");
 
+    const [file, setFile] = useState<File | null>(null);
+    const [fileUrl, setFileUrl] = useState("");
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -80,6 +82,8 @@ const Assets = () => {
         setLink("");
         setAssetType("");
         setAssetDescription("");
+        setFile(null);
+        setFileUrl("");
         setSelectedAsset(null);
     };
 
@@ -98,19 +102,30 @@ const Assets = () => {
     };
 
     const handleAddSubmit = async () => {
-        const trimmedName = name.trim();
-        const trimmedLink = link.trim();
-
-        if (!trimmedName || !trimmedLink) {
-            toast.error("Both name and link are required");
+        const trimmedTitle = name.trim();
+        const trimmedType = assetType.trim();
+        const trimmedDescription = assetDescription.trim();
+        const trimmedFileUrl = fileUrl.trim();
+        if (!trimmedTitle || !trimmedType || !trimmedDescription || (!file && !trimmedFileUrl)) {
+            toast.error("All fields and either a file or file URL are required");
             return;
         }
-
         try {
-            await addAsset({
-                name: trimmedName,
-                link: trimmedLink
-            });
+            if (file) {
+                await addAsset({
+                    assetType: trimmedType,
+                    assetTitle: trimmedTitle,
+                    assetDescription: trimmedDescription,
+                    file
+                });
+            } else {
+                await addAsset({
+                    assetType: trimmedType,
+                    assetTitle: trimmedTitle,
+                    assetDescription: trimmedDescription,
+                    fileUrl: trimmedFileUrl
+                });
+            }
             toast.success("Asset added successfully");
             setOpenAddDialog(false);
             resetForm();
@@ -285,14 +300,22 @@ const Assets = () => {
                             onChange={(e) => setAssetDescription(e.target.value)}
                             required
                         />
-                        <TextField
-                            label="Link"
-                            variant="outlined"
-                            fullWidth
-                            value={link}
-                            onChange={(e) => setLink(e.target.value)}
-                            required
-                        />
+                        <div className="flex flex-col gap-2">
+                            <label className="font-medium">Upload File</label>
+                            <input
+                                type="file"
+                                accept="image/*,application/pdf"
+                                onChange={e => setFile(e.target.files && e.target.files[0] ? e.target.files[0] : null)}
+                            />
+                            <span className="text-center py-2">or</span>
+                            <TextField
+                                label="File URL"
+                                variant="outlined"
+                                fullWidth
+                                value={fileUrl}
+                                onChange={e => setFileUrl(e.target.value)}
+                            />
+                        </div>
                     </div>
                 </DialogContent>
                 <DialogActions className="p-4 border-t bg-gray-50">

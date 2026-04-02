@@ -154,11 +154,22 @@ export const getAssets = async () => {
         .catch((error) => { throw error });
 };
 
-export const addAsset = async (payload: { name: string; link: string }) => {
-    return api
-        .post("masters/assets", payload)
-        .then((response) => response)
-        .catch((error) => { throw error });
+export const addAsset = async (payload: { assetType: string; assetTitle: string; assetDescription: string; file?: File; fileUrl?: string }) => {
+    const formData = new FormData();
+    formData.append('assetType', payload.assetType);
+    formData.append('assetTitle', payload.assetTitle);
+    formData.append('assetDescription', payload.assetDescription);
+    if (payload.file) {
+        formData.append('file', payload.file);
+    }
+    if (payload.fileUrl) {
+        formData.append('staticAssetUrl', payload.fileUrl);
+    }
+    return api.post('masters/assets', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    .then((response) => response)
+    .catch((error) => { throw error });
 };
 
 export const editAsset = async (
