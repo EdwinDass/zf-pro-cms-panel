@@ -161,11 +161,20 @@ export const addAsset = async (payload: { name: string; link: string }) => {
         .catch((error) => { throw error });
 };
 
-export const editAsset = async (assetId: number, payload: { name: string; link: string; isActive?: boolean }) => {
-    return api
-        .put(`masters/assets/${assetId}`, payload)
-        .then((response) => response)
-        .catch((error) => { throw error });
+export const editAsset = async (
+    assetId: number,
+    payload: { assetType?: string; assetTitle: string; assetDescription?: string; isActive?: boolean }
+) => {
+    const formData = new FormData();
+    if (payload.assetType) formData.append('assetType', payload.assetType);
+    formData.append('assetTitle', payload.assetTitle);
+    if (payload.assetDescription) formData.append('assetDescription', payload.assetDescription);
+    if (payload.isActive !== undefined) formData.append('isActive', String(payload.isActive));
+    return api.put(`masters/assets/${assetId}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    .then((response) => response)
+    .catch((error) => { throw error });
 };
 
 export const deleteAsset = async (assetId: number) => {

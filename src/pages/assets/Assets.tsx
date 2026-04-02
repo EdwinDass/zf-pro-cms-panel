@@ -14,8 +14,10 @@ import { clearTokens } from "../../redux/slices/authTokenSlice";
 
 export interface Asset {
     assetId: number;
-    name: string;
-    link: string;
+    assetTitle: string;
+    assetUrl: string;
+    assetType?: string;
+    assetDescription?: string;
     isActive: boolean;
 }
 
@@ -34,6 +36,8 @@ const Assets = () => {
     // Form states
     const [name, setName] = useState("");
     const [link, setLink] = useState("");
+    const [assetType, setAssetType] = useState("");
+    const [assetDescription, setAssetDescription] = useState("");
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -55,6 +59,10 @@ const Assets = () => {
             const response = await getAssets();
             if (response?.data?.data) {
                 setAssets(response.data.data);
+            } else if (Array.isArray(response?.data)) {
+                setAssets(response.data);
+            } else if (Array.isArray(response)) {
+                setAssets(response);
             }
         } catch (error) {
             toast.error("Failed to fetch Assets");
@@ -70,6 +78,8 @@ const Assets = () => {
     const resetForm = () => {
         setName("");
         setLink("");
+        setAssetType("");
+        setAssetDescription("");
         setSelectedAsset(null);
     };
 
@@ -80,8 +90,10 @@ const Assets = () => {
 
     const handleOpenEditDialog = (asset: Asset) => {
         setSelectedAsset(asset);
-        setName(asset.name);
-        setLink(asset.link);
+        setName(asset.assetTitle);
+        setLink(asset.assetUrl);
+        setAssetType(asset.assetType || "");
+        setAssetDescription(asset.assetDescription || "");
         setOpenEditDialog(true);
     };
 
@@ -111,18 +123,27 @@ const Assets = () => {
     const handleEditSubmit = async () => {
         if (!selectedAsset) return;
 
-        const trimmedName = name.trim();
-        const trimmedLink = link.trim();
-
-        if (!trimmedName || !trimmedLink) {
-            toast.error("Both name and link are required");
+        const trimmedTitle = name.trim();
+        const trimmedType = assetType.trim();
+        const trimmedDescription = assetDescription.trim();
+        if (!trimmedTitle) {
+            toast.error("Asset title is required");
+            return;
+        }
+        if (!trimmedType) {
+            toast.error("Asset type is required");
+            return;
+        }
+        if (!trimmedDescription) {
+            toast.error("Asset description is required");
             return;
         }
 
         try {
             await editAsset(selectedAsset.assetId, {
-                name: trimmedName,
-                link: trimmedLink,
+                assetTitle: trimmedTitle,
+                assetType: trimmedType,
+                assetDescription: trimmedDescription,
                 isActive: selectedAsset.isActive,
             });
             toast.success("Asset updated successfully");
@@ -157,15 +178,15 @@ const Assets = () => {
     };
 
     const columns: Column[] = [
-        { key: "name", label: "Asset Name", className: "w-1/4" },
+        { key: "assetTitle", label: "Asset Name", className: "w-1/4" },
         {
-            key: "link",
+            key: "assetUrl",
             label: "Asset Link",
             className: "w-1/2",
             render: (item: Asset) => (
                 <div className="whitespace-pre-wrap break-words">
-                    <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                        {item.link}
+                    <a href={item.assetUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                        {item.assetUrl}
                     </a>
                 </div>
             )
@@ -246,6 +267,22 @@ const Assets = () => {
                             fullWidth
                             value={name}
                             onChange={(e) => setName(e.target.value)}
+                            required
+                        />
+                        <TextField
+                            label="Type"
+                            variant="outlined"
+                            fullWidth
+                            value={assetType}
+                            onChange={(e) => setAssetType(e.target.value)}
+                            required
+                        />
+                        <TextField
+                            label="Description"
+                            variant="outlined"
+                            fullWidth
+                            value={assetDescription}
+                            onChange={(e) => setAssetDescription(e.target.value)}
                             required
                         />
                         <TextField

@@ -3,18 +3,20 @@
 import React, { useState } from "react";
 import Card from "./Card";
 import CardVariantTwo from "./CardVariantTwo";
-import { getTotalScans, getKycStatus, getMemberCount } from "../../../services/ApiService";
+import { getTotalScans, getKycStatus, getMemberCount, getTotalGenerated } from "../../../services/ApiService";
 
 import { FaQrcode, FaUserCheck, FaUserShield } from "react-icons/fa";
 import { stat } from "fs";
 
 const StatsRowTwo: React.FC = () => {
     const [totalScans, setTotalScans] = useState("0");
+    const [totalQrGenerated, setTotalQrGenerated] = useState("0");
     const [kycStatus, setKycStatus] = useState({ approved: "0", pending: "0", percentage: "0" });
     const [blockedMembers, setBlockedMembers] = useState("0");
     const [activeMembers, setActiveMembers] = useState("0");
     React.useEffect(() => {
         fetchTotalScans();
+        fetchTotalQrGenerated();
         fetchKycStatus();
         fetchBlockedMembers();
         fetchActiveMembers();
@@ -26,6 +28,15 @@ const StatsRowTwo: React.FC = () => {
             setTotalScans(response?.data?.data?.totalScans?.toString() || "0");
         } catch (error) {
             console.error("Total scans error:", error);
+        }
+    };
+
+    const fetchTotalQrGenerated = async () => {
+        try {
+            const response = await getTotalGenerated();
+            setTotalQrGenerated(response?.data?.data?.totalCount?.toString() || "0");
+        } catch (error) {
+            console.error("Total QR generated error:", error);
         }
     };
 
@@ -76,14 +87,24 @@ const StatsRowTwo: React.FC = () => {
     return (
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
 
-            {/* 🔹 Normal Card */}
-            <Card
-                title="Total Scans"
-                value={totalScans}
-                percentage="+15.2%"
-                percentageColor="text-green-600"
+            {/* 🔹 Scans vs QR Generated — CardVariantTwo */}
+            <CardVariantTwo
+                title="Scans vs QR Generated"
                 icon={<FaQrcode />}
-                iconColor="text-indigo-500"
+                iconColor="text-blue-500"
+                leftValue={totalScans}
+                leftLabel="Scans"
+                rightValue={totalQrGenerated}
+                rightLabel="QR Generated"
+                progress={
+                    Math.min(
+                        100,
+                        Number(totalQrGenerated) > 0
+                            ? (Number(totalScans) / Number(totalQrGenerated)) * 100
+                            : 0
+                    )
+                }
+                footerText={`${totalQrGenerated !== "0" ? ((Number(totalScans) / Number(totalQrGenerated)) * 100).toFixed(2) : "0.00"}% of QR codes have been scanned`}
             />
 
             {/* 🔹 KYC Status — CardVariantTwo */}
@@ -91,13 +112,10 @@ const StatsRowTwo: React.FC = () => {
                 title="KYC Status"
                 icon={<FaUserCheck />}
                 iconColor="text-teal-500"
-
                 leftValue={kycStatus.approved}
                 leftLabel="Approved"
-
                 rightValue={kycStatus.pending}
                 rightLabel="Pending"
-
                 progress={Number(kycStatus.percentage)}
                 footerText={`${kycStatus.percentage}% of members have completed KYC`}
             />
@@ -107,13 +125,10 @@ const StatsRowTwo: React.FC = () => {
                 title="User Status"
                 icon={<FaUserShield />}
                 iconColor="text-amber-500"
-
                 leftValue={activeMembers}
                 leftLabel="Active"
-
                 rightValue={blockedMembers}
                 rightLabel="Blocked"
-
                 progress={
                     Math.max(
                         0,
@@ -126,7 +141,6 @@ const StatsRowTwo: React.FC = () => {
                     100 - ((Number(blockedMembers) || 0) /
                         ((Number(activeMembers) || 0) + (Number(blockedMembers) || 0) || 1) * 100)
                 ).toFixed(2)}% of users are active`}
-
             />
 
         </div>
