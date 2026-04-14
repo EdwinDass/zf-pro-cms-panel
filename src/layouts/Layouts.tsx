@@ -63,7 +63,7 @@ export const Layout: React.FC<LayoutProps> = ({
         { id: 'tickets', label: 'Tickets', icon: 'fas fa-ticket-alt', path: '/tickets' },
         { id: 'members', label: 'Members and KYC', icon: 'fas fa-users', path: '/members-management' },
         { id: 'faqs', label: 'FAQs', icon: 'fas fa-question-circle', path: '/faqs' },
-        { id: 'assets', label: 'Assets', icon: 'fas fa-folder-open', path: '/assets' },
+        { id: 'assets', label: 'Assets', icon: 'fas fa-folder-open', path: '/assets-management' },
         // { id: 'configuration', label: 'Configuration', icon: 'fas fa-sliders-h', path: '/configuration' },
         { id: 'amazon-marketplace', label: 'Amazon Marketplace', icon: 'fas fa-store', path: '/amazon-marketplace' },
         {

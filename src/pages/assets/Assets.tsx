@@ -173,15 +173,9 @@ const Assets = () => {
     const handleDeleteConfirm = async () => {
         if (!selectedAsset) return;
         try {
-            // Delete approach: Call editAsset and change isActive = false, or call deleteAsset.
-            // Using editAsset with isActive = false as per prompt "delete(is_active = false)"
             await editAsset(selectedAsset.assetId, {
-                name: selectedAsset.name,
-                link: selectedAsset.link,
                 isActive: false
-            });
-            // If the backend has a delete api, it could alternatively be:
-            // await deleteAsset(selectedAsset.assetId);
+            } as any);
 
             toast.success("Asset deleted successfully");
             setOpenDeleteDialog(false);
@@ -206,6 +200,7 @@ const Assets = () => {
                 </div>
             )
         },
+        { key: "assetType", label: "Asset Tag", className: "w-1/4" },
         {
             key: "isActive",
             label: "Status",
