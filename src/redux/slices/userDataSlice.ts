@@ -2,6 +2,7 @@ import { createAsyncThunk, createSelector, createSlice, PayloadAction } from '@r
 import User, { UserDetails } from '../../types/User';
 import { Persistance } from '../../services/storage.service';
 import { RootState } from '../../redux/store';
+import { api } from '../../services/ApiService';
 
 export interface UserState {
   userData: UserDetails | null;
@@ -80,6 +81,21 @@ const userSlice = createSlice({
       }
     }
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchUserProfile.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchUserProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.userData = action.payload;
+        state.isAuthenticated = true;
+        Persistance.storeData({ key: 'userData', value: action.payload });
+      })
+      .addCase(fetchUserProfile.rejected, (state) => {
+        state.loading = false;
+      });
+  },
 });
 
 const selectUserState = (state: RootState) => state.user;
@@ -91,6 +107,24 @@ export const hydrateAuth = createAsyncThunk(
     const storedUser = await Persistance.retrieveData('userData') as UserDetails;
     if (authFlag && storedUser) {
       dispatch(loginUser(storedUser));
+    }
+  }
+);
+
+export const fetchUserProfile = createAsyncThunk(
+  'user/fetchUserProfile',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('user/user-profile');
+      const body = response.data as { data?: unknown } | unknown;
+      const raw =
+        body && typeof body === 'object' && 'data' in body && (body as { data: unknown }).data != null
+          ? (body as { data: unknown }).data
+          : body;
+      const profileData = new UserDetails(raw);
+      return profileData;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
