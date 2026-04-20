@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../redux/hooks';
+import { getAllowedModules } from '../values/roleModuleRules';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -16,6 +17,37 @@ interface NavItem {
     subItems?: { id: string; label: string; path: string; }[];
 }
 
+export const navItems: NavItem[] = [
+    { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-tachometer-alt', path: '/dashboard' },
+    // { id: 'masters-config', label: 'Masters & Config', icon: 'fas fa-cogs', path: '/masters-config' },
+    // { id: 'schemes-campaigns', label: 'Schemes & Campaigns', icon: 'fas fa-bullhorn', path: '/schemes-campaigns' },
+    { id: 'qr-management', label: 'QR Management', icon: 'fas fa-qrcode', path: '/qr' },
+    { id: 'communication', label: 'Communication', icon: 'fas fa-broadcast-tower', path: '/communication' },
+    // { id: 'finance-compliance', label: 'Finance & Compliance', icon: 'fas fa-coins', path: '/finance-compliance' },
+    // { id: 'fraud-detection', label: 'Fraud Detection', icon: 'fas fa-shield-alt', path: '/fraud-detection' },
+    { id: 'mis-analytics', label: 'MIS & Analytics', icon: 'fas fa-chart-line', path: '/mis-analytics' },
+    { id: 'role-management', label: 'Role Management', icon: 'fas fa-user-shield', path: '/role-management' },
+    // { id: 'integrations', label: 'Integrations', icon: 'fas fa-plug', path: '/integrations' },
+    { id: 'process', label: 'Process Redemption', icon: 'fas fa-cogs', path: '/process-management' },
+    { id: 'tickets', label: 'Tickets', icon: 'fas fa-ticket-alt', path: '/tickets' },
+    { id: 'members', label: 'Members and KYC', icon: 'fas fa-users', path: '/members-management' },
+    { id: 'faqs', label: 'FAQs', icon: 'fas fa-question-circle', path: '/faqs' },
+    { id: 'assets', label: 'Assets', icon: 'fas fa-folder-open', path: '/assets-management' },
+    // { id: 'configuration', label: 'Configuration', icon: 'fas fa-sliders-h', path: '/configuration' },
+    { id: 'amazon-marketplace', label: 'Amazon Marketplace', icon: 'fas fa-store', path: '/amazon-marketplace' },
+    {
+        id: 'surveys',
+        label: 'Survey Module',
+        icon: 'fas fa-poll',
+        path: '',
+        subItems: [
+            { id: 'survey-questions', label: 'Survey Questions', path: '/survey-questions' },
+            { id: 'survey-responses', label: 'Survey Responses', path: '/survey-responses' }
+        ]
+    },
+    { id: 'sku-management', label: 'SKU Management', icon: 'fas fa-boxes', path: '/categories' },
+];
+
 export const Layout: React.FC<LayoutProps> = ({
     children,
     sidebarProps,
@@ -30,6 +62,7 @@ export const Layout: React.FC<LayoutProps> = ({
     });
     const [isMobile, setIsMobile] = useState(false);
     const [openSubMenus, setOpenSubMenus] = useState<{ [key: string]: boolean }>({});
+    const [filteredNavItems, setFilteredNavItems] = useState<NavItem[]>([]);
 
     const roleMap: Record<string, string> = {
         "1": "mechanic",
@@ -85,36 +118,35 @@ export const Layout: React.FC<LayoutProps> = ({
         sessionStorage.setItem('sidebarExpanded', JSON.stringify(expanded));
     }, [expanded]);
 
-    const navItems: NavItem[] = [
-        { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-tachometer-alt', path: '/dashboard' },
-        // { id: 'masters-config', label: 'Masters & Config', icon: 'fas fa-cogs', path: '/masters-config' },
-        // { id: 'schemes-campaigns', label: 'Schemes & Campaigns', icon: 'fas fa-bullhorn', path: '/schemes-campaigns' },
-        { id: 'qr-management', label: 'QR Management', icon: 'fas fa-qrcode', path: '/qr' },
-        { id: 'communication', label: 'Communication', icon: 'fas fa-broadcast-tower', path: '/communication' },
-        // { id: 'finance-compliance', label: 'Finance & Compliance', icon: 'fas fa-coins', path: '/finance-compliance' },
-        // { id: 'fraud-detection', label: 'Fraud Detection', icon: 'fas fa-shield-alt', path: '/fraud-detection' },
-        { id: 'mis-analytics', label: 'MIS & Analytics', icon: 'fas fa-chart-line', path: '/mis-analytics' },
-        { id: 'role-management', label: 'Role Management', icon: 'fas fa-user-shield', path: '/role-management' },
-        // { id: 'integrations', label: 'Integrations', icon: 'fas fa-plug', path: '/integrations' },
-        { id: 'process', label: 'Process Redemption', icon: 'fas fa-cogs', path: '/process-management' },
-        { id: 'tickets', label: 'Tickets', icon: 'fas fa-ticket-alt', path: '/tickets' },
-        { id: 'members', label: 'Members and KYC', icon: 'fas fa-users', path: '/members-management' },
-        { id: 'faqs', label: 'FAQs', icon: 'fas fa-question-circle', path: '/faqs' },
-        { id: 'assets', label: 'Assets', icon: 'fas fa-folder-open', path: '/assets-management' },
-        // { id: 'configuration', label: 'Configuration', icon: 'fas fa-sliders-h', path: '/configuration' },
-        { id: 'amazon-marketplace', label: 'Amazon Marketplace', icon: 'fas fa-store', path: '/amazon-marketplace' },
-        {
-            id: 'surveys',
-            label: 'Survey Module',
-            icon: 'fas fa-poll',
-            path: '',
-            subItems: [
-                { id: 'survey-questions', label: 'Survey Questions', path: '/survey-questions' },
-                { id: 'survey-responses', label: 'Survey Responses', path: '/survey-responses' }
-            ]
-        },
-        { id: 'sku-management', label: 'SKU Management', icon: 'fas fa-boxes', path: '/categories' },
-    ];
+    // Filter navigation items based on user role
+    useEffect(() => {
+        const userRoleId = user?.userRoleId;
+        const allowedModules = getAllowedModules(userRoleId);
+
+        const filtered = navItems.filter(item => {
+            // Check if item's module is allowed
+            if (allowedModules.includes(item.id)) {
+                return true;
+            }
+            // For items with subItems, check if any subItems are in allowed modules
+            if (item.subItems && item.subItems.length > 0) {
+                const hasAllowedSubItem = item.subItems.some(subItem => allowedModules.includes(subItem.id));
+                return hasAllowedSubItem;
+            }
+            return false;
+        }).map(item => {
+            // Filter subItems if they exist
+            if (item.subItems && item.subItems.length > 0) {
+                return {
+                    ...item,
+                    subItems: item.subItems.filter(subItem => allowedModules.includes(subItem.id))
+                };
+            }
+            return item;
+        });
+
+        setFilteredNavItems(filtered);
+    }, [user?.userRoleId]);
 
     const handleNavigation = (path: string) => {
         navigate(path);
@@ -203,7 +235,7 @@ export const Layout: React.FC<LayoutProps> = ({
                     {/* Navigation */}
                     <div className="flex-1 overflow-y-auto py-4">
                         <nav className="px-2 space-y-1">
-                            {navItems.map((item) => (
+                            {filteredNavItems.map((item) => (
                                 <div key={item.id}>
                                     <button
                                         onClick={() => {

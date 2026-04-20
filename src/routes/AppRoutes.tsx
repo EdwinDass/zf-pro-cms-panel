@@ -1,5 +1,5 @@
-import React from "react";
-import { Routes, Route } from "react-router-dom";
+import React, { useEffect, useRef } from "react";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import PrivateRoute from "../routes/PrivateRoute";
 import PublicRoute from "../routes/PublicRoute";
 import NotFound from "../pages/NotFound";
@@ -16,39 +16,72 @@ import MembersManagment from "../pages/members-and-kyc/MembersManagement";
 import Communication from "../pages/communication/Communication";
 import AmazonMarketplace from "../pages/amazon-marketplace/AmazonMarketplace";
 import Faqs from "../pages/faqs/Faqs";
-// import Communication from "../pages/communication/Communication";
-// import AmazonMarketplace from "../pages/amazon-marketplace/AmazonMarketplace";
 import SurveyQuestions from "../pages/surveys/SurveyQuestions";
-import SurveyResponses from "../pages/surveys/SurveyResponses"; import Categories from "../pages/sku-management/categories/Categories";
+import SurveyResponses from "../pages/surveys/SurveyResponses";
+import Categories from "../pages/sku-management/categories/Categories";
 import SubCategories from "../pages/sku-management/subcategories/Subcategories";
 import Skus from "../pages/sku-management/skus/Skus";
 import Assets from "../pages/assets/Assets";
+import { useAppSelector } from "../redux/hooks";
+import { getAllowedRoutes } from "../values/roleModuleRules";
+
+export const appRoutes = [
+    { path: "/", element: <PublicRoute element={<Login />} />, isPublic: true },
+    { path: "/dashboard", element: <PrivateRoute element={<Dashboard />} />, moduleId: "dashboard" },
+    { path: "/role-management", element: <PrivateRoute element={<UserRoleManagement />} />, moduleId: "role-management" },
+    { path: "/qr", element: <PrivateRoute element={<Qr />} />, moduleId: "qr-management" },
+    { path: "/tickets", element: <PrivateRoute element={<Tickets />} />, moduleId: "tickets" },
+    { path: "/process-management", element: <PrivateRoute element={<ProcessManagement />} />, moduleId: "process" },
+    { path: "/integrations", element: <PrivateRoute element={<Integrations />} />, moduleId: "integrations" },
+    { path: "/mis-analytics", element: <PrivateRoute element={<MisAnalytics />} />, moduleId: "mis-analytics" },
+    { path: "/reports", element: <PrivateRoute element={<Reports />} />, moduleId: "mis-analytics" },
+    { path: "/members-management", element: <PrivateRoute element={<MembersManagment />} />, moduleId: "members" },
+    { path: "/communication", element: <PrivateRoute element={<Communication />} />, moduleId: "communication" },
+    { path: "/amazon-marketplace", element: <PrivateRoute element={<AmazonMarketplace />} />, moduleId: "amazon-marketplace" },
+    { path: "/faqs", element: <PrivateRoute element={<Faqs />} />, moduleId: "faqs" },
+    { path: "/assets-management", element: <PrivateRoute element={<Assets />} />, moduleId: "assets" },
+    { path: "/survey-questions", element: <PrivateRoute element={<SurveyQuestions />} />, moduleId: "surveys" },
+    { path: "/survey-responses", element: <PrivateRoute element={<SurveyResponses />} />, moduleId: "surveys" },
+    { path: "/categories", element: <PrivateRoute element={<Categories />} />, moduleId: "sku-management" },
+    { path: "/categories/:categoryId/subcategories", element: <PrivateRoute element={<SubCategories />} />, moduleId: "sku-management" },
+    { path: "/subcategories/:subcategoryId/skus", element: <PrivateRoute element={<Skus />} />, moduleId: "sku-management" },
+    { path: "*", element: <NotFound />, isPublic: true },
+];
 
 const AppRoutes = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const user = useAppSelector((state) => state.user.userData);
+    const lastValidRouteRef = useRef<string>("/dashboard");
+
+    useEffect(() => {
+        const currentPath = location.pathname;
+        const isPublicRoute = appRoutes.filter(route => route.isPublic).some(route => route.path === currentPath);
+        
+        if (isPublicRoute || currentPath === "/") {
+            return;
+        }
+
+        if (user?.userRoleId) {
+            const allowedRoutes = getAllowedRoutes(user.userRoleId);
+            const isAllowed = allowedRoutes.filter(route => currentPath === route || currentPath.startsWith(route.split(":")[0])).length > 0;
+            
+            if (isAllowed) {
+                // Update last valid route if current route is authorized
+                lastValidRouteRef.current = currentPath;
+            } else {
+                // Redirect to last valid route or dashboard if unauthorized
+                const fallbackRoute = lastValidRouteRef.current || "/dashboard";
+                navigate(fallbackRoute, { replace: true });
+            }
+        }
+    }, [location.pathname, user?.userRoleId, navigate]);
+    
     return (
         <Routes>
-            <Route path="*" element={<NotFound />} />
-            <Route path="/" element={<PublicRoute element={<Login />} />} />
-            <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
-            <Route path="/role-management" element={<PrivateRoute element={<UserRoleManagement />} />} />
-            <Route path="/qr" element={<PrivateRoute element={<Qr />} />} />
-            <Route path="/tickets" element={<PrivateRoute element={<Tickets />} />} />
-            <Route path="/process-management" element={<PrivateRoute element={<ProcessManagement />} />} />
-            <Route path="/integrations" element={<PrivateRoute element={<Integrations />} />} />
-            <Route path="/mis-analytics" element={<PrivateRoute element={<MisAnalytics />} />} />
-            <Route path="/reports" element={<PrivateRoute element={<Reports />} />} />
-            <Route path="/members-management" element={<PrivateRoute element={<MembersManagment />} />} />
-            <Route path="/communication" element={<PrivateRoute element={<Communication />} />} />
-            <Route path="/amazon-marketplace" element={<PrivateRoute element={<AmazonMarketplace />} />} />
-            <Route path="/faqs" element={<PrivateRoute element={<Faqs />} />} />
-            <Route path="/assets-management" element={<PrivateRoute element={<Assets />} />} />
-            <Route path="/communication" element={<PrivateRoute element={<Communication />} />} />
-            <Route path="/amazon-marketplace" element={<PrivateRoute element={<AmazonMarketplace />} />} />
-            <Route path="/survey-questions" element={<PrivateRoute element={<SurveyQuestions />} />} />
-            <Route path="/survey-responses" element={<PrivateRoute element={<SurveyResponses />} />} />
-            <Route path="/categories" element={<PrivateRoute element={<Categories />} />} />
-            <Route path="/categories/:categoryId/subcategories" element={<PrivateRoute element={<SubCategories />} />} />
-            <Route path="/subcategories/:subcategoryId/skus" element={<PrivateRoute element={<Skus />} />} />
+            {appRoutes.map((route) => (
+                <Route key={route.path} path={route.path} element={route.element} />
+            ))}
         </Routes>
     );
 };
