@@ -1,4 +1,5 @@
 // export const API_LINK = 'http://zf-pro-alb-uat-1166462272.ap-south-1.elb.amazonaws.com/api/'
+// export const API_LINK = 'https://api.zfpropoints.co.in/'
 // export const API_LINK = 'http://10.77.68.131:5005/'
 // export const API_LINK = 'http://192.168.1.53:5005/'
 export const API_LINK = 'http://localhost:5005/'

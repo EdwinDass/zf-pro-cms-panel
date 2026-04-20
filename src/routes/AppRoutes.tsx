@@ -41,7 +41,7 @@ const AppRoutes = () => {
             <Route path="/communication" element={<PrivateRoute element={<Communication />} />} />
             <Route path="/amazon-marketplace" element={<PrivateRoute element={<AmazonMarketplace />} />} />
             <Route path="/faqs" element={<PrivateRoute element={<Faqs />} />} />
-            <Route path="/assets" element={<PrivateRoute element={<Assets />} />} />
+            <Route path="/assets-management" element={<PrivateRoute element={<Assets />} />} />
             <Route path="/communication" element={<PrivateRoute element={<Communication />} />} />
             <Route path="/amazon-marketplace" element={<PrivateRoute element={<AmazonMarketplace />} />} />
             <Route path="/survey-questions" element={<PrivateRoute element={<SurveyQuestions />} />} />
