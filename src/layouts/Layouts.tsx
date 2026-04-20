@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAppSelector } from '../redux/hooks';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -22,12 +23,48 @@ export const Layout: React.FC<LayoutProps> = ({
 }) => {
     const navigate = useNavigate();
     const location = useLocation();
+    const user = useAppSelector((state) => state.user.userData);
     const [expanded, setExpanded] = useState(() => {
         const savedExpanded = sessionStorage.getItem('sidebarExpanded');
         return savedExpanded !== null ? JSON.parse(savedExpanded) : false;
     });
     const [isMobile, setIsMobile] = useState(false);
     const [openSubMenus, setOpenSubMenus] = useState<{ [key: string]: boolean }>({});
+
+    const roleMap: Record<string, string> = {
+        "1": "mechanic",
+        "2": "regional_manager",
+        "3": "call_centre_executive",
+        "4": "marketing_manager",
+        "5": "operator",
+        "6": "viewer",
+        "7": "qr_admin",
+        "8": "evolve_admin",
+        "9": "client_admin"
+    };
+
+    const formatRoleLabel = (raw: string) =>
+        raw
+            .split(/[_\s]+/)
+            .filter(Boolean)
+            .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+            .join(" ");
+
+    const roleIdKey =
+        user?.userRoleId !== undefined && user?.userRoleId !== null && String(user.userRoleId) !== ""
+            ? String(user.userRoleId)
+            : "";
+
+    const roleLabel = user
+        ? (user.userRole ||
+            (user as any).roleName ||
+            (roleIdKey ? roleMap[roleIdKey] : "") ||
+            user.userSubRole ||
+            (user as any).subRoleName ||
+            "")
+        : "";
+
+    const displayRole = roleLabel ? formatRoleLabel(roleLabel) : "";
 
     useEffect(() => {
         const checkIfMobile = () => {
@@ -222,12 +259,18 @@ export const Layout: React.FC<LayoutProps> = ({
                             <div className="flex items-center">
                                 <div className="flex-shrink-0">
                                     <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                        <span className="text-blue-600 font-medium">A</span>
+                                        <span className="text-blue-600 font-medium">
+                                            {(displayRole || "-").charAt(0).toUpperCase()}
+                                        </span>
                                     </div>
                                 </div>
                                 <div className="ml-3 overflow-hidden">
-                                    <p className="text-sm font-medium text-gray-900 truncate">Admin User</p>
-                                    <p className="text-xs text-gray-500 truncate">admin@zf.com</p>
+                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                        {displayRole || "-"}
+                                    </p>
+                                    <p className="text-xs text-gray-500 truncate">
+                                        {user?.userEmail || "—"}
+                                    </p>
                                 </div>
                             </div>
                         </div>
