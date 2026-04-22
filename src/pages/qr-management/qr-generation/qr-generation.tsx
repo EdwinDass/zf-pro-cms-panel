@@ -88,7 +88,7 @@ const QrGeneration: FC = () => {
     // Fetch categories
     const fetchCategories = async () => {
         try {
-            const response = await getCategories();
+            const response = await getCategories(1, 10000);
             setCategories(response.data.data);
         } catch (err) {
             console.error("Error fetching categories:", err);
@@ -151,7 +151,7 @@ const QrGeneration: FC = () => {
         setIsSubCategoriesLoading(true);
 
         try {
-            const response = await getSubcategoriesByCategory(selected.categoryId);
+            const response = await getSubcategoriesByCategory(selected.categoryId, 1, 10000);
             setSubCategories(response.data.data);
         } catch (err) {
             console.error("Error fetching subcategories:", err);
