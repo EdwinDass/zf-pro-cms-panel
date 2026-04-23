@@ -23,6 +23,7 @@ import SurveyResponses from "../pages/surveys/SurveyResponses"; import Categorie
 import SubCategories from "../pages/sku-management/subcategories/Subcategories";
 import Skus from "../pages/sku-management/skus/Skus";
 import Assets from "../pages/assets/Assets";
+import SchemeEngineConfig from "../pages/scheme-management/SchemeEngineConfig";
 
 const AppRoutes = () => {
     return (
@@ -49,6 +50,7 @@ const AppRoutes = () => {
             <Route path="/categories" element={<PrivateRoute element={<Categories />} />} />
             <Route path="/categories/:categoryId/subcategories" element={<PrivateRoute element={<SubCategories />} />} />
             <Route path="/subcategories/:subcategoryId/skus" element={<PrivateRoute element={<Skus />} />} />
+            <Route path="/scheme-config" element={<PrivateRoute element={<SchemeEngineConfig />} />} />
         </Routes>
     );
 };

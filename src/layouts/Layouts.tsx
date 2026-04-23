@@ -51,7 +51,7 @@ export const Layout: React.FC<LayoutProps> = ({
     const navItems: NavItem[] = [
         { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-tachometer-alt', path: '/dashboard' },
         // { id: 'masters-config', label: 'Masters & Config', icon: 'fas fa-cogs', path: '/masters-config' },
-        // { id: 'schemes-campaigns', label: 'Schemes & Campaigns', icon: 'fas fa-bullhorn', path: '/schemes-campaigns' },
+        { id: 'schemes-campaigns', label: 'Scheme Engine', icon: 'fas fa-bullhorn', path: '/scheme-config' },
         { id: 'qr-management', label: 'QR Management', icon: 'fas fa-qrcode', path: '/qr' },
         { id: 'communication', label: 'Communication', icon: 'fas fa-broadcast-tower', path: '/communication' },
         // { id: 'finance-compliance', label: 'Finance & Compliance', icon: 'fas fa-coins', path: '/finance-compliance' },
