@@ -18,18 +18,19 @@ export const moduleRoutes: Record<string, string[]> = {
   "survey-responses": ["/survey-responses"],
   "sku-management": ["/categories", "/categories/:categoryId/subcategories", "/subcategories/:subcategoryId/skus"],
   integrations: ["/integrations"],
+  "delete-account": ["/delete-account"],
 };
 
 const allModules = Object.keys(moduleRoutes);
 
 // Define which modules are accessible by each role
 export const roleModuleAccess: Record<number, string[]> = {
-  1: ["dashboard"], // mechanic
-  2: ["dashboard", "qr-management", "communication", "mis-analytics", "members", "process"], // regional_manager
+  1:allModules,// mechanic
+  2: allModules, // regional_manager
   3: allModules, // call_centre_executive
-  4: ["dashboard", "communication", "surveys"], // marketing_manager
-  5: ["dashboard", "tickets", "members"], // operator
-  6: ["dashboard"], // viewer
+  4: allModules, // marketing_manager
+  5: allModules, // operator
+  6: allModules, // viewer
   7: allModules, // qr_admin
   8: allModules, // evolve_admin
   9: allModules, // client_admin
