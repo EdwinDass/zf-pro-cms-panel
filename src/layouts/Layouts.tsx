@@ -45,7 +45,16 @@ export const navItems: NavItem[] = [
             { id: 'survey-responses', label: 'Survey Responses', path: '/survey-responses' }
         ]
     },
-    { id: 'sku-management', label: 'SKU Management', icon: 'fas fa-boxes', path: '/categories' },
+    {
+        id: 'sku-management',
+        label: 'SKU Master',
+        icon: 'fas fa-boxes',
+        path: '',
+        subItems: [
+            { id: 'sku-management', label: 'Categories', path: '/categories' },
+            { id: 'shock-replacement-skus', label: 'Shock Replacement SKUs', path: '/shock-replacement-skus' }
+        ]
+    },
 ];
 
 export const Layout: React.FC<LayoutProps> = ({

@@ -209,6 +209,30 @@ export const getAllSkus = async () => {
         .then((response) => response);
 };
 
+export const getActiveSkus = async () => {
+    return api
+        .get("sku/active")
+        .then((response) => response);
+};
+
+export const getShockReplacementSkus = async () => {
+    return api
+        .get("sku/shock-replacement-config")
+        .then((response) => response);
+};
+
+export const addShockReplacementSku = async (payload: { sku: number | string; sku_code?: number | string }) => {
+    return api
+        .post("sku/shock-replacement-config", payload)
+        .then((response) => response);
+};
+
+export const removeShockReplacementSku = async (sku: number | string) => {
+    return api
+        .delete(`sku/shock-replacement-config/${sku}`)
+        .then((response) => response);
+};
+
 export const getSubcategoriesBySku = async (skuId: number) => {
     return api
         .get(`sku/skus/${skuId}/subcategories`)
