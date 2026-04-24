@@ -17,6 +17,7 @@ export const moduleRoutes: Record<string, string[]> = {
   "survey-questions": ["/survey-questions"],
   "survey-responses": ["/survey-responses"],
   "sku-management": ["/categories", "/categories/:categoryId/subcategories", "/subcategories/:subcategoryId/skus"],
+  "shock-replacement-skus": ["/shock-replacement-skus"],
   integrations: ["/integrations"],
   "delete-account": ["/delete-account"],
 };
