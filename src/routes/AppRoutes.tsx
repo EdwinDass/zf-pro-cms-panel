@@ -22,6 +22,7 @@ import Categories from "../pages/sku-management/categories/Categories";
 import SubCategories from "../pages/sku-management/subcategories/Subcategories";
 import Skus from "../pages/sku-management/skus/Skus";
 import Assets from "../pages/assets/Assets";
+import DeleteAccount from "../pages/delete-account/DeleteAccount";
 import { useAppSelector } from "../redux/hooks";
 import { getAllowedRoutes } from "../values/roleModuleRules";
 
@@ -45,6 +46,7 @@ export const appRoutes = [
     { path: "/categories", element: <PrivateRoute element={<Categories />} />, moduleId: "sku-management" },
     { path: "/categories/:categoryId/subcategories", element: <PrivateRoute element={<SubCategories />} />, moduleId: "sku-management" },
     { path: "/subcategories/:subcategoryId/skus", element: <PrivateRoute element={<Skus />} />, moduleId: "sku-management" },
+    { path: "/delete-account", element: <DeleteAccount />, isPublic: true },
     { path: "*", element: <NotFound />, isPublic: true },
 ];
 
