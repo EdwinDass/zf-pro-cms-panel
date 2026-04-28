@@ -221,7 +221,11 @@ export const getShockReplacementSkus = async () => {
         .then((response) => response);
 };
 
-export const addShockReplacementSku = async (payload: { sku: number | string; sku_code?: number | string }) => {
+export const addShockReplacementSku = async (
+    payload:
+        | { sku: number | string; sku_code?: number | string }
+        | { sku: number | string; quantity: number }[]
+) => {
     return api
         .post("sku/shock-replacement-config", payload)
         .then((response) => response);
