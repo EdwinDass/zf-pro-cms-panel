@@ -15,6 +15,8 @@ type SkuOption = {
     skuCode: string;
     skuName: string;
     skuKey: string;
+    originalSku: string | number | null;
+    originalSkuCode: string | number | null;
 };
 
 const ShockReplacementSkus = () => {
@@ -48,6 +50,9 @@ const ShockReplacementSkus = () => {
             skuCode,
             skuName: String(item?.skuName ?? item?.sku_name ?? item?.name ?? item?.title ?? ""),
             skuKey,
+            // Store original values for delete operations
+            originalSku: item?.sku ?? rawSkuCode,
+            originalSkuCode: item?.sku_code ?? rawSkuCode,
         };
     };
 
@@ -154,7 +159,22 @@ const ShockReplacementSkus = () => {
 
         setIsAdding(true);
         try {
-            await addShockReplacementSku({ sku: numericSku, sku_code: numericSku });
+            try {
+                // Keep legacy CMS payload first.
+                await addShockReplacementSku({ sku: numericSku, sku_code: numericSku });
+            } catch (legacyError: any) {
+                const message = legacyError?.response?.data?.message || "";
+                const needsArrayPayload =
+                    typeof message === "string" &&
+                    message.includes("Request body must be a non-empty array of items with sku and quantity");
+
+                if (!needsArrayPayload) {
+                    throw legacyError;
+                }
+
+                // Backend may enforce mobile-style contract on this endpoint.
+                await addShockReplacementSku([{ sku: numericSku, quantity: 1 }]);
+            }
             toast.success("Shock replacement SKU added");
             await fetchPageData();
             setSelectedSku("");
@@ -170,15 +190,18 @@ const ShockReplacementSkus = () => {
         const confirmed = window.confirm("Remove this SKU from shock replacement list?");
         if (!confirmed) return;
 
-        const numericSku = sku.numericSku ?? toNumberOrNull(sku.skuCode);
-        if (numericSku === null) {
-            toast.error("Valid numeric SKU is required");
+        // Use original values that match what was stored in backend
+        const skuToDelete = sku.originalSku ?? sku.originalSkuCode ?? sku.numericSku ?? sku.skuCode;
+        console.log("Removing SKU:", { sku, skuToDelete, skuKey: sku.skuKey });
+        
+        if (!skuToDelete) {
+            toast.error("Valid SKU is required");
             return;
         }
 
         setIsRemovingSkuKey(sku.skuKey);
         try {
-            await removeShockReplacementSku(numericSku);
+            await removeShockReplacementSku(skuToDelete);
             toast.success("Shock replacement SKU removed");
             await fetchPageData();
         } catch (error: any) {

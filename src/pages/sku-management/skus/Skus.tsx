@@ -5,6 +5,7 @@ import { getSkusBySubcategory, userLogout, editSku, addSku, getSkuHistory } from
 import { toast } from "react-toastify";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import HistoryIcon from "@mui/icons-material/History";
@@ -183,6 +184,28 @@ const Skus = () => {
         }
     };
 
+    // ── Delete helpers ───────────────────────────────────────────────────────
+    const handleDeleteSku = async (sku: any) => {
+        const skuId = sku.id || sku.skuId || sku._id;
+        if (!skuId) {
+            toast.error("SKU ID not found");
+            return;
+        }
+        
+        if (!window.confirm(`Are you sure you want to delete "${sku.skuName || sku.name || sku.title}"?`)) {
+            return;
+        }
+
+        try {
+            await deleteSku(skuId);
+            toast.success("SKU deleted successfully");
+            if (subcategoryId) fetchSkus(subcategoryId, page);
+        } catch (error: any) {
+            console.error("Error deleting SKU:", error);
+            toast.error(error?.response?.data?.message || "Failed to delete SKU");
+        }
+    };
+
     useEffect(() => {
         if (isHistoryModalOpen && selectedSkuForHistory) {
             fetchHistory(selectedSkuForHistory.id || selectedSkuForHistory.skuId || selectedSkuForHistory._id, historyPage);
@@ -251,6 +274,13 @@ const Skus = () => {
                         title="View History"
                     >
                         <HistoryIcon fontSize="small" />
+                    </button>
+                    <button
+                        className="text-red-600 hover:text-red-900 flex items-center"
+                        onClick={() => handleDeleteSku(row)}
+                        title="Delete"
+                    >
+                        <DeleteIcon fontSize="small" />
                     </button>
                 </div>
             ),
