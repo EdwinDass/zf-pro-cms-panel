@@ -51,6 +51,33 @@ export const appRoutes = [
     { path: "/delete-account", element: <DeleteAccount />, isPublic: true },
     { path: "*", element: <NotFound />, isPublic: true },
 ];
+import DeleteAccount from "../pages/delete-account/DeleteAccount";
+import { useAppSelector } from "../redux/hooks";
+import { getAllowedRoutes } from "../values/roleModuleRules";
+
+export const appRoutes = [
+    { path: "/", element: <PublicRoute element={<Login />} />, isPublic: true },
+    { path: "/dashboard", element: <PrivateRoute element={<Dashboard />} />, moduleId: "dashboard" },
+    { path: "/role-management", element: <PrivateRoute element={<UserRoleManagement />} />, moduleId: "role-management" },
+    { path: "/qr", element: <PrivateRoute element={<Qr />} />, moduleId: "qr-management" },
+    { path: "/tickets", element: <PrivateRoute element={<Tickets />} />, moduleId: "tickets" },
+    { path: "/process-management", element: <PrivateRoute element={<ProcessManagement />} />, moduleId: "process" },
+    { path: "/integrations", element: <PrivateRoute element={<Integrations />} />, moduleId: "integrations" },
+    { path: "/mis-analytics", element: <PrivateRoute element={<MisAnalytics />} />, moduleId: "mis-analytics" },
+    { path: "/reports", element: <PrivateRoute element={<Reports />} />, moduleId: "mis-analytics" },
+    { path: "/members-management", element: <PrivateRoute element={<MembersManagment />} />, moduleId: "members" },
+    { path: "/communication", element: <PrivateRoute element={<Communication />} />, moduleId: "communication" },
+    { path: "/amazon-marketplace", element: <PrivateRoute element={<AmazonMarketplace />} />, moduleId: "amazon-marketplace" },
+    { path: "/faqs", element: <PrivateRoute element={<Faqs />} />, moduleId: "faqs" },
+    { path: "/assets-management", element: <PrivateRoute element={<Assets />} />, moduleId: "assets" },
+    { path: "/survey-questions", element: <PrivateRoute element={<SurveyQuestions />} />, moduleId: "surveys" },
+    { path: "/survey-responses", element: <PrivateRoute element={<SurveyResponses />} />, moduleId: "surveys" },
+    { path: "/categories", element: <PrivateRoute element={<Categories />} />, moduleId: "sku-management" },
+    { path: "/categories/:categoryId/subcategories", element: <PrivateRoute element={<SubCategories />} />, moduleId: "sku-management" },
+    { path: "/subcategories/:subcategoryId/skus", element: <PrivateRoute element={<Skus />} />, moduleId: "sku-management" },
+    { path: "/delete-account", element: <DeleteAccount />, isPublic: true },
+    { path: "*", element: <NotFound />, isPublic: true },
+];
 
 const AppRoutes = () => {
     const location = useLocation();
@@ -61,7 +88,7 @@ const AppRoutes = () => {
     useEffect(() => {
         const currentPath = location.pathname;
         const isPublicRoute = appRoutes.filter(route => route.isPublic).some(route => route.path === currentPath);
-        
+
         if (isPublicRoute || currentPath === "/") {
             return;
         }
@@ -69,7 +96,7 @@ const AppRoutes = () => {
         if (user?.userRoleId) {
             const allowedRoutes = getAllowedRoutes(user.userRoleId);
             const isAllowed = allowedRoutes.filter(route => currentPath === route || currentPath.startsWith(route.split(":")[0])).length > 0;
-            
+
             if (isAllowed) {
                 // Update last valid route if current route is authorized
                 lastValidRouteRef.current = currentPath;
@@ -80,9 +107,12 @@ const AppRoutes = () => {
             }
         }
     }, [location.pathname, user?.userRoleId, navigate]);
-    
+
     return (
         <Routes>
+            {appRoutes.map((route) => (
+                <Route key={route.path} path={route.path} element={route.element} />
+            ))}
             {appRoutes.map((route) => (
                 <Route key={route.path} path={route.path} element={route.element} />
             ))}
