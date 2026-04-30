@@ -18,15 +18,21 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch()
 
+    useEffect(() => {
+        console.log('📊 Dashboard component mounted');
+    }, []);
+
     const logout = async () => {
         try {
+            console.log('🔐 Logging out user...');
             await userLogout();
         } catch (err) {
-            console.error("Logout API failed:", err);
+            console.error("❌ Logout API failed:", err);
         }
 
         dispatch(logoutUser());
         dispatch(clearTokens());
+        console.log('✅ User logged out successfully');
         navigate("/");
     };
 
@@ -34,6 +40,7 @@ const Dashboard = () => {
         <div className="h-screen overflow-y-auto pb-10">
             <TopBar logout={logout} />
             <div className="m-5">
+                {console.log('📈 Rendering dashboard stats rows')}
                 <StatsRowOne />
                 <StatsRowTwo />
                 <StatsRowThree />

@@ -209,6 +209,34 @@ export const getAllSkus = async () => {
         .then((response) => response);
 };
 
+export const getActiveSkus = async () => {
+    return api
+        .get("sku/active")
+        .then((response) => response);
+};
+
+export const getShockReplacementSkus = async () => {
+    return api
+        .get("sku/shock-replacement-config")
+        .then((response) => response);
+};
+
+export const addShockReplacementSku = async (
+    payload:
+        | { sku: number | string; sku_code?: number | string }
+        | { sku: number | string; quantity: number }[]
+) => {
+    return api
+        .post("sku/shock-replacement-config", payload)
+        .then((response) => response);
+};
+
+export const removeShockReplacementSku = async (sku: number | string) => {
+    return api
+        .delete(`sku/shock-replacement-config/${sku}`)
+        .then((response) => response);
+};
+
 export const getSubcategoriesBySku = async (skuId: number) => {
     return api
         .get(`sku/skus/${skuId}/subcategories`)
@@ -370,13 +398,13 @@ export const getRoles = async () => {
 
 export const getRedemptionHistory = async (payload: any) => {
     return api
-        .post("redeem/redemptions/history", payload)
+        .post("redeem/history", payload)
         .then((res) => res.data);
 };
 
 export const updateRedemptionStatus = async (payload: any) => {
     return api
-        .patch("redeem/redemptions", payload)
+        .patch("redeem/history", payload)
         .then((response) => response)
         .catch((error) => { throw error });
 };
@@ -403,6 +431,15 @@ export const getUserProfile = () => {
 
 export const userLogout = () => {
     return api.get('auth/user-logout');
+};
+
+export const deleteAccount = async (payload: {
+    username: string;
+    password: string;
+    details?: string;
+    confirmText: string;
+}) => {
+    return api.post("user/delete-account", payload);
 };
 
 export const resolveTicket = async (ticketId: number, comments: string) => {

@@ -17,7 +17,6 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
 
-import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -26,7 +25,7 @@ import { userLogin } from "../../services/ApiService";
 import { LoginPayload } from "../../types";
 import { saveTokens } from "../../services/tokenStorage";
 import { useDispatch } from 'react-redux';
-import { existingLogin } from "../../redux/slices/userDataSlice";
+import { existingLogin, fetchUserProfile } from "../../redux/slices/userDataSlice";
 import { setTokens } from "../../redux/slices/authTokenSlice";
 
 const Login = () => {
@@ -57,7 +56,8 @@ const Login = () => {
         setSnackbarState((prev) => ({ ...prev, open, message }));
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
         try {
             setLoading((prev) => ({ ...prev, loginButton: true }));
             const res = await userLogin(loginPayload);
@@ -68,6 +68,7 @@ const Login = () => {
                 }
                 dispatch(setTokens(tokens));
                 dispatch(existingLogin());
+                await dispatch(fetchUserProfile());
                 navigate("/dashboard")
             } else {
                 openSnackbar(res?.message || "Unexpected error", true)

@@ -26,18 +26,39 @@ export class UserDetails {
   tdsSlabs: string = "";
   referralCode: string = ""
   constructor(data: any) {
+    const rolePayload = data?.role;
+    const resolvedRoleId =
+      data?.userRoleId ?? data?.roleId ?? rolePayload?.roleId ?? "";
+    const resolvedSubRoleId =
+      data?.userSubRoleId ?? data?.subRoleId ?? rolePayload?.subRoleId ?? "";
+
     this.userId = data?.userId || "";
     this.userName = data?.userName || "";
     this.userCode = data?.userCode || "";
     this.userEmail = data?.userEmail || "";
     this.displayName = data?.displayName || "";
     this.userMobile = data?.userMobile || "";
-    this.userRoleId = data?.userRoleId?.toString() || "";
-    this.userSubRoleId = data?.userSubRoleId?.toString() || "";
+    this.userRoleId =
+      resolvedRoleId !== "" && resolvedRoleId != null
+        ? String(resolvedRoleId)
+        : "";
+    this.userSubRoleId =
+      resolvedSubRoleId !== "" && resolvedSubRoleId != null
+        ? String(resolvedSubRoleId)
+        : "";
     this.age = data?.age || "";
-    this.userRole = data?.userRole || "";
+    this.userRole =
+      data?.userRole ||
+      data?.roleName ||
+      rolePayload?.roleName ||
+      rolePayload?.name ||
+      "";
     this.gender = data?.gender || "";
-    this.userSubRole = data?.subRoleName || "";
+    this.userSubRole =
+      data?.userSubRole ||
+      data?.subRoleName ||
+      rolePayload?.subRoleName ||
+      "";
     this.blockStatus = data?.blockStatus || "";
     this.firmName = data?.dfirmName || data?.rfirmName || "";
     this.profileUrl = data?.dprofileUrl || data?.rprofileUrl || "";
