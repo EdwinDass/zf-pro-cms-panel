@@ -191,15 +191,15 @@ const Skus = () => {
             toast.error("SKU ID not found");
             return;
         }
-        
+
         if (!window.confirm(`Are you sure you want to delete "${sku.skuName || sku.name || sku.title}"?`)) {
             return;
         }
 
         try {
-            await deleteSku(skuId);
+            // await handleDeleteSku(skuId);
             toast.success("SKU deleted successfully");
-            if (subcategoryId) fetchSkus(subcategoryId, page);
+            // if (subcategoryId) fetchSkus(subcategoryId, page);
         } catch (error: any) {
             console.error("Error deleting SKU:", error);
             toast.error(error?.response?.data?.message || "Failed to delete SKU");

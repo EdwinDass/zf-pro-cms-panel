@@ -40,12 +40,12 @@ export class UserDetails {
     this.userMobile = data?.userMobile || "";
     this.userRoleId =
       resolvedRoleId !== "" && resolvedRoleId != null
-        ? String(resolvedRoleId)
-        : "";
+        ? Number(resolvedRoleId)
+        : 0;
     this.userSubRoleId =
       resolvedSubRoleId !== "" && resolvedSubRoleId != null
-        ? String(resolvedSubRoleId)
-        : "";
+        ? Number(resolvedSubRoleId)
+        : 0;
     this.age = data?.age || "";
     this.userRole =
       data?.userRole ||

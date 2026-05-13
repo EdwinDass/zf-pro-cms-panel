@@ -27,6 +27,7 @@ import { saveTokens } from "../../services/tokenStorage";
 import { useDispatch } from 'react-redux';
 import { existingLogin, fetchUserProfile } from "../../redux/slices/userDataSlice";
 import { setTokens } from "../../redux/slices/authTokenSlice";
+import { AppDispatch } from "../../redux/store";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -46,7 +47,7 @@ const Login = () => {
         password: ""
     })
 
-    const dispatch = useDispatch()
+    const dispatch = useDispatch<AppDispatch>()
 
     const closeSnackBar = () => {
         openSnackbar(``, false);

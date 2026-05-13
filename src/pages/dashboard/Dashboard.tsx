@@ -40,7 +40,6 @@ const Dashboard = () => {
         <div className="h-screen overflow-y-auto pb-10">
             <TopBar logout={logout} />
             <div className="m-5">
-                {console.log('📈 Rendering dashboard stats rows')}
                 <StatsRowOne />
                 <StatsRowTwo />
                 <StatsRowThree />
