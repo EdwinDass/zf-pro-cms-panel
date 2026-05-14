@@ -26,24 +26,24 @@ const allModules = Object.keys(moduleRoutes);
 
 // Define which modules are accessible by each role
 export const roleModuleAccess: Record<number, string[]> = {
-  1:allModules,// mechanic
-  2: allModules, // regional_manager
-  3: allModules, // call_centre_executive
-  4: allModules, // marketing_manager
+  1: [],// mechanic
+  2: ["dashboard", "mis-analytics", "process", "members"], // regional_manager
+  3: ["dashboard", "communication", "mis-analytics", "tickets", ""], // call_centre_executive
+  4: ["dashboard", "mis-analytics", "process", "members"], // marketing_manager
   5: allModules, // operator
   6: allModules, // viewer
-  7: allModules, // qr_admin
+  7: ["dashboard", "qr-management"], // qr_admin
   8: allModules, // evolve_admin
-  9: allModules, // client_admin
+  9: ["dashboard", "qr-management", "communication", "mis-analytics", "process", "members"], // client_admin
 };
 
 // Get allowed routes for a specific roleId
 export const getAllowedRoutes = (roleId: number | string | null | undefined): string[] => {
   if (!roleId) return [];
-  
+
   const roleIdNum = Number(roleId);
   const allowedModules = roleModuleAccess[roleIdNum] || [];
-  
+
   const allowedRoutes: string[] = [];
   allowedModules.forEach(moduleId => {
     const routes = moduleRoutes[moduleId];
