@@ -29,7 +29,7 @@ export const roleModuleAccess: Record<number, string[]> = {
   1: [],// mechanic
   2: ["dashboard", "mis-analytics", "process", "members"], // regional_manager
   3: ["dashboard", "communication", "mis-analytics", "tickets", ""], // call_centre_executive
-  4: ["dashboard", "mis-analytics", "process", "members"], // marketing_manager
+  4: ["dashboard", "mis-analytics", "process", "members", "qr-management", "communication"], // marketing_manager or client admin are same
   5: allModules, // operator
   6: allModules, // viewer
   7: ["dashboard", "qr-management"], // qr_admin
