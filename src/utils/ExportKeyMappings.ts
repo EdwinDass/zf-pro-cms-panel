@@ -277,3 +277,13 @@ export const SubCategoriesListKeys: any = {
     subCategoryDescription: "Description",
     isActive: "Status"
 };
+
+export const ShockReplacementReportKeys: any = {
+    id: "Record ID",
+    userId: "User ID",
+    skuCode: "SKU Code",
+    skuName: "SKU Name",
+    quantity: "Quantity",
+    createdAt: "Created At",
+    createdBy: "Created By"
+};

@@ -747,6 +747,10 @@ export const getAnomalyTransactionsReport = (data: any) => {
     return api.post('report/anomaly-transactions-report', data);
 };
 
+export const getShockReplacementReport = (data: any) => {
+    return api.post('report/shock-replacement-report', data);
+};
+
 export const getNotifications = async (params?: any) => {
     return api.get("notifications", { params }).then((res) => res?.data);
 };

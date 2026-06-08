@@ -18,6 +18,7 @@ import NotificationReport from "./notification-report/NotificationReport";
 import BlockedMemberReport from "./blocked-member-report/BlockedMemberReport";
 import BlockedMemberScanReport from "./blocked-member-scan-report/BlockedMemberScanReport";
 import AnomalyTransactionsReport from "./anomaly-transactions-report/AnomalyTransactionsReport";
+import ShockReplacementReport from "./shock-replacement-report/ShockReplacementReport";
 
 // Icons
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
@@ -35,6 +36,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import BlockIcon from "@mui/icons-material/Block";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import BuildIcon from "@mui/icons-material/Build";
 
 
 const Reports = () => {
@@ -237,6 +239,18 @@ const Reports = () => {
                             <span className="text-[14px]">Anomaly Transactions</span>
                         </button>
 
+                        {/* Shock Replacement Report */}
+                        <button
+                            onClick={() => setActiveReport("shock-replacement")}
+                            className={`w-full text-left px-3 py-2 rounded-md flex items-center gap-2
+                                ${activeReport === "shock-replacement"
+                                    ? "bg-blue-50 text-blue-600"
+                                    : "hover:bg-gray-100"}`}
+                        >
+                            <BuildIcon fontSize="small" />
+                            <span className="text-[14px]">Shock Replacement Report</span>
+                        </button>
+
                     </div>
                 </div>
 
@@ -330,6 +344,12 @@ const Reports = () => {
                     {activeReport === "anomaly-transactions" && (
                         <div className="min-h-[80vh] px-4 md:px-6 lg:px-8">
                             <AnomalyTransactionsReport />
+                        </div>
+                    )}
+
+                    {activeReport === "shock-replacement" && (
+                        <div className="min-h-[80vh] px-4 md:px-6 lg:px-8">
+                            <ShockReplacementReport />
                         </div>
                     )}
 

@@ -52,7 +52,7 @@ export const navItems: NavItem[] = [
         path: '',
         subItems: [
             { id: 'sku-management', label: 'Categories', path: '/categories' },
-            { id: 'shock-replacement-skus', label: 'Shock Replacement SKUs', path: '/shock-replacement-skus' }
+            // { id: 'shock-replacement-skus', label: 'Shock Replacement SKUs', path: '/shock-replacement-skus' }
         ]
     },
 ];
