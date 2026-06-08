@@ -19,5 +19,8 @@ export interface ExporterType {
     | "Blocked Member Scan Report"
     | "Anomaly Transactions Report"
     | "Categories List"
-    | "Subcategories List";
+    | "Subcategories List"
+    | "Tickets List"
+    | "Shock Replacement Report";
+
 }
