@@ -7,8 +7,9 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../../redux/slices/userDataSlice";
 import { clearTokens } from "../../redux/slices/authTokenSlice";
-import { userLogout } from "../../services/ApiService";
+import { userLogout, getTickets } from "../../services/ApiService";
 import CreateTicket from "./components/CreateTicket";
+import ExportButton from "../../components/ExportButton";
 
 const Tickets = () => {
     const [activeTab, setActiveTab] = useState("all-tickets");
@@ -27,6 +28,42 @@ const Tickets = () => {
         navigate("/");
     };
 
+    const exportTickets = async () => {
+        try {
+            const payload: any = {
+                page: 1,
+                limit: 10000,
+            };
+            if (activeTab === "pending") {
+                payload.ticketStatus = "Pending";
+            } else if (activeTab === "resolved") {
+                payload.ticketStatus = "Resolved";
+            }
+
+            const response = await getTickets(payload);
+            const raw = response?.data?.data?.data || [];
+
+            const mapped = raw.map((x: any) => ({
+                TicketID: x.ticket?.ticketId || "-",
+                Category: x.category?.name || "-",
+                Description: x.ticket?.description || "-",
+                Username: x.user?.name || "-",
+                email: x.user?.email || "-",
+                mobile: x.user?.mobile || "-",
+                Status: x.ticket?.ticketStatus || "-",
+                roleAssigned: x.role?.roleName || "-",
+                resolvedComments: x.ticket?.resolvedComments || "-",
+                createdAt: x.ticket?.createdAt || "-",
+                createdBy: x.ticket?.createdBy || "-",
+            }));
+
+            return mapped;
+        } catch (error) {
+            console.error("Tickets export error:", error);
+            return [];
+        }
+    };
+
     const tabs = [
         { id: "all-tickets", label: "All Tickets" },
         { id: "pending", label: "Pending" },
@@ -40,12 +77,15 @@ const Tickets = () => {
                     title="Tickets Management"
                     description="Manage customer support tickets and inquiries"
                     actionButton={
-                        <button
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-                            onClick={() => setShowModal(true)}   // <<< opens modal
-                        >
-                            Create Ticket
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <ExportButton exporter={exportTickets} reportName="Tickets List" />
+                            <button
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                                onClick={() => setShowModal(true)}   // <<< opens modal
+                            >
+                                Create Ticket
+                            </button>
+                        </div>
                     }
                     logout={logout}
                 />

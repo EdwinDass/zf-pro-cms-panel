@@ -18,6 +18,7 @@ interface FiltersBarProps {
   }) => void;
 
   onApply?: () => void;
+  extraAction?: React.ReactNode;
 }
 
 const FiltersBar: FC<FiltersBarProps> = ({
@@ -27,6 +28,7 @@ const FiltersBar: FC<FiltersBarProps> = ({
   onSearch,
   onFilterChange,
   onApply,
+  extraAction,
 }) => {
   const [search, setSearch] = React.useState("");
   const [status, setStatus] = React.useState("all");
@@ -134,6 +136,7 @@ const FiltersBar: FC<FiltersBarProps> = ({
         ))}
       </select>
 
+      {extraAction}
     </div>
   );
 };

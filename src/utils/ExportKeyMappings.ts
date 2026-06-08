@@ -287,3 +287,17 @@ export const ShockReplacementReportKeys: any = {
     createdAt: "Created At",
     createdBy: "Created By"
 };
+
+export const TicketsListKeys: any = {
+    TicketID: "Ticket ID",
+    Category: "Category",
+    Description: "Description",
+    Username: "Username",
+    email: "Email",
+    mobile: "Mobile",
+    roleAssigned: "Role Assigned",
+    Status: "Status",
+    resolvedComments: "Resolved Comments",
+    createdAt: "Created At",
+    createdBy: "Created By"
+};

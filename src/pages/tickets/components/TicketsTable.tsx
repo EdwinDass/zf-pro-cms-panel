@@ -93,16 +93,28 @@ const TicketsTable: React.FC<TicketsTableProps> = ({
     const pageSize = 10;
     const [totalRows, setTotalRows] = useState(0);
 
+    const [searchTerm, setSearchTerm] = useState("");
+    const [activeFilters, setActiveFilters] = useState<any>({
+        ticketStatus: defaultStatus || undefined,
+    });
+
     /** INITIAL LOAD */
     useEffect(() => {
         fetchMasterData();
-        fetchTickets({ ticketStatus: defaultStatus || undefined });
+    }, []);
+
+    /** Re-fetch on status parameter change */
+    useEffect(() => {
+        setPage(1);
+        setActiveFilters({
+            ticketStatus: defaultStatus || undefined,
+        });
     }, [defaultStatus]);
 
-    /** Re-fetch on page change */
+    /** Re-fetch on page change or filter change */
     useEffect(() => {
-        fetchTickets({ ticketStatus: defaultStatus || undefined });
-    }, [page]);
+        fetchTickets();
+    }, [page, activeFilters]);
 
     /** Fetch master data (categories, roles, statuses) */
     const fetchMasterData = async () => {
@@ -112,12 +124,13 @@ const TicketsTable: React.FC<TicketsTableProps> = ({
     };
 
     /** Fetch Tickets */
-    const fetchTickets = async (params?: any) => {
+    const fetchTickets = async (customParams?: any) => {
         try {
             const payload = {
                 page: page,
                 limit: pageSize,
-                ...params
+                ...activeFilters,
+                ...customParams
             };
 
             const response = await getTickets(payload);
@@ -141,7 +154,21 @@ const TicketsTable: React.FC<TicketsTableProps> = ({
             }));
 
             setTickets(mapped);
-            setFilteredTickets(mapped);
+
+            if (searchTerm) {
+                const lower = searchTerm.toLowerCase();
+                const results = mapped.filter((t) =>
+                    t.Description.toLowerCase().includes(lower) ||
+                    t.Username.toLowerCase().includes(lower) ||
+                    t.email.toLowerCase().includes(lower) ||
+                    t.Category.toLowerCase().includes(lower) ||
+                    t.Status.toLowerCase().includes(lower) ||
+                    t.roleAssigned.toLowerCase().includes(lower)
+                );
+                setFilteredTickets(results);
+            } else {
+                setFilteredTickets(mapped);
+            }
 
         } catch (error) {
             console.error("Tickets fetch error:", error);
@@ -176,6 +203,7 @@ const TicketsTable: React.FC<TicketsTableProps> = ({
 
     /** SEARCH */
     const handleSearch = (value: string) => {
+        setSearchTerm(value);
         const lower = value.toLowerCase();
         const results = tickets.filter((t) =>
             t.Description.toLowerCase().includes(lower) ||
@@ -190,15 +218,13 @@ const TicketsTable: React.FC<TicketsTableProps> = ({
     };
 
     /** FILTER HANDLER */
-    const handleFilterChange = async (filters: any) => {
+    const handleFilterChange = (filters: any) => {
         const { status, role, category } = filters;
 
         setPage(1);
-
-        await fetchTickets({
+        setActiveFilters({
             ticketStatus:
                 disableStatusFilter || status === "all" ? defaultStatus : status,
-
             ticketCategoryId: category !== "all" ? category : undefined,
             roleAssigned: role !== "all" ? role : undefined,
         });

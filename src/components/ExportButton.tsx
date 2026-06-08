@@ -18,6 +18,7 @@ import {
     CategoriesListKeys,
     SubCategoriesListKeys,
     ShockReplacementReportKeys,
+    TicketsListKeys,
 } from "../utils/ExportKeyMappings";
 import * as XLSX from "xlsx";
 import { ExporterType } from "../types/Export";
@@ -97,6 +98,9 @@ const ExporterButton = ({
                 case "Shock Replacement Report":
                     mappings = ShockReplacementReportKeys;
                     break;
+                case "Tickets List":
+                    mappings = TicketsListKeys;
+                    break;
 
                 default:
                     console.warn("❗ Export mapping not found for:", reportName);
@@ -124,6 +128,7 @@ const ExporterButton = ({
             ];
 
             const numberFields: string[] = [
+                "TicketID",
                 "quantity",
                 "welcomePoints",
                 "totalScannedPoints",

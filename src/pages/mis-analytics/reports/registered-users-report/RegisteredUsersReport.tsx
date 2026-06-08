@@ -72,7 +72,9 @@ const RegisteredUsersReport = () => {
                 city: formatCell(item.city),
                 pincode: formatCell(item.pincode),
                 zone: formatCell(item.zone),
-                mappedRetailers: formatCell(item.mappedRetailers?.join(", "))
+                mappedRetailers: Array.isArray(item.mappedRetailers)
+                    ? formatCell(item.mappedRetailers.join(", "))
+                    : formatCell(item.mappedRetailers)
             }));
 
             setTableData(mapped);
@@ -156,7 +158,9 @@ const RegisteredUsersReport = () => {
                 city: formatCell(item.city),
                 pincode: formatCell(item.pincode),
                 zone: formatCell(item.zone),
-                mappedRetailers: formatCell(item.mappedRetailers?.join(", "))
+                mappedRetailers: Array.isArray(item.mappedRetailers)
+                    ? formatCell(item.mappedRetailers.join(", "))
+                    : formatCell(item.mappedRetailers)
             }));
 
             return mapped;

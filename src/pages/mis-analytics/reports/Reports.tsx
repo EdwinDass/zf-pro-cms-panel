@@ -1,7 +1,7 @@
 // src/pages/mis-analytics/Reports.tsx
 
-import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 import RedemptionReport from "./redemption-report/RedemptionReport";
 import ApplicationLoginReport from "./application-login-report/ApplicationLoginReport";
@@ -41,7 +41,17 @@ import BuildIcon from "@mui/icons-material/Build";
 
 const Reports = () => {
     const location = useLocation();
-    const [activeReport, setActiveReport] = useState("application-login");
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const activeReport = searchParams.get("report") || "application-login";
+
+    const setActiveReport = (reportName: string) => {
+        setSearchParams((prev) => {
+            const params = new URLSearchParams(prev);
+            params.set("report", reportName);
+            return params;
+        });
+    };
 
     // AUTO SELECT QR REPORT WHEN COMING FROM DASHBOARD
     useEffect(() => {

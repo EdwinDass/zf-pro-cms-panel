@@ -35,12 +35,13 @@ const TopBar: React.FC<Props> = ({
                             id="refresh-btn"
                             aria-label="Refresh data"
                             title="Refresh data"
+                            onClick={() => window.location.reload()}
                         >
                             <i className="fas fa-sync-alt mr-2"></i> Refresh
                         </button>
                     )}
 
-                    {!hideNotificationIcon && (
+                    {/* {!hideNotificationIcon && (
                         <div className="relative">
                             <button
                                 className="p-2 text-gray-600 hover:text-gray-900 relative"
@@ -51,9 +52,9 @@ const TopBar: React.FC<Props> = ({
                                 <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
                             </button>
                         </div>
-                    )}
+                    )} */}
 
-                    <div className="relative">
+                    {/* <div className="relative">
                         <button
                             className="p-2 text-gray-600 hover:text-gray-900"
                             aria-label="Open settings"
@@ -61,7 +62,7 @@ const TopBar: React.FC<Props> = ({
                         >
                             <i className="fas fa-cog text-lg"></i>
                         </button>
-                    </div>
+                    </div> */}
 
                     <button
                         id="logout-btn"
@@ -94,7 +95,7 @@ const TopBar: React.FC<Props> = ({
                         </button>
                     )}
 
-                    {!hideNotificationIcon && (
+                    {/* {!hideNotificationIcon && (
                         <div className="relative">
                             <button
                                 className="p-2 text-gray-600 hover:text-gray-900 relative"
@@ -115,7 +116,7 @@ const TopBar: React.FC<Props> = ({
                         >
                             <i className="fas fa-cog"></i>
                         </button>
-                    </div>
+                    </div> */}
 
                     <button
                         id="logout-btn-tablet"
@@ -165,7 +166,7 @@ const TopBar: React.FC<Props> = ({
                                 </button>
                             )}
 
-                            {!hideNotificationIcon && (
+                            {/* {!hideNotificationIcon && (
                                 <button
                                     className="w-full px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition flex items-center justify-center"
                                     aria-label="View notifications"
@@ -175,16 +176,16 @@ const TopBar: React.FC<Props> = ({
                                     <i className="fas fa-bell mr-2"></i> Notifications
                                     <span className="ml-2 inline-block h-2 w-2 rounded-full bg-red-500"></span>
                                 </button>
-                            )}
+                            )} */}
 
-                            <button
+                            {/* <button
                                 className="w-full px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition flex items-center justify-center"
                                 aria-label="Open settings"
                                 title="Open settings"
                                 onClick={() => setShowMobileMenu(false)}
                             >
                                 <i className="fas fa-cog mr-2"></i> Settings
-                            </button>
+                            </button> */}
 
                             <button
                                 id="logout-btn-mobile"
