@@ -139,17 +139,16 @@ export const BankDetailsReportKeys: any = {
 };
 
 export const KycReportKeys: any = {
-    userId: "User ID",
     uniqueCode: "Unique Code",
     name: "Name",
     roleName: "Role Name",
     mobileNumber: "Mobile Number",
     emailId: "Email ID",
     status: "Status",
-    kycVerified: "KYC Verified",
     dob: "Date of Birth",
     createdAt: "Created At",
-    aadhaarNumber: "Aadhaar Number"
+    aadhaarNumber: "Aadhaar Number",
+    kycDocStatus: "KYC Status"
 };
 
 export const ProductWiseReportKeys: any = {

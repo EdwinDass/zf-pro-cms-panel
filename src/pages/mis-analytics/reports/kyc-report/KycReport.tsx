@@ -222,7 +222,8 @@ const KycReport = () => {
             aadhaarFront: formatCell(item.aadhaarFrontImage ?? item.aadhaarFront),
             aadhaarBack: formatCell(item.aadhaarBackImage ?? item.aadhaarBack),
             panFront: formatCell(item.panFrontImage ?? item.panFront),
-            profileImage: formatCell(item.profileImage)
+            profileImage: formatCell(item.profileImage),
+            kycDocStatus: formatCell(item.kycDocStatus),
         }));
 
         return exportData;
@@ -339,7 +340,8 @@ const KycReport = () => {
                             onChange={(e) => setKycDocStatus(e.target.value)}
                         >
                             <option value="">All</option>
-                            <option value="Approved">Approved</option>
+                            <option value="Approved By Market Head">Approved By Market Head</option>
+                            <option value="Approved By Regional Head">Approved By Regional Head</option>
                             <option value="Pending">Pending</option>
                             <option value="Rejected">Rejected</option>
                         </select>
