@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import CustomTable, { Column } from "../../../../components/CustomTable";
 import ExporterButton from "../../../../components/ExportButton";
 import { getKycReport } from "../../../../services/ApiService";
@@ -6,6 +7,9 @@ import { KycReportKeys } from "../../../../utils/ExportKeyMappings";
 import ViewImageModal from "../../../../pages/tickets/components/ViewImageModal";
 
 const KycReport = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const kycDocStatusParam = searchParams.get("kycDocStatus") || "";
+
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
     const [uniqueCode, setUniqueCode] = useState("");
@@ -15,13 +19,32 @@ const KycReport = () => {
     const [emailId, setEmailId] = useState("");
     const [status, setStatus] = useState("");
     const [aadhaarNumber, setAadhaarNumber] = useState("");
-    const [kycDocStatus, setKycDocStatus] = useState("");
+    const [kycDocStatus, setKycDocStatus] = useState(kycDocStatusParam);
 
     const [tableData, setTableData] = useState<any[]>([]);
     const [totalRows, setTotalRows] = useState(0);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const pageSize = 10;
+
+    // Sync state with URL search param
+    useEffect(() => {
+        setKycDocStatus(kycDocStatusParam);
+    }, [kycDocStatusParam]);
+
+    const handleKycDocStatusChange = (newStatus: string) => {
+        setKycDocStatus(newStatus);
+        setSearchParams((prev) => {
+            const params = new URLSearchParams(prev);
+            if (newStatus) {
+                params.set("kycDocStatus", newStatus);
+            } else {
+                params.delete("kycDocStatus");
+            }
+            return params;
+        });
+        setPage(1); // Reset page on filter change
+    };
 
     // View Image Modal States
     const [viewImageModalOpen, setViewImageModalOpen] = useState(false);
@@ -337,7 +360,7 @@ const KycReport = () => {
                         <select
                             className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
                             value={kycDocStatus}
-                            onChange={(e) => setKycDocStatus(e.target.value)}
+                            onChange={(e) => handleKycDocStatusChange(e.target.value)}
                         >
                             <option value="">All</option>
                             <option value="Approved By Market Head">Approved By Market Head</option>

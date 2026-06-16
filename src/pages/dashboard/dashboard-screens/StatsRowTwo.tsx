@@ -1,6 +1,5 @@
-// src/components/CardsContainer/CardsContainer.tsx
-
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Card from "./Card";
 import CardVariantTwo from "./CardVariantTwo";
 import { getTotalScans, getKycStatus, getMemberCount, getTotalGenerated } from "../../../services/ApiService";
@@ -9,6 +8,7 @@ import { FaQrcode, FaUserCheck, FaUserShield } from "react-icons/fa";
 import { stat } from "fs";
 
 const StatsRowTwo: React.FC = () => {
+    const navigate = useNavigate();
     const [totalScans, setTotalScans] = useState("0");
     const [totalQrGenerated, setTotalQrGenerated] = useState("0");
     const [kycStatus, setKycStatus] = useState({ approved: "0", pending: "0", percentage: "0" });
@@ -68,7 +68,7 @@ const StatsRowTwo: React.FC = () => {
 
     const fetchBlockedMembers = async () => {
         try {
-            const response = await getMemberCount({ role: 1, status: "none" });
+            const response = await getMemberCount({ role: 1, status: "blocked" });
             setBlockedMembers(response?.data?.count?.toString() || "0");
         } catch (error) {
             console.error("Blocked members error:", error);
@@ -105,6 +105,7 @@ const StatsRowTwo: React.FC = () => {
                     )
                 }
                 footerText={`${totalQrGenerated !== "0" ? ((Number(totalScans) / Number(totalQrGenerated)) * 100).toFixed(2) : "0.00"}% of QR codes have been scanned`}
+                onClick={() => navigate("/qr")}
             />
 
             {/* 🔹 KYC Status — CardVariantTwo */}
@@ -118,6 +119,8 @@ const StatsRowTwo: React.FC = () => {
                 rightLabel="Pending"
                 progress={Number(kycStatus.percentage)}
                 footerText={`${kycStatus.percentage}% of members have completed KYC`}
+                onLeftClick={() => navigate("/reports?report=kyc&kycDocStatus=Approved By Market Head")}
+                onRightClick={() => navigate("/reports?report=kyc&kycDocStatus=Pending")}
             />
 
             {/* 🔹 User Status — CardVariantTwo */}
@@ -141,6 +144,8 @@ const StatsRowTwo: React.FC = () => {
                     100 - ((Number(blockedMembers) || 0) /
                         ((Number(activeMembers) || 0) + (Number(blockedMembers) || 0) || 1) * 100)
                 ).toFixed(2)}% of users are active`}
+                onLeftClick={() => navigate("/reports?report=registered-users&status=none")}
+                onRightClick={() => navigate("/reports?report=registered-users&status=blocked")}
             />
 
         </div>

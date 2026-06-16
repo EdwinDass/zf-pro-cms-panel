@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Card from "../dashboard-screens/Card";
 import { FaCoins, FaGift, FaUsers, FaUserCheck } from "react-icons/fa";
 import { getMemberCount, getScannedPoints, getRedeemedPoints } from "../../../services/ApiService";
 
 const StatsRowOne: React.FC = () => {
+    const navigate = useNavigate();
 
     const [totalMembers, setTotalMembers] = useState("0");
     const [activeMembers, setActiveMembers] = useState("0");
@@ -64,6 +66,7 @@ const StatsRowOne: React.FC = () => {
                 percentageColor="text-green-600"
                 icon={<FaUsers />}
                 iconColor='text-blue-500'
+                onClick={() => navigate("/reports?report=registered-users")}
             />
 
             {/* CARD 2 */}
@@ -74,6 +77,7 @@ const StatsRowOne: React.FC = () => {
                 percentageColor="text-green-600"
                 icon={<FaUserCheck />}
                 iconColor='text-green-500'
+                onClick={() => navigate("/reports?report=registered-users&status=none")}
             />
 
             {/* CARD 3 (static now) */}
@@ -84,6 +88,7 @@ const StatsRowOne: React.FC = () => {
                 percentageColor="text-green-600"
                 icon={<FaCoins />}
                 iconColor='text-yellow-500'
+                onClick={() => navigate("/reports?report=qr")}
             />
 
             {/* CARD 4 (static now) */}
@@ -94,6 +99,7 @@ const StatsRowOne: React.FC = () => {
                 percentageColor="text-red-600"
                 icon={<FaGift />}
                 iconColor='text-purple-500'
+                onClick={() => navigate("/reports?report=redemptions")}
             />
         </div>
     );

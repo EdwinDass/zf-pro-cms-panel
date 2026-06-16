@@ -1,5 +1,6 @@
 // src/components/Card/Card.tsx
 import React from "react";
+import { FiArrowUpRight } from "react-icons/fi";
 
 interface CardProps {
   title: string;
@@ -8,6 +9,7 @@ interface CardProps {
   percentageColor?: string; 
   icon: React.ReactNode;
   iconColor?: string; // ⭐ NEW — dynamic icon color
+  onClick?: () => void;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -17,13 +19,24 @@ const Card: React.FC<CardProps> = ({
   percentageColor = "text-green-600",
   icon,
   iconColor = "text-blue-600", // ⭐ default icon color
+  onClick,
 }) => {
   return (
-    <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-5 flex flex-col gap-3">
+    <div 
+      onClick={onClick}
+      className={`bg-white shadow-sm border border-gray-200 rounded-xl p-5 flex flex-col gap-3 group ${
+        onClick ? "cursor-pointer hover:shadow-md transition-shadow" : ""
+      }`}
+    >
 
       {/* Top row: title + icon */}
       <div className="flex justify-between items-center">
-        <h2 className="text-gray-600 font-medium text-sm">{title}</h2>
+        <div className="flex items-center gap-1">
+          <h2 className="text-gray-600 font-medium text-sm">{title}</h2>
+          {onClick && (
+            <FiArrowUpRight className="text-gray-400 group-hover:text-blue-500 transition-all text-sm opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          )}
+        </div>
         
         {/* ⭐ Apply dynamic icon color */}
         <span className={`${iconColor} text-xl`}>

@@ -1,18 +1,42 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import CustomTable, { Column } from "../../../../components/CustomTable";
 import { getregisteredUsersReport } from "../../../../services/ApiService";
 import ExporterButton from "../../../../components/ExportButton";
 
 const RegisteredUsersReport = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const statusParam = searchParams.get("status") || "";
+
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
     const [userName, setUserName] = useState("");
     const [userMobile, setUserMobile] = useState("");
+    const [status, setStatus] = useState(statusParam);
     const [tableData, setTableData] = useState([]);
     const [totalRows, setTotalRows] = useState(0);
     const [page, setPage] = useState(1);
     const pageSize = 10;
+
+    // Sync state with URL search param
+    useEffect(() => {
+        setStatus(statusParam);
+    }, [statusParam]);
+
+    const handleStatusChange = (newStatus: string) => {
+        setStatus(newStatus);
+        setSearchParams((prev) => {
+            const params = new URLSearchParams(prev);
+            if (newStatus) {
+                params.set("status", newStatus);
+            } else {
+                params.delete("status");
+            }
+            return params;
+        });
+        setPage(1); // Reset page on filter change
+    };
 
     const formatCell = (value: any) => {
         if (value === null || value === undefined || value === "") return "-";
@@ -51,6 +75,7 @@ const RegisteredUsersReport = () => {
             if (toDate) payload.toDate = toDate;
             if (userName.length >= 3) payload.userName = userName;
             if (userMobile.length >= 3) payload.userMobile = userMobile;
+            if (status) payload.status = status;
 
             const res = await getregisteredUsersReport(payload);
 
@@ -85,10 +110,10 @@ const RegisteredUsersReport = () => {
         }
     };
 
-    // Fetch on page/date change
+    // Fetch on page/date change/status change
     useEffect(() => {
         fetchReport();
-    }, [page, fromDate, toDate]);
+    }, [page, fromDate, toDate, status]);
 
     // userName typing
     useEffect(() => {
@@ -137,6 +162,7 @@ const RegisteredUsersReport = () => {
             if (toDate) payload.toDate = toDate;
             if (userName.length >= 3) payload.userName = userName;
             if (userMobile.length >= 3) payload.userMobile = userMobile;
+            if (status) payload.status = status;
 
             const res = await getregisteredUsersReport(payload);
 
@@ -236,6 +262,22 @@ const RegisteredUsersReport = () => {
                             value={userMobile}
                             onChange={(e) => setUserMobile(e.target.value)}
                         />
+                    </div>
+
+                    <div className="w-[220px]">
+                        <label htmlFor="status" className="text-sm font-medium text-gray-600">Status</label>
+                        <select
+                            id="status"
+                            className="w-full px-2 py-1.5 mt-1 border rounded-md text-sm"
+                            value={status}
+                            onChange={(e) => handleStatusChange(e.target.value)}
+                        >
+                            <option value="">All</option>
+                            <option value="none">None</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="blocked">Blocked</option>
+                        </select>
                     </div>
 
                 </div>
