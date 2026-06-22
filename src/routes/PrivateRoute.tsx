@@ -1,17 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
+import { Navigate } from "react-router-dom";
 import { Layout } from "../layouts/Layouts";
-import Login from "../pages/auth/Login";
-import { STORAGE_KEY } from "../services/tokenStorage";
-import store, { RootState } from "../redux/store";
+import { useAppSelector } from "../redux/hooks";
 
 interface PrivateRouteProps {
     element: React.ReactElement;
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
-    const isAuthenticated = store.getState()?.authToken?.accessToken;
+    const isAuthenticated = useAppSelector((state) => state.authToken.accessToken);
 
-    return isAuthenticated ? <Layout>{element}</Layout> : <Login/>;
+    return isAuthenticated ? <Layout>{element}</Layout> : <Navigate to="/" replace />;
 };
 
 export default PrivateRoute;

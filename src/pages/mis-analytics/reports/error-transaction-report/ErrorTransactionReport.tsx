@@ -66,6 +66,7 @@ const ErrorTransactionReport = () => {
             const payload: any = {
                 limit: isExport ? totalRows || 10000 : pageSize,
                 skip: isExport ? 0 : (currentPage - 1) * pageSize,
+                status: "Failure"
             };
 
             if (fromDate) payload.fromDate = new Date(fromDate).toISOString();

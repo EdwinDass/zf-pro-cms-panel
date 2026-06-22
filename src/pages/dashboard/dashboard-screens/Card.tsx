@@ -10,6 +10,7 @@ interface CardProps {
   icon: React.ReactNode;
   iconColor?: string; // ⭐ NEW — dynamic icon color
   onClick?: () => void;
+  extra?: React.ReactNode;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -20,6 +21,7 @@ const Card: React.FC<CardProps> = ({
   icon,
   iconColor = "text-blue-600", // ⭐ default icon color
   onClick,
+  extra,
 }) => {
   return (
     <div 
@@ -46,6 +48,9 @@ const Card: React.FC<CardProps> = ({
 
       {/* Big value */}
       <p className="text-3xl font-bold text-gray-900">{value}</p>
+
+      {/* Extra details */}
+      {extra}
 
       {/* Percentage text
       <p className="text-sm text-gray-500">

@@ -41,6 +41,7 @@ const QRTransactionReport = () => {
             const payload: any = {
                 skip: (page - 1) * pageSize,
                 limit: pageSize,
+                status: "Success"
             };
 
             if (fromDate) payload.fromDate = fromDate;

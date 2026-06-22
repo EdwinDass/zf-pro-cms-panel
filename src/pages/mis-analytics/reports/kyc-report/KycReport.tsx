@@ -60,6 +60,15 @@ const KycReport = () => {
         return value;
     };
 
+    const formatStatus = (value: any) => {
+        if (value === "none") return "Active User";
+        if (value === "digilocker") return "Digilocker pending";
+        if (value === "kyc") return "KYC document upload pending";
+        if (value === "incomplete-profile") return "Address and profile";
+        if (value === "tds-consent") return "TDS consent is pending";
+        return formatCell(value);
+    };
+
     const columns: Column[] = [
         { key: "userId", label: "User ID" },
         { key: "uniqueCode", label: "Unique Code" },
@@ -178,7 +187,13 @@ const KycReport = () => {
                 } else {
                     const mapped = (response?.data?.data?.reportList || []).map((item: any) => {
                         const row: any = {};
-                        Object.keys(item).forEach(k => { row[k] = formatCell(item[k]); });
+                        Object.keys(item).forEach(k => {
+                            if (k === "status") {
+                                row[k] = formatStatus(item[k]);
+                            } else {
+                                row[k] = formatCell(item[k]);
+                            }
+                        });
                         return row;
                     });
                     setTableData(mapped);
@@ -237,7 +252,7 @@ const KycReport = () => {
             roleName: formatCell(item.roleName),
             mobileNumber: formatCell(item.mobileNumber),
             emailId: formatCell(item.emailId),
-            status: formatCell(item.status),
+            status: formatStatus(item.status),
             kycVerified: formatCell(item.kycVerified),
             dob: formatExportDate(item.dateOfBirth ?? item.dob),
             createdAt: formatExportDate(item.createdAt),
@@ -340,9 +355,11 @@ const KycReport = () => {
                             onChange={(e) => setStatus(e.target.value)}
                         >
                             <option value="">All</option>
-                            <option value="none">None</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
+                            <option value="none">Active User</option>
+                            <option value="digilocker">Digilocker pending</option>
+                            <option value="kyc">KYC document upload pending</option>
+                            <option value="incomplete-profile">Address and profile</option>
+                            <option value="tds-consent">TDS consent is pending</option>
                         </select>
                     </div>
                     <div className="w-[220px]">

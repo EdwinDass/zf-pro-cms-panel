@@ -9,7 +9,11 @@ const StatsRowOne: React.FC = () => {
 
     const [totalMembers, setTotalMembers] = useState("0");
     const [activeMembers, setActiveMembers] = useState("0");
-    const [scannedPoints, setScannedPoints] = useState("0");
+    const [scannedPoints, setScannedPoints] = useState({
+        totalPoints: 0,
+        totalPointsScanned: 0,
+        totalBonusPoints: 0
+    });
     const [redeemedPoints, setRedeemedPoints] = useState("0");
 
     useEffect(() => {
@@ -40,7 +44,12 @@ const StatsRowOne: React.FC = () => {
     const fetchScannedPoints = async () => {
         try {
             const response = await getScannedPoints({});
-            setScannedPoints(response?.data?.data?.totalPointsScanned?.toString() || "0");
+            const data = response?.data?.data;
+            setScannedPoints({
+                totalPoints: data?.totalPoints ?? 0,
+                totalPointsScanned: data?.totalPointsScanned ?? 0,
+                totalBonusPoints: data?.totalBonusPoints ?? 0
+            });
         } catch (error) {
             console.error("Scanned points error:", error);
         }
@@ -83,12 +92,24 @@ const StatsRowOne: React.FC = () => {
             {/* CARD 3 (static now) */}
             <Card
                 title="Total Points Issued"
-                value={scannedPoints}
+                value={scannedPoints.totalPoints.toLocaleString()}
                 percentage="+9.1%"
                 percentageColor="text-green-600"
                 icon={<FaCoins />}
                 iconColor='text-yellow-500'
                 onClick={() => navigate("/reports?report=qr")}
+                extra={
+                    <div className="flex gap-4 text-xs font-medium border-t border-gray-100 pt-2 mt-1 w-full justify-between">
+                        <div>
+                            <span className="text-gray-400">Scanned: </span>
+                            <span className="text-gray-700 font-semibold">{scannedPoints.totalPointsScanned.toLocaleString()}</span>
+                        </div>
+                        <div>
+                            <span className="text-gray-400">Bonus: </span>
+                            <span className="text-gray-700 font-semibold">{scannedPoints.totalBonusPoints.toLocaleString()}</span>
+                        </div>
+                    </div>
+                }
             />
 
             {/* CARD 4 (static now) */}

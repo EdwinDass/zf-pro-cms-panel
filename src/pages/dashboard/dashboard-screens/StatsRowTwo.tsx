@@ -105,7 +105,9 @@ const StatsRowTwo: React.FC = () => {
                     )
                 }
                 footerText={`${totalQrGenerated !== "0" ? ((Number(totalScans) / Number(totalQrGenerated)) * 100).toFixed(2) : "0.00"}% of QR codes have been scanned`}
-                onClick={() => navigate("/qr")}
+                // onClick={() => navigate("/qr")}
+                onLeftClick={() => navigate("/reports?report=qr")}
+                onRightClick={() => navigate("/qr")}
             />
 
             {/* 🔹 KYC Status — CardVariantTwo */}
