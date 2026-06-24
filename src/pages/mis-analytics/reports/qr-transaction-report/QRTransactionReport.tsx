@@ -119,6 +119,7 @@ const QRTransactionReport = () => {
             const payload: any = {
                 skip: 0,
                 limit: totalRows,
+                status: "Success"
             };
 
             if (fromDate) payload.fromDate = fromDate;

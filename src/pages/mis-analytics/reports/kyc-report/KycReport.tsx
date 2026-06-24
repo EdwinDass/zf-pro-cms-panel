@@ -64,8 +64,9 @@ const KycReport = () => {
         if (value === "none") return "Active User";
         if (value === "digilocker") return "Digilocker pending";
         if (value === "kyc") return "KYC document upload pending";
-        if (value === "incomplete-profile") return "Address and profile";
+        if (value === "incomplete-registration") return "Address and profile";
         if (value === "tds-consent") return "TDS consent is pending";
+        if (value === "kyc-admin") return "Admin Approval Pending";
         return formatCell(value);
     };
 
@@ -358,7 +359,8 @@ const KycReport = () => {
                             <option value="none">Active User</option>
                             <option value="digilocker">Digilocker pending</option>
                             <option value="kyc">KYC document upload pending</option>
-                            <option value="incomplete-profile">Address and profile</option>
+                            <option value="incomplete-registration">Address and profile</option>
+                            <option value="kyc-admin">Admin Approval Pending</option>
                             <option value="tds-consent">TDS consent is pending</option>
                         </select>
                     </div>
