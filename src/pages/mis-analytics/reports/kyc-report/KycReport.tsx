@@ -76,6 +76,8 @@ const KycReport = () => {
         { key: "name", label: "Name" },
         { key: "roleName", label: "Role Name" },
         { key: "mobileNumber", label: "Mobile Number" },
+        { key: "workshopName", label: "Workshop Name" },
+        // { key: "workshopAddress", label: "Workshop Address" },
         { key: "emailId", label: "Email ID" },
         { key: "status", label: "Status" },
         { key: "kycVerified", label: "KYC Verified" },
