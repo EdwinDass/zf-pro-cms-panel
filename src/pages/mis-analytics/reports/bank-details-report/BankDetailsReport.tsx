@@ -30,7 +30,7 @@ const BankDetailsReport = () => {
     };
 
     const columns: Column[] = [
-        { key: "userId", label: "User ID" },
+        // { key: "userId", label: "User ID" },
         { key: "uniqueCode", label: "Unique Code" },
         { key: "name", label: "Name" },
         { key: "roleName", label: "Role Name" },
