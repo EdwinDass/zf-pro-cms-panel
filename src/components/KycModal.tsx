@@ -292,7 +292,7 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                 {localPreferred && localPreferred.length > 0 && (
                     <div className="border border-gray-200 rounded-lg overflow-hidden mb-6">
                         <div className="bg-gray-50 px-6 py-3 border-b border-gray-200 flex items-center justify-between">
-                            <h3 className="text-sm font-semibold text-gray-900">Mapped Retailers</h3>
+                            <h3 className="text-sm font-semibold text-gray-900">Mapped Workshop</h3>
                             {/* show status of preferred-retailers doc if present */}
                             {/* {(() => {
                                 const prefDoc = localKycDocuments.find(d => d.kycType === "preferred-retailers");
@@ -303,7 +303,7 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                             <table className="w-full">
                                 <thead className="bg-gray-50 border-b border-gray-200">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Retailer ID</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Workshop ID</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Workshop Name</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Mobile</th>

@@ -252,6 +252,7 @@ const KycReport = () => {
             userId: formatCell(item.userId),
             uniqueCode: formatCell(item.uniqueCode),
             name: formatCell(item.name),
+            workshopName: formatCell(item.workshopName),
             roleName: formatCell(item.roleName),
             mobileNumber: formatCell(item.mobileNumber),
             emailId: formatCell(item.emailId),
