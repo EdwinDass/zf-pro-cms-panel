@@ -65,10 +65,13 @@ const TopPerformers: React.FC = () => {
                   {index + 1}
                 </div>
 
-                {/* Name + Points */}
+                {/* Name + Workshop + Points */}
                 <div>
                   <p className="text-gray-900 font-medium">
                     {p.displayName || p.userName || "Unknown User"}
+                  </p>
+                  <p className="text-gray-500 text-xs font-medium">
+                    {p.workshopName || p.storeName || "-"}
                   </p>
                   <p className="text-gray-600 text-sm">
                     {p.totalPoints} points

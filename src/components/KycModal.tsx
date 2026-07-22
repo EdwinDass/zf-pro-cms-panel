@@ -17,6 +17,7 @@ interface KycDocument {
     kycCreatedAt: string;
     kycUpdatedAt: string | null;
     comment: string | null;
+    workshopName?: string;
 }
 
 interface KycModalProps {
@@ -30,6 +31,7 @@ interface KycModalProps {
         mobile: string;
         name: string;
         pincode: number;
+        workshopName?: string;
     }[];
     loggedUser: UserDetails
 }
@@ -113,7 +115,9 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
             "aadhaar-back": "Aadhaar Back",
             "pan-front": "PAN Image",
             "pan-number": "PAN Number",
-            "preferred-retailers": "Preferred Retailers"
+            "preferred-retailers": "Preferred Retailers",
+            "user-profile": "Profile Picture",
+            "profile-picture": "Profile Picture"
         };
         return labels[kycType] || kycType;
     };
@@ -123,6 +127,8 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
             return <InsertDriveFileIcon className="text-blue-600" fontSize="small" />;
         } else if (kycType.includes("pan")) {
             return <InsertDriveFileIcon className="text-purple-600" fontSize="small" />;
+        } else if (kycType.includes("profile")) {
+            return <InsertDriveFileIcon className="text-indigo-600" fontSize="small" />;
         } else {
             return <InsertDriveFileIcon className="text-green-600" fontSize="small" />;
         }
@@ -286,7 +292,7 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                 {localPreferred && localPreferred.length > 0 && (
                     <div className="border border-gray-200 rounded-lg overflow-hidden mb-6">
                         <div className="bg-gray-50 px-6 py-3 border-b border-gray-200 flex items-center justify-between">
-                            <h3 className="text-sm font-semibold text-gray-900">Mapped Retailers</h3>
+                            <h3 className="text-sm font-semibold text-gray-900">Mapped Workshop</h3>
                             {/* show status of preferred-retailers doc if present */}
                             {/* {(() => {
                                 const prefDoc = localKycDocuments.find(d => d.kycType === "preferred-retailers");
@@ -297,7 +303,8 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                             <table className="w-full">
                                 <thead className="bg-gray-50 border-b border-gray-200">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Retailer ID</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Workshop ID</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Workshop Name</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Mobile</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Pincode</th>
@@ -307,6 +314,7 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                                     {localPreferred.map((r) => (
                                         <tr key={r.retailerId} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 text-sm text-gray-900">{r.retailerId}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-900 font-medium">{r.workshopName || '-'}</td>
                                             <td className="px-6 py-4 text-sm text-gray-900">{r.name}</td>
                                             <td className="px-6 py-4 text-sm text-gray-900">{r.mobile}</td>
                                             <td className="px-6 py-4 text-sm text-gray-900">{r.pincode}</td>

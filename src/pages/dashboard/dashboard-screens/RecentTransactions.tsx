@@ -42,9 +42,10 @@ const RecentTransactions: React.FC = () => {
       </div>
 
       {/* Table Headers */}
-      <div className="grid grid-cols-5 text-sm font-semibold text-gray-600 border-b pb-2">
+      <div className="grid grid-cols-6 text-sm font-semibold text-gray-600 border-b pb-2 gap-2">
         <div>Transaction ID</div>
         <div>Member</div>
+        <div>Workshop</div>
         <div>Type</div>
         <div>Points</div>
         <div>Time</div>
@@ -58,12 +59,16 @@ const RecentTransactions: React.FC = () => {
         transactions.map((txn: any, index: number) => (
           <div
             key={index}
-            className="grid grid-cols-5 py-3 text-sm items-center border-b last:border-none"
+            className="grid grid-cols-6 py-3 text-sm items-center border-b last:border-none gap-2"
           >
             <div className="text-gray-800">#{txn.id}</div>
 
-            <div className="text-gray-800">
+            <div className="text-gray-800 truncate">
               {txn.displayName || txn.userEmail}
+            </div>
+
+            <div className="text-gray-600 truncate font-medium">
+              {txn.workshopName || txn.storeName || "-"}
             </div>
 
             <div>

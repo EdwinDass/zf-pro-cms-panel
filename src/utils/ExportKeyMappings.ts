@@ -141,6 +141,7 @@ export const BankDetailsReportKeys: any = {
 export const KycReportKeys: any = {
     uniqueCode: "Unique Code",
     name: "Name",
+    workshopName: "Workshop Name",
     roleName: "Role Name",
     mobileNumber: "Mobile Number",
     emailId: "Email ID",
