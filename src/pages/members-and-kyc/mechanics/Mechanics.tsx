@@ -186,7 +186,7 @@ const MechanicsScreen: React.FC = () => {
         try {
             const res = await getUserProfile();
             setLoggedUserDetails(res?.data?.data);
-            console.log("dacwvwrgr",res?.data?.data)
+            console.log("dacwvwrgr", res?.data?.data)
         } catch (error) {
 
         }
@@ -635,7 +635,7 @@ const MechanicsScreen: React.FC = () => {
                                                     </div> */}
 
                                                     {/* More Dropdown */}
-                                                    <div className="relative">
+                                                    {/* <div className="relative">
                                                         <button
                                                             type="button"
                                                             onClick={() => toggleDropdown(mechanic.userId, "more")}
@@ -644,34 +644,34 @@ const MechanicsScreen: React.FC = () => {
                                                             <MoreHorizIcon fontSize="small" />
                                                             More
                                                             <KeyboardArrowDownIcon fontSize="small" />
-                                                        </button>
-                                                        {openMoreDropdown === mechanic.userId && (
-                                                            <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[180px]">
-                                                                {/* <button
+                                                        </button> */}
+                                                    {/* {openMoreDropdown === mechanic.userId && ( */}
+                                                    {/* <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[180px]"> */}
+                                                    {/* <button
                                                                     type="button"
                                                                     className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 font-medium"
                                                                 >
                                                                     <VisibilityIcon fontSize="small" />
                                                                     View Details
                                                                 </button> */}
-                                                                <button
+                                                    {/* <button
                                                                     type="button"
                                                                     onClick={() => handleEditClick(mechanic)}
                                                                     className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 font-medium"
                                                                 >
                                                                     <EditIcon fontSize="small" />
                                                                     Edit Member
-                                                                </button>
-                                                                {/* <button
+                                                                </button> */}
+                                                    {/* <button
                                                                     type="button"
                                                                     className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 font-medium"
                                                                 >
                                                                     <MessageIcon fontSize="small" />
                                                                     Send Message
                                                                 </button> */}
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                                    {/* </div> */}
+                                                    {/* )} */}
+                                                    {/* </div> */}
                                                 </div>
                                             </td>
                                         </tr>
