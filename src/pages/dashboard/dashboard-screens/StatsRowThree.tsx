@@ -12,7 +12,9 @@ const StatsRowThree: React.FC = () => {
 
   // ---------------- LINE GRAPH STATE ----------------
   const [lineLabels, setLineLabels] = useState<string[]>([]);
-  const [lineValues, setLineValues] = useState<number[]>([]);
+  const [registeredData, setRegisteredData] = useState<number[]>([]);
+  const [activeData, setActiveData] = useState<number[]>([]);
+  const [mauData, setMauData] = useState<number[]>([]);
   const [lineLoading, setLineLoading] = useState(true);
 
   // ---------------- BAR GRAPH STATE ----------------
@@ -50,13 +52,19 @@ const StatsRowThree: React.FC = () => {
       const params = buildRequestParams(lineRange);
       const response = await getUserRegistrations(params);
 
-      setLineLabels(response?.data?.data?.labels || []);
-      setLineValues(response?.data?.data?.values || []);
+      const rawData = response?.data?.data || response?.data || {};
+
+      setLineLabels(rawData.labels || []);
+      setRegisteredData(rawData.registered || rawData.values || []);
+      setActiveData(rawData.active || []);
+      setMauData(rawData.mau || []);
 
     } catch (error) {
       console.error("Line Graph API Error:", error);
       setLineLabels([]);
-      setLineValues([]);
+      setRegisteredData([]);
+      setActiveData([]);
+      setMauData([]);
     } finally {
       setLineLoading(false);
     }
@@ -104,13 +112,13 @@ const StatsRowThree: React.FC = () => {
 
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">
-            Member Growth
+            Member Growth &amp; Engagement
           </h2>
 
           <select
             value={lineRange}
             onChange={(e) => setLineRange(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-1 text-sm"
+            className="border border-gray-300 rounded-md px-3 py-1 text-sm text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             <option value="7">Last 7 days</option>
             <option value="30">Last 30 days</option>
@@ -122,7 +130,12 @@ const StatsRowThree: React.FC = () => {
         {lineLoading ? (
           <p className="text-gray-500">Loading chart...</p>
         ) : (
-          <LineGraph labels={lineLabels} values={lineValues} />
+          <LineGraph
+            labels={lineLabels}
+            registered={registeredData}
+            active={activeData}
+            mau={mauData}
+          />
         )}
       </div>
 

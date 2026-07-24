@@ -7,9 +7,17 @@ interface BarGraphProps {
   labels: string[];           // ['Mon', 'Tue', ...]
   datasetA: number[];         // [820, 932, ...]
   datasetB: number[];         // [720, 800, ...]
+  nameA?: string;             // Name for dataset A (default: "Points Issued")
+  nameB?: string;             // Name for dataset B (default: "Points Redeemed")
 }
 
-const BarGraph: React.FC<BarGraphProps> = ({ labels, datasetA, datasetB }) => {
+const BarGraph: React.FC<BarGraphProps> = ({
+  labels,
+  datasetA,
+  datasetB,
+  nameA = "Points Issued",
+  nameB = "Points Redeemed",
+}) => {
   const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -20,7 +28,7 @@ const BarGraph: React.FC<BarGraphProps> = ({ labels, datasetA, datasetB }) => {
         trigger: "axis",
       },
       legend: {
-        data: ["Dataset A", "Dataset B"],
+        data: [nameA, nameB],
         top: 10,            // moves legend downward
       },
       xAxis: {
@@ -32,12 +40,12 @@ const BarGraph: React.FC<BarGraphProps> = ({ labels, datasetA, datasetB }) => {
       },
       series: [
         {
-          name: "Dataset A",
+          name: nameA,
           type: "bar",
           data: datasetA,
         },
         {
-          name: "Dataset B",
+          name: nameB,
           type: "bar",
           data: datasetB,
         },
@@ -60,7 +68,7 @@ const BarGraph: React.FC<BarGraphProps> = ({ labels, datasetA, datasetB }) => {
       chart.dispose();
       resizeObserver.disconnect();
     };
-  }, [labels, datasetA, datasetB]);
+  }, [labels, datasetA, datasetB, nameA, nameB]);
 
   return <div ref={chartRef} className="w-full h-64" />;
 };

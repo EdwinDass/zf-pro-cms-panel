@@ -203,6 +203,20 @@ export const getTopPerformers = async (count: number) => {
         .then((response) => response);
 };
 
+// Get regional sales performance graph
+export const getRegionalSalesPerformance = async (params?: { [key: string]: any }) => {
+    return api
+        .get("masters/sales/regional", { params })
+        .then((response) => response);
+};
+
+// Get user status distribution (active/inactive/dormant)
+export const getUserStatusDistribution = async () => {
+    return api
+        .get("masters/users/status-distribution")
+        .then((response) => response);
+};
+
 export const getAllSkus = async () => {
     return api
         .get("sku/skus")
@@ -554,7 +568,7 @@ export const getUserKycsByUserId = async (userId: number, page: number, limit: n
     });
 };
 
-export const updateKycRecords = async (updates: { detailId: number; status: "Approved" | "Rejected" | "Completed"; comment?: string }[]) => {
+export const updateKycRecords = async (updates: { detailId: number; status: "Approved" | "Rejected" | "Completed"; comment?: string; userId?: number }[]) => {
     return api.post(`kyc/updateKycRecords`, {
         updates
     });

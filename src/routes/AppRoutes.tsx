@@ -12,6 +12,7 @@ import ProcessManagement from "../pages/process-management/Processmanagement";
 import Integrations from "../pages/integrations/Integrations";
 import MisAnalytics from "../pages/mis-analytics/MsiAnalytics";
 import Reports from "../pages/mis-analytics/reports/Reports";
+import DataExport from "../pages/data-export/DataExport";
 import MembersManagment from "../pages/members-and-kyc/MembersManagement";
 import Communication from "../pages/communication/Communication";
 import AmazonMarketplace from "../pages/amazon-marketplace/AmazonMarketplace";
@@ -37,6 +38,7 @@ export const appRoutes = [
     { path: "/integrations", element: <PrivateRoute element={<Integrations />} />, moduleId: "integrations" },
     { path: "/mis-analytics", element: <PrivateRoute element={<MisAnalytics />} />, moduleId: "mis-analytics" },
     { path: "/reports", element: <PrivateRoute element={<Reports />} />, moduleId: "mis-analytics" },
+    { path: "/data-export", element: <PrivateRoute element={<DataExport />} />, moduleId: "data-export" },
     { path: "/members-management", element: <PrivateRoute element={<MembersManagment />} />, moduleId: "members" },
     { path: "/communication", element: <PrivateRoute element={<Communication />} />, moduleId: "communication" },
     { path: "/amazon-marketplace", element: <PrivateRoute element={<AmazonMarketplace />} />, moduleId: "amazon-marketplace" },

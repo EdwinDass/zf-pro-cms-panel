@@ -26,6 +26,7 @@ export const navItems: NavItem[] = [
     // { id: 'finance-compliance', label: 'Finance & Compliance', icon: 'fas fa-coins', path: '/finance-compliance' },
     // { id: 'fraud-detection', label: 'Fraud Detection', icon: 'fas fa-shield-alt', path: '/fraud-detection' },
     { id: 'mis-analytics', label: 'MIS & Analytics', icon: 'fas fa-chart-line', path: '/mis-analytics' },
+    { id: 'data-export', label: 'Data Export', icon: 'fas fa-file-export', path: '/data-export' },
     { id: 'role-management', label: 'Role Management', icon: 'fas fa-user-shield', path: '/role-management' },
     // { id: 'integrations', label: 'Integrations', icon: 'fas fa-plug', path: '/integrations' },
     { id: 'process', label: 'Process Redemption', icon: 'fas fa-cogs', path: '/process-management' },
@@ -169,7 +170,7 @@ export const Layout: React.FC<LayoutProps> = ({
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="min-h-screen bg-[#f4f6fa]">
             {/* Overlay for mobile */}
             {isMobile && expanded && (
                 <div
@@ -183,7 +184,7 @@ export const Layout: React.FC<LayoutProps> = ({
             {isMobile && !expanded && (
                 <button
                     onClick={() => setExpanded(true)}
-                    className="fixed top-4 left-4 z-50 bg-blue-600 text-white p-3 rounded-lg shadow-lg hover:bg-blue-700 transition-all"
+                    className="fixed top-4 left-4 z-50 bg-[#001476] text-white p-3 rounded-lg shadow-lg hover:bg-blue-900 transition-all"
                     aria-label="Open sidebar"
                     title="Open sidebar"
                 >
@@ -195,7 +196,7 @@ export const Layout: React.FC<LayoutProps> = ({
                 {/* Sidebar */}
                 <div
                     className={`
-                        fixed top-0 h-screen bg-white shadow-xl z-50 transition-all duration-300 ease-in-out flex flex-col
+                        fixed top-0 h-screen bg-[#001476] text-white shadow-xl z-50 transition-all duration-300 ease-in-out flex flex-col
                         ${isMobile
                             ? expanded
                                 ? 'left-0 w-4/5 max-w-xs'
@@ -207,7 +208,7 @@ export const Layout: React.FC<LayoutProps> = ({
                     `}
                 >
                     {/* Logo Section */}
-                    <div className="p-6 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+                    <div className="p-5 border-b border-blue-900/50 flex items-center justify-between flex-shrink-0">
                         {expanded && (
                             <img
                                 src="https://ik.imagekit.io/ewxcertfq/ZF_proPoints_Logo_xcept_Black_RGB%201.png?updatedAt=1760210363486"
@@ -220,11 +221,11 @@ export const Layout: React.FC<LayoutProps> = ({
                         {!isMobile && (
                             <button
                                 onClick={() => setExpanded(!expanded)}
-                                className="text-gray-600 hover:text-gray-900 transition-colors ml-auto"
+                                className="text-blue-200 hover:text-white transition-colors ml-auto p-1"
                                 aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
                                 title={expanded ? "Collapse sidebar" : "Expand sidebar"}
                             >
-                                <i className={`fas ${expanded ? 'fa-times' : 'fa-bars'} text-xl`}></i>
+                                <i className={`fas ${expanded ? 'fa-times' : 'fa-bars'} text-lg`}></i>
                             </button>
                         )}
 
@@ -232,84 +233,94 @@ export const Layout: React.FC<LayoutProps> = ({
                         {isMobile && (
                             <button
                                 onClick={() => setExpanded(false)}
-                                className="text-gray-600 hover:text-gray-900 transition-colors ml-auto"
+                                className="text-blue-200 hover:text-white transition-colors ml-auto p-1"
                                 aria-label="Close sidebar"
                                 title="Close sidebar"
                             >
-                                <i className="fas fa-times text-xl"></i>
+                                <i className="fas fa-times text-lg"></i>
                             </button>
                         )}
                     </div>
 
                     {/* Navigation */}
                     <div className="flex-1 overflow-y-auto py-4">
-                        <nav className="px-2 space-y-1">
-                            {filteredNavItems.map((item) => (
-                                <div key={item.id}>
-                                    <button
-                                        onClick={() => {
-                                            if (item.subItems) {
-                                                setOpenSubMenus(prev => ({ ...prev, [item.id]: !prev[item.id] }));
-                                                if (!expanded && !isMobile) setExpanded(true);
-                                            } else {
-                                                handleNavigation(item.path);
-                                            }
-                                        }}
-                                        aria-label={item.label}
-                                        title={item.label}
-                                        className={`
-                                            flex items-center w-full text-left rounded-lg transition-all duration-200
-                                            ${expanded ? 'px-4 py-3' : 'px-3 py-3 justify-center'}
-                                            ${(isActive(item.path) || (item.subItems && item.subItems.some(sub => isActive(sub.path))))
-                                                ? 'bg-blue-50 text-blue-600 font-medium'
-                                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:translate-x-1'
-                                            }
-                                        `}
-                                    >
-                                        <i className={`${item.icon} ${expanded ? 'mr-3' : ''} text-lg`}></i>
-                                        {expanded && <span className="text-sm whitespace-nowrap flex-1">{item.label}</span>}
-                                        {expanded && item.subItems && (
-                                            <i className={`fas fa-chevron-${openSubMenus[item.id] ? 'up' : 'down'} text-xs ml-2`}></i>
-                                        )}
-                                    </button>
+                        <nav className="px-2.5 space-y-1.5">
+                            {filteredNavItems.map((item) => {
+                                const itemIsActive = isActive(item.path) || (item.subItems && item.subItems.some(sub => isActive(sub.path)));
 
-                                    {item.subItems && expanded && openSubMenus[item.id] && (
-                                        <div className="pl-10 pr-2 mt-1 space-y-1">
-                                            {item.subItems.map((sub: any) => (
-                                                <button
-                                                    key={sub.id}
-                                                    onClick={() => handleNavigation(sub.path)}
-                                                    className={`
-                                                        w-full text-left px-4 py-2 text-sm rounded-lg transition-colors
-                                                        ${isActive(sub.path) ? 'text-blue-600 font-medium bg-blue-50' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}
-                                                    `}
-                                                >
-                                                    {sub.label}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
+                                return (
+                                    <div key={item.id}>
+                                        <button
+                                            onClick={() => {
+                                                if (item.subItems) {
+                                                    setOpenSubMenus(prev => ({ ...prev, [item.id]: !prev[item.id] }));
+                                                    if (!expanded && !isMobile) setExpanded(true);
+                                                } else {
+                                                    handleNavigation(item.path);
+                                                }
+                                            }}
+                                            aria-label={item.label}
+                                            title={item.label}
+                                            className={`
+                                                flex items-center w-full text-left transition-all duration-200
+                                                ${expanded ? 'px-3.5 py-2.5 rounded-xl' : 'px-3 py-2.5 justify-center rounded-xl'}
+                                                ${itemIsActive
+                                                    ? 'bg-[#132899] text-white font-semibold shadow-sm border-l-4 border-amber-400'
+                                                    : 'text-blue-100/75 hover:bg-blue-900/40 hover:text-white hover:translate-x-1'
+                                                }
+                                            `}
+                                        >
+                                            <i className={`${item.icon} ${expanded ? 'mr-3' : ''} text-lg ${itemIsActive ? 'text-white' : 'text-blue-200/90'}`}></i>
+                                            {expanded && <span className="text-sm whitespace-nowrap flex-1">{item.label}</span>}
+                                            {expanded && item.subItems && (
+                                                <i className={`fas fa-chevron-${openSubMenus[item.id] ? 'up' : 'down'} text-xs ml-2 opacity-70`}></i>
+                                            )}
+                                        </button>
+
+                                        {item.subItems && expanded && openSubMenus[item.id] && (
+                                            <div className="pl-9 pr-2 mt-1 space-y-1">
+                                                {item.subItems.map((sub: any) => {
+                                                    const subIsActive = isActive(sub.path);
+                                                    return (
+                                                        <button
+                                                            key={sub.id}
+                                                            onClick={() => handleNavigation(sub.path)}
+                                                            className={`
+                                                                w-full text-left px-3.5 py-2 text-xs rounded-lg transition-colors
+                                                                ${subIsActive
+                                                                    ? 'text-white font-semibold bg-[#132899]/80 border-l-2 border-amber-400'
+                                                                    : 'text-blue-200/70 hover:text-white hover:bg-blue-900/30'
+                                                                }
+                                                            `}
+                                                        >
+                                                            {sub.label}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </nav>
                     </div>
 
                     {/* User Profile */}
                     {expanded && (
-                        <div className="p-4 border-t border-gray-200 flex-shrink-0">
+                        <div className="p-4 border-t border-blue-900/50 flex-shrink-0 bg-[#001063]">
                             <div className="flex items-center">
                                 <div className="flex-shrink-0">
-                                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                        <span className="text-blue-600 font-medium">
+                                    <div className="h-9 w-9 rounded-full bg-blue-800/80 border border-blue-600/50 flex items-center justify-center">
+                                        <span className="text-white font-bold text-sm">
                                             {(displayRole || "-").charAt(0).toUpperCase()}
                                         </span>
                                     </div>
                                 </div>
                                 <div className="ml-3 overflow-hidden">
-                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                    <p className="text-xs font-semibold text-white truncate">
                                         {displayRole || "-"}
                                     </p>
-                                    <p className="text-xs text-gray-500 truncate">
+                                    <p className="text-[11px] text-blue-200/70 truncate">
                                         {user?.userEmail || "—"}
                                     </p>
                                 </div>
@@ -330,7 +341,7 @@ export const Layout: React.FC<LayoutProps> = ({
                         }
                     `}
                 >
-                    <div className="w-full min-h-screen">
+                    <div className="w-full min-h-screen bg-[#f4f6fa]">
                         {children}
                     </div>
                 </div>
