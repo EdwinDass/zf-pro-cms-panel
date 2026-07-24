@@ -568,7 +568,7 @@ export const getUserKycsByUserId = async (userId: number, page: number, limit: n
     });
 };
 
-export const updateKycRecords = async (updates: { detailId: number; status: "Approved" | "Rejected" | "Completed"; comment?: string; userId?: number }[]) => {
+export const updateKycRecords = async (updates: { detailId: number; status: "Approved" | "Rejected" | "Completed"; comment?: string }[]) => {
     return api.post(`kyc/updateKycRecords`, {
         updates
     });
