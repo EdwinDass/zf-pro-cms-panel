@@ -244,19 +244,25 @@ const KycModal: React.FC<KycModalProps> = ({ isOpen, onClose, mechanicName, mech
                                             {renderDocumentDetails(doc)}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="space-y-1">
-                                                <input
-                                                    type="text"
-                                                    placeholder="Add comment"
-                                                    value={comments[doc.detailId] || doc.comment || ""}
-                                                    onChange={(e) => handleCommentChange(doc.detailId, e.target.value)}
-                                                    className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                    disabled={(loggedUser?.userRoleId == ROLES.REGION_MANAGER && doc.docStatus !== "Pending") || (loggedUser?.userRoleId == ROLES.MARKETING_MANAGER && doc.docStatus !== "Approved")}
-                                                />
-                                            </div>
+                                            {doc.kycType === "user-profile" || doc.kycType === "profile-picture" ? (
+                                                <span className="text-sm text-gray-400 font-medium">—</span>
+                                            ) : (
+                                                <div className="space-y-1">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Add comment"
+                                                        value={comments[doc.detailId] || doc.comment || ""}
+                                                        onChange={(e) => handleCommentChange(doc.detailId, e.target.value)}
+                                                        className="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        disabled={(loggedUser?.userRoleId == ROLES.REGION_MANAGER && doc.docStatus !== "Pending") || (loggedUser?.userRoleId == ROLES.MARKETING_MANAGER && doc.docStatus !== "Approved")}
+                                                    />
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4">
-                                            {(loggedUser?.userRoleId == ROLES.REGION_MANAGER && doc.docStatus === "Pending") || (loggedUser?.userRoleId == ROLES.MARKETING_MANAGER && doc.docStatus === "Approved") ? (
+                                            {doc.kycType === "user-profile" || doc.kycType === "profile-picture" ? (
+                                                <span className="text-sm text-gray-400 font-medium">—</span>
+                                            ) : (loggedUser?.userRoleId == ROLES.REGION_MANAGER && doc.docStatus === "Pending") || (loggedUser?.userRoleId == ROLES.MARKETING_MANAGER && doc.docStatus === "Approved") ? (
                                                 <div className="flex gap-2">
                                                     <button
                                                         type="button"
