@@ -25,42 +25,32 @@ export const ProgramPerformanceTab: React.FC<Props> = () => (
 );
 
 
-export const SalesBusinessTab: React.FC<Props> = () => (
-    <EmptyTabPlaceholder
-        icon="💰"
-        title="Sales & Business"
-        description="Revenue breakdown, sales trends and business analytics will be shown here."
-    />
+import SalesBusinessTabContent from "./SalesBusinessTab";
+
+export const SalesBusinessTab: React.FC<Props> = ({ filters }) => (
+    <SalesBusinessTabContent filters={filters} />
 );
+
+import Member360TabContent from "./Member360Tab";
 
 export const Member360Tab: React.FC<Props> = () => (
-    <EmptyTabPlaceholder
-        icon="👤"
-        title="Member 360"
-        description="Detailed member insights, segmentation and lifetime value analysis will be shown here."
-    />
+    <Member360TabContent />
 );
+
+import ProductSKUTabContent from "./ProductSKUTab";
 
 export const ProductSKUTab: React.FC<Props> = () => (
-    <EmptyTabPlaceholder
-        icon="📦"
-        title="Product & SKU"
-        description="Product-wise performance, SKU analytics and category breakdown will be shown here."
-    />
+    <ProductSKUTabContent />
 );
+
+import RewardsTabContent from "./RewardsTab";
 
 export const RewardsTab: React.FC<Props> = () => (
-    <EmptyTabPlaceholder
-        icon="🎁"
-        title="Rewards"
-        description="Points economy, redemption trends and reward catalog performance will be shown here."
-    />
+    <RewardsTabContent />
 );
 
+import GeographyTabContent from "./GeographyTab";
+
 export const GeographyTab: React.FC<Props> = () => (
-    <EmptyTabPlaceholder
-        icon="🗺️"
-        title="Geography"
-        description="Zone-wise, state-wise and city-level sales and member distribution will be shown here."
-    />
+    <GeographyTabContent />
 );

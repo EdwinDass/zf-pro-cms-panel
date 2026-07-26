@@ -390,9 +390,6 @@ export const DataExport: React.FC = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-xl font-bold text-slate-800">Data Export</h1>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                        Generate and download reports in CSV or Excel format
-                    </p>
                 </div>
 
                 <button
@@ -406,7 +403,7 @@ export const DataExport: React.FC = () => {
             </div>
 
             {/* Filter Bar */}
-            <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+            {/* <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
                 <div className="flex flex-wrap items-center gap-3">
                     <div className="flex items-center gap-1.5 text-slate-500 font-semibold text-xs uppercase tracking-wider">
                         <FiFilter className="text-sm" />
@@ -454,23 +451,8 @@ export const DataExport: React.FC = () => {
                         </button>
                     )}
                 </div>
-            </div>
+            </div> */}
 
-            {/* Info Banner */}
-            <div className="flex items-center gap-3 p-4 bg-white border border-slate-200/80 rounded-xl shadow-sm text-xs sm:text-sm text-slate-600">
-                <div className="w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-                    <FiFilter className="text-xs" />
-                </div>
-                <span>
-                    Exports respect the active filters above. Current scope:{" "}
-                    <strong className="text-slate-800 font-semibold">
-                        {zone ? `Zone: ${zone}` : "all-India"}
-                        {fromDate && ` from ${fromDate}`}
-                        {toDate && ` to ${toDate}`}
-                    </strong>
-                    . Downloads are generated in-browser (CSV / Excel) — no data leaves this device.
-                </span>
-            </div>
 
             {/* Grid of 15 Report Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

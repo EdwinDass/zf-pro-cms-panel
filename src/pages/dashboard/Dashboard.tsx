@@ -101,7 +101,7 @@ const Dashboard = () => {
                 <h1 className="text-xl font-bold text-gray-800 mb-3">Analytics Dashboards</h1>
 
                 {/* ── Global Filters ── */}
-                <GlobalFilters filters={filters} onChange={setFilters} />
+                {/* <GlobalFilters filters={filters} onChange={setFilters} /> */}
 
                 {/* ── Tabs ── */}
                 <div className="flex items-center gap-1.5 mb-5 overflow-x-auto bg-gray-100 rounded-xl p-1 w-fit max-w-full">

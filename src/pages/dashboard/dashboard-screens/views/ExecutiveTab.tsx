@@ -5,6 +5,7 @@ import StatsRowTwo from "../../dashboard-screens/StatsRowTwo";
 import StatsRowThree from "../../dashboard-screens/StatsRowThree";
 import StatsRowFour from "../../dashboard-screens/StatsRowFour";
 import StatsRowFive from "../../dashboard-screens/StatsRowFive";
+import TopRankingsRow from "../../dashboard-screens/TopRankingsRow";
 
 interface Props {
     filters: GlobalFilterValues;
@@ -16,6 +17,7 @@ const ExecutiveTab: React.FC<Props> = ({ filters }) => {
             <StatsRowOne />
             <StatsRowTwo />
             <StatsRowThree />
+            <TopRankingsRow />
             <StatsRowFour />
             <StatsRowFive />
         </div>

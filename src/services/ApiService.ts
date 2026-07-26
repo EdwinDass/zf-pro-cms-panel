@@ -168,8 +168,8 @@ export const addAsset = async (payload: { assetType: string; assetTitle: string;
     return api.post('masters/assets', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
     })
-    .then((response) => response)
-    .catch((error) => { throw error });
+        .then((response) => response)
+        .catch((error) => { throw error });
 };
 
 export const editAsset = async (
@@ -184,8 +184,8 @@ export const editAsset = async (
     return api.put(`masters/assets/${assetId}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
     })
-    .then((response) => response)
-    .catch((error) => { throw error });
+        .then((response) => response)
+        .catch((error) => { throw error });
 };
 
 export const deleteAsset = async (assetId: number) => {
@@ -203,10 +203,114 @@ export const getTopPerformers = async (count: number) => {
         .then((response) => response);
 };
 
+// Get top mechanics
+export const getTopMechanics = async (count: number = 5) => {
+    return api
+        .get("masters/users/top-mechanics", {
+            params: { count }
+        })
+        .then((response) => response);
+};
+
+// Get top dealers
+export const getTopDealers = async (count: number = 5) => {
+    return api
+        .get("masters/users/top-workshops", {
+            params: { count }
+        })
+        .then((response) => response);
+};
+
+// Get top products
+export const getTopProducts = async (count: number = 5) => {
+    return api
+        .get("masters/inventory/top-products", {
+            params: { count }
+        })
+        .then((response) => response);
+};
+
 // Get regional sales performance graph
 export const getRegionalSalesPerformance = async (params?: { [key: string]: any }) => {
     return api
         .get("masters/sales/regional", { params })
+        .then((response) => response);
+};
+
+// Get sales by product category
+export const getSalesByCategory = async (params?: { [key: string]: any }) => {
+    return api
+        .get("masters/sales/category", { params })
+        .then((response) => response);
+};
+
+// Get scans by product
+export const getScansByProduct = async (count: number = 5) => {
+    return api
+        .get("masters/scans/by-product", { params: { count } })
+        .then((response) => response);
+};
+
+// Get category share (pie chart)
+export const getCategoryShare = async () => {
+    return api
+        .get("masters/scans/category-share")
+        .then((response) => response);
+};
+
+// Get product scan heatmap by zone
+export const getProductHeatmapByZone = async (count: number = 5) => {
+    return api
+        .get("masters/scans/product-heatmap", { params: { count } })
+        .then((response) => response);
+};
+
+// Get most redeemed rewards
+export const getMostRedeemedRewards = async (count: number = 5) => {
+    return api
+        .get("masters/rewards/most-redeemed", { params: { count } })
+        .then((response) => response);
+};
+
+// Get State member density
+export const getStateMemberDensity = async () => {
+    return api
+        .get("masters/geography/state-member-density")
+        .then((response) => response);
+};
+
+// Get Density by state
+export const getDensityByState = async () => {
+    return api
+        .get("masters/geography/density-by-state")
+        .then((response) => response);
+};
+
+// Get Member 360 list
+export const getMember360List = async (search?: string) => {
+    return api
+        .get("masters/members/360-list", { params: { search } })
+        .then((response) => response);
+};
+
+// Get Member 360 detail
+export const getMember360Detail = async (userId: number) => {
+    return api
+        .get(`masters/members/360-detail/${userId}`)
+        .then((response) => response);
+};
+
+// Get Points Issued vs Redeemed monthly graph data
+export const getPointsIssuedVsRedeemedMonthly = async () => {
+    return api
+        .get("masters/mis/points-issued-vs-redeemed")
+        .then((response) => response);
+};
+
+// Get Top Mechanics by Zone
+export const getTopMechanicsByZone = async () => {
+    return api
+        .get("masters/mis/top-mechanics-by-zone")
         .then((response) => response);
 };
 

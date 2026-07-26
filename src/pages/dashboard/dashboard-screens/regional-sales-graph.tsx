@@ -14,19 +14,11 @@ interface RegionalSalesGraphProps {
   data?: RegionData[];
 }
 
-const defaultRegions: RegionData[] = [
-  { zone: "West", amount: 512, formattedAmount: "₹512" },
-  { zone: "South", amount: 468, formattedAmount: "₹468" },
-  { zone: "North", amount: 421, formattedAmount: "₹421" },
-  { zone: "East", amount: 268, formattedAmount: "₹268" },
-  { zone: "Central", amount: 173, formattedAmount: "₹173" },
-];
-
 const RegionalSalesGraph: React.FC<RegionalSalesGraphProps> = ({
   title = "Regional Sales Performance",
   data: propsData,
 }) => {
-  const [regions, setRegions] = useState<RegionData[]>(propsData || defaultRegions);
+  const [regions, setRegions] = useState<RegionData[]>(propsData || []);
   const [loading, setLoading] = useState<boolean>(!propsData);
 
   useEffect(() => {
@@ -40,7 +32,7 @@ const RegionalSalesGraph: React.FC<RegionalSalesGraphProps> = ({
         setLoading(true);
         const res = await getRegionalSalesPerformance();
         const apiData = res?.data?.data?.regions;
-        if (Array.isArray(apiData) && apiData.length > 0) {
+        if (Array.isArray(apiData)) {
           setRegions(apiData);
         }
       } catch (error) {
