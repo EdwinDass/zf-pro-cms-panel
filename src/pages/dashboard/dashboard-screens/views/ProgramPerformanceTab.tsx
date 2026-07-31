@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as echarts from "echarts";
-import { getUserRegistrations, getKycStatus, getUserStatusDistribution } from "../../../../services/ApiService";
+import { getUserRegistrations, getKycStatus, getUserStatusDistribution, getProgramPerformanceStats } from "../../../../services/ApiService";
+import Card from "../Card";
+import { FaUsers, FaUserPlus, FaUserCheck } from "react-icons/fa";
 
 // ─────────────────────────────────────────────
 // Reusable ECharts Pie / Donut
@@ -167,6 +169,15 @@ const buildParams = (v: string) => {
 };
 
 const ProgramPerformanceTab: React.FC = () => {
+    // ── Summary stats state ──
+    const [perfStats, setPerfStats] = useState({
+        totalMembers: 0,
+        newRegistrationsThisMonth: 0,
+        activeMembers: 0,
+        activeRate: 0
+    });
+    const [perfLoading, setPerfLoading] = useState(true);
+
     // ── Line chart state ──
     const [lineRange, setLineRange] = useState("7");
     const [lineData, setLineData] = useState<LineData>({ labels: [], active: [], mau: [] });
@@ -179,6 +190,23 @@ const ProgramPerformanceTab: React.FC = () => {
     // ── KYC status pie state ──
     const [kycStatus, setKycStatus] = useState({ approved: 0, pending: 0, rejected: 0 });
     const [kycLoading, setKycLoading] = useState(true);
+
+    // Fetch summary stats
+    useEffect(() => {
+        setPerfLoading(true);
+        getProgramPerformanceStats()
+            .then(res => {
+                const d = res?.data?.data || {};
+                setPerfStats({
+                    totalMembers: d.totalMembers ?? 0,
+                    newRegistrationsThisMonth: d.newRegistrationsThisMonth ?? 0,
+                    activeMembers: d.activeMembers ?? 0,
+                    activeRate: d.activeRate ?? 0
+                });
+            })
+            .catch(() => setPerfStats({ totalMembers: 0, newRegistrationsThisMonth: 0, activeMembers: 0, activeRate: 0 }))
+            .finally(() => setPerfLoading(false));
+    }, []);
 
     // Fetch line chart
     useEffect(() => {
@@ -249,6 +277,34 @@ const ProgramPerformanceTab: React.FC = () => {
 
     return (
         <div className="space-y-6">
+
+            {/* ── Summary KPI Cards ── */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <Card
+                    title="Total Members"
+                    value={perfLoading ? "..." : perfStats.totalMembers.toLocaleString()}
+                    percentage="Total Mechanics"
+                    percentageColor="text-blue-600"
+                    icon={<FaUsers />}
+                    iconColor="text-blue-500"
+                />
+                <Card
+                    title="New Registrations This Month"
+                    value={perfLoading ? "..." : perfStats.newRegistrationsThisMonth.toLocaleString()}
+                    percentage="This Month"
+                    percentageColor="text-teal-600"
+                    icon={<FaUserPlus />}
+                    iconColor="text-teal-500"
+                />
+                <Card
+                    title="Active Rate"
+                    value={perfLoading ? "..." : `${perfStats.activeRate}%`}
+                    percentage={`${perfStats.activeMembers.toLocaleString()} Active Members`}
+                    percentageColor="text-green-600"
+                    icon={<FaUserCheck />}
+                    iconColor="text-green-500"
+                />
+            </div>
 
             {/* ── Row 1: Active Users & MAU Line Chart ── */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">

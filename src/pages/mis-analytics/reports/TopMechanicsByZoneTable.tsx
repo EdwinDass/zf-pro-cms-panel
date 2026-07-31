@@ -34,7 +34,7 @@ const TopMechanicsByZoneTable: React.FC = () => {
 
     return (
         <div className="bg-white shadow-md rounded-2xl p-6 border border-gray-100 w-full">
-            <h2 className="text-lg font-bold text-gray-900 mb-6">Top mechanics by zone</h2>
+            <h2 className="text-lg font-semibold text-gray mb-6">Top Mechanics By Zone</h2>
 
             {loading ? (
                 <div className="py-12 text-center text-gray-400 text-sm">

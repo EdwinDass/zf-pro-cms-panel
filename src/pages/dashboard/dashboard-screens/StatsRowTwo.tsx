@@ -88,7 +88,7 @@ const StatsRowTwo: React.FC = () => {
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
 
             {/* 🔹 Scans vs QR Generated — CardVariantTwo */}
-            <CardVariantTwo
+            {/* <CardVariantTwo
                 title="Scans vs QR Generated"
                 icon={<FaQrcode />}
                 iconColor="text-blue-500"
@@ -108,10 +108,10 @@ const StatsRowTwo: React.FC = () => {
                 // onClick={() => navigate("/qr")}
                 onLeftClick={() => navigate("/reports?report=qr")}
                 onRightClick={() => navigate("/qr")}
-            />
+            /> */}
 
             {/* 🔹 KYC Status — CardVariantTwo */}
-            <CardVariantTwo
+            {/* <CardVariantTwo
                 title="KYC Status"
                 icon={<FaUserCheck />}
                 iconColor="text-teal-500"
@@ -123,10 +123,10 @@ const StatsRowTwo: React.FC = () => {
                 footerText={`${kycStatus.percentage}% of members have completed KYC`}
                 onLeftClick={() => navigate("/reports?report=kyc&kycDocStatus=Approved By Market Head")}
                 onRightClick={() => navigate("/reports?report=kyc&kycDocStatus=Pending")}
-            />
+            /> */}
 
             {/* 🔹 User Status — CardVariantTwo */}
-            <CardVariantTwo
+            {/* <CardVariantTwo
                 title="User Status"
                 icon={<FaUserShield />}
                 iconColor="text-amber-500"
@@ -148,7 +148,7 @@ const StatsRowTwo: React.FC = () => {
                 ).toFixed(2)}% of users are active`}
                 onLeftClick={() => navigate("/reports?report=registered-users&status=none")}
                 onRightClick={() => navigate("/reports?report=registered-users&status=blocked")}
-            />
+            /> */}
 
         </div>
     );

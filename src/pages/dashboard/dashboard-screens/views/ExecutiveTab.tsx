@@ -17,9 +17,9 @@ const ExecutiveTab: React.FC<Props> = ({ filters }) => {
             <StatsRowOne />
             <StatsRowTwo />
             <StatsRowThree />
+            <StatsRowFive />
             <TopRankingsRow />
             <StatsRowFour />
-            <StatsRowFive />
         </div>
     );
 };

@@ -113,7 +113,7 @@ const Member360TabContent: React.FC = () => {
                                 <tr className="border-b border-gray-100 text-[11px] font-bold text-gray-400 tracking-wider uppercase">
                                     <th className="pb-3 pl-2">Member</th>
                                     <th className="pb-3 text-right">Points</th>
-                                    <th className="pb-3 pr-2 text-right">Health</th>
+                                    {/* <th className="pb-3 pr-2 text-right">Health</th> */}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
@@ -123,9 +123,8 @@ const Member360TabContent: React.FC = () => {
                                         <tr
                                             key={m.userId}
                                             onClick={() => setSelectedMember(m)}
-                                            className={`cursor-pointer transition-colors duration-150 hover:bg-blue-50/50 ${
-                                                isSelected ? "bg-blue-50/80 font-medium" : ""
-                                            }`}
+                                            className={`cursor-pointer transition-colors duration-150 hover:bg-blue-50/50 ${isSelected ? "bg-blue-50/80 font-medium" : ""
+                                                }`}
                                         >
                                             {/* Member Name, ZF-ID & City */}
                                             <td className="py-3.5 pl-2">
@@ -189,14 +188,14 @@ const Member360TabContent: React.FC = () => {
                                 </span>
                             </div>
 
-                            <div className="bg-[#F8FAFC] p-4 rounded-xl border border-gray-100">
+                            {/* <div className="bg-[#F8FAFC] p-4 rounded-xl border border-gray-100">
                                 <span className="text-xs font-medium text-gray-400 block mb-1">
                                     Health Score
                                 </span>
                                 <span className="text-lg font-bold text-gray-900">
                                     {selectedMember.healthScore}/100
                                 </span>
-                            </div>
+                            </div> */}
 
                             <div className="bg-[#F8FAFC] p-4 rounded-xl border border-gray-100">
                                 <span className="text-xs font-medium text-gray-400 block mb-1">

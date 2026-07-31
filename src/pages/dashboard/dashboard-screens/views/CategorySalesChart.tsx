@@ -120,7 +120,7 @@ const CategorySalesChart: React.FC<CategorySalesChartProps> = ({ filters }) => {
     return (
         <div className="bg-white shadow-md rounded-xl p-6 border border-gray-100 w-full flex flex-col justify-between">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                Sales by product category (₹ Cr)
+                Sales By Product Category
             </h2>
 
             {loading ? (

@@ -43,7 +43,7 @@ const MISDashboardView: React.FC = () => {
         <div className="space-y-6 pb-12">
             {/* Top row: Enrollment Status KPI Summary Cards */}
             <div className="bg-white shadow-md rounded-2xl p-6 border border-gray-100">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">
+                <h2 className="text-lg font-semibold text-gray mb-4">
                     Enrollment Status (KYC & User Status)
                 </h2>
 
@@ -53,7 +53,7 @@ const MISDashboardView: React.FC = () => {
                             Total Registered
                         </span>
                         <span className="text-xl font-bold text-gray-900">
-                            {statusData.total ? statusData.total.toLocaleString() : "14,850"}
+                            {statusData.total ? statusData.total.toLocaleString() : "0"}
                         </span>
                     </div>
 
@@ -62,7 +62,7 @@ const MISDashboardView: React.FC = () => {
                             KYC Approved / Active
                         </span>
                         <span className="text-xl font-bold text-emerald-600">
-                            {statusData.active ? statusData.active.toLocaleString() : "12,400"}
+                            {statusData.active ? statusData.active.toLocaleString() : "0"}
                         </span>
                     </div>
 
@@ -71,7 +71,7 @@ const MISDashboardView: React.FC = () => {
                             Pending Verification
                         </span>
                         <span className="text-xl font-bold text-amber-600">
-                            {statusData.pending ? statusData.pending.toLocaleString() : "650"}
+                            {statusData.pending ? statusData.pending.toLocaleString() : "0"}
                         </span>
                     </div>
 
@@ -80,7 +80,7 @@ const MISDashboardView: React.FC = () => {
                             Incomplete / Inactive
                         </span>
                         <span className="text-xl font-bold text-rose-600">
-                            {statusData.inactive ? statusData.inactive.toLocaleString() : "1,800"}
+                            {statusData.inactive ? statusData.inactive.toLocaleString() : "0"}
                         </span>
                     </div>
                 </div>

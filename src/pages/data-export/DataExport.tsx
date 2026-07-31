@@ -470,7 +470,7 @@ export const DataExport: React.FC = () => {
                                     {card.icon}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <h3 className="text-sm font-bold text-slate-800 truncate" title={card.title}>
+                                    <h3 className="text-base font-semibold text-gray-800 truncate" title={card.title}>
                                         {card.title}
                                     </h3>
                                     <p className="text-xs text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
@@ -484,9 +484,9 @@ export const DataExport: React.FC = () => {
                                 <button
                                     onClick={() => handleExportCard(card, "csv")}
                                     disabled={isLoading}
-                                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-50/70 text-blue-600 hover:bg-blue-100 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-50/70 text-green-600 hover:bg-blue-100 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer"
                                 >
-                                    <FiDownload className="text-xs" />
+                                    <FiDownload className="text-xs text-green-600" />
                                     CSV
                                 </button>
 

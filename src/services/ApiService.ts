@@ -124,6 +124,42 @@ export const getKycStatus = async (params: any) => {
         .then((response) => response);
 };
 
+export const getExecutiveStats = async (params?: any) => {
+    return api
+        .get('masters/executive-stats', { params })
+        .then((response) => response);
+};
+
+export const getProgramPerformanceStats = async (params?: any) => {
+    return api
+        .get('masters/program-performance-stats', { params })
+        .then((response) => response);
+};
+
+export const getProductSkuStats = async (params?: any) => {
+    return api
+        .get('masters/product-sku-stats', { params })
+        .then((response) => response);
+};
+
+export const getZonePerformance = async (params?: any) => {
+    return api
+        .get('masters/zone-performance', { params })
+        .then((response) => response);
+};
+
+export const getRewardsStats = async (params?: any) => {
+    return api
+        .get('masters/rewards-stats', { params })
+        .then((response) => response);
+};
+
+export const getGeographyStats = async (params?: any) => {
+    return api
+        .get('masters/geography-stats', { params })
+        .then((response) => response);
+};
+
 // Get member registration graph data
 export const getUserRegistrations = async (params: { [key: string]: any }) => {
     return api

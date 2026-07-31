@@ -140,8 +140,8 @@ const PointsIssuedVsRedeemedChart: React.FC = () => {
 
     return (
         <div className="bg-white shadow-md rounded-2xl p-6 border border-gray-100 w-full">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">
-                Points issued vs redeemed (₹ Cr)
+            <h2 className="text-lg font-semibold text-gray mb-4">
+                Points Issued vs Redeemed
             </h2>
 
             {loading ? (
