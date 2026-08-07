@@ -23,6 +23,7 @@ import SubCategories from "../pages/sku-management/subcategories/Subcategories";
 import Skus from "../pages/sku-management/skus/Skus";
 import ShockReplacementSkus from "../pages/sku-management/shock-replacement-skus/ShockReplacementSkus";
 import Assets from "../pages/assets/Assets";
+import ManageWorkshopPage from "../pages/manage-workshop/ManageWorkshopPage";
 import DeleteAccount from "../pages/delete-account/DeleteAccount";
 import { useAppSelector } from "../redux/hooks";
 import { getAllowedRoutes } from "../values/roleModuleRules";
@@ -42,6 +43,7 @@ export const appRoutes = [
     { path: "/amazon-marketplace", element: <PrivateRoute element={<AmazonMarketplace />} />, moduleId: "amazon-marketplace" },
     { path: "/faqs", element: <PrivateRoute element={<Faqs />} />, moduleId: "faqs" },
     { path: "/assets-management", element: <PrivateRoute element={<Assets />} />, moduleId: "assets" },
+    { path: "/manage-workshop", element: <PrivateRoute element={<ManageWorkshopPage />} />, moduleId: "manage-workshop" },
     { path: "/survey-questions", element: <PrivateRoute element={<SurveyQuestions />} />, moduleId: "surveys" },
     { path: "/survey-responses", element: <PrivateRoute element={<SurveyResponses />} />, moduleId: "surveys" },
     { path: "/categories", element: <PrivateRoute element={<Categories />} />, moduleId: "sku-management" },

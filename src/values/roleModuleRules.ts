@@ -12,6 +12,7 @@ export const moduleRoutes: Record<string, string[]> = {
   members: ["/members-management"],
   faqs: ["/faqs"],
   assets: ["/assets-management"],
+  "manage-workshop": ["/manage-workshop"],
   "amazon-marketplace": ["/amazon-marketplace"],
   surveys: ["/survey-questions", "/survey-responses"],
   "survey-questions": ["/survey-questions"],
@@ -29,12 +30,12 @@ export const roleModuleAccess: Record<number, string[]> = {
   1: [],// mechanic
   2: ["dashboard", "mis-analytics", "process", "members"], // regional_manager
   3: ["dashboard", "communication", "mis-analytics", "tickets", ""], // call_centre_executive
-  4: ["dashboard", "mis-analytics", "process", "members", "qr-management", "communication"], // marketing_manager or client admin are same
+  4: ["dashboard", "mis-analytics", "process", "members", "qr-management", "communication", "manage-workshop"], // marketing_manager or client admin are same
   5: allModules, // operator
   6: allModules, // viewer
   7: ["dashboard", "qr-management"], // qr_admin
   8: allModules, // evolve_admin
-  9: ["dashboard", "qr-management", "communication", "mis-analytics", "process", "members"], // client_admin
+  9: ["dashboard", "qr-management", "communication", "mis-analytics", "process", "members", "manage-workshop"], // client_admin
 };
 
 // Get allowed routes for a specific roleId

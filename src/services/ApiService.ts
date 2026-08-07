@@ -885,9 +885,51 @@ export const getCampaignNotifications = async (
     return api.get(`notifications/campaigns/${campaignId}/notifications`, { params }).then((res) => res?.data);
 };
 
+// ─── Workshop (Retailer) APIs ──────────────────────────────────────────────────
 
+export const getWorkshops = async (params: {
+    page: number;
+    limit: number;
+    search?: string;
+}) => {
+    return api.get('masters/workshops', { params });
+};
 
+export const getWorkshopById = async (id: number) => {
+    return api.get(`masters/workshops/${id}`);
+};
 
+export const bulkCreateWorkshops = async (
+    items: {
+        store_name: string;
+        retailer_name: string;
+        mobile_number: string;
+        current_address: string;
+        current_pincode?: number;
+    }[]
+) => {
+    return api.post('masters/add-workshops', items);
+};
 
+export const updateWorkshop = async (
+    retailerId: number,
+    payload: {
+        store_name?: string;
+        retailer_name?: string;
+        mobile_number?: string;
+        current_pincode?: number | string;
+    }
+) => {
+    return api.put(`masters/workshops/${retailerId}`, payload);
+};
 
+export const updateMechanicPreferredRetailer = async (
+    userId: number,
+    retailerId: number | null
+) => {
+    return api.put(`masters/mechanics/${userId}/preferred-retailer`, { retailerId });
+};
 
+export const searchWorkshops = async (search: string) => {
+    return api.get('masters/workshops', { params: { page: 1, limit: 100, search } });
+};
