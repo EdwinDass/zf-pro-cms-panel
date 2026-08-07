@@ -34,7 +34,7 @@ const StatsRowOne: React.FC = () => {
 
     const fetchActiveMembers = async () => {
         try {
-            const response = await getMemberCount({ role: 1, status: "none" });
+            const response = await getMemberCount({ role: 1, status: "active_members" });
             setActiveMembers(response?.data?.count?.toString() || "0");
         } catch (error) {
             console.error("Active members error:", error);
@@ -86,7 +86,7 @@ const StatsRowOne: React.FC = () => {
                 percentageColor="text-green-600"
                 icon={<FaUserCheck />}
                 iconColor='text-green-500'
-                onClick={() => navigate("/reports?report=registered-users&status=none")}
+                onClick={() => navigate("/reports?report=registered-users&status=active_members")}
             />
 
             {/* CARD 3 (static now) */}
