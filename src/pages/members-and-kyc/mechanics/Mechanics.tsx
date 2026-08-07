@@ -15,7 +15,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import MessageIcon from "@mui/icons-material/Message";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import CloseIcon from "@mui/icons-material/Close";
-import { getUserKycsByUserId, getUserCount, getKycStatus as apiGetKycStatus, getUserList, editUser, getUserProfile } from "../../../services/ApiService";
+import { getUserKycsByUserId, getUserCount, getKycStatus as apiGetKycStatus, getUserList, editUser, getUserProfile, updateMechanicPreferredRetailer, searchWorkshops } from "../../../services/ApiService";
 import { toast } from "react-toastify";
 import KycModal from "../../../components/KycModal";
 import { UserDetails } from "../../../types/User";
@@ -59,6 +59,184 @@ interface User {
     userRole: string;
 }
 
+// ─── Preferred Retailer Modal ───────────────────────────────────────────────────
+
+interface WorkshopOption {
+    retailerId: number;
+    storeName: string;
+    retailerName: string;
+    mobileNumber: string;
+    currentPincode: number | null;
+}
+
+const PreferredRetailerModal: React.FC<{
+    mechanic: Mechanic;
+    onClose: () => void;
+    onSuccess: () => void;
+}> = ({ mechanic, onClose, onSuccess }) => {
+    const [searchTerm, setSearchTerm] = useState("");
+    const [workshops, setWorkshops] = useState<WorkshopOption[]>([]);
+    const [searching, setSearching] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [selectedId, setSelectedId] = useState<number | null>(
+        mechanic.preferredRetailerList?.[0]?.retailerId ?? null
+    );
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleSearch = (value: string) => {
+        setSearchTerm(value);
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        if (!value.trim()) { setWorkshops([]); return; }
+        debounceRef.current = setTimeout(async () => {
+            setSearching(true);
+            try {
+                const res = await searchWorkshops(value.trim());
+                setWorkshops(res?.data?.data || []);
+            } catch {
+                toast.error("Failed to search workshops");
+            } finally {
+                setSearching(false);
+            }
+        }, 400);
+    };
+
+    const handleSelect = (id: number) => {
+        // Click the already-selected one to deselect it
+        setSelectedId(prev => (prev === id ? null : id));
+    };
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            await updateMechanicPreferredRetailer(mechanic.userId, selectedId);
+            toast.success(selectedId ? "Preferred retailer updated successfully" : "Preferred retailer cleared");
+            onSuccess();
+        } catch (err: any) {
+            toast.error(err?.response?.data?.message || "Failed to update preferred retailer");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+                {/* Header */}
+                <div className="bg-indigo-600 px-6 py-4 flex items-center justify-between">
+                    <div>
+                        <h2 className="text-white font-bold text-lg">Edit Preferred Retailer</h2>
+                        <p className="text-indigo-200 text-xs mt-0.5">
+                            {mechanic.displayName || mechanic.userName} &bull; ID {mechanic.userId}
+                        </p>
+                    </div>
+                    <button onClick={onClose} className="text-white hover:text-indigo-200 transition">
+                        <CloseIcon />
+                    </button>
+                </div>
+
+                <div className="p-6 space-y-4">
+                    {/* Current preferred retailer */}
+                    {(mechanic.preferredRetailerList?.length ?? 0) > 0 && (
+                        <div className="bg-indigo-50 rounded-lg px-4 py-3">
+                            <p className="text-xs font-semibold text-indigo-600 uppercase mb-1.5">Current Preferred Retailer</p>
+                            <span className="bg-indigo-100 text-indigo-700 text-xs px-2.5 py-1 rounded-full font-medium">
+                                {mechanic.preferredRetailerList![0].name} (#{mechanic.preferredRetailerList![0].retailerId})
+                            </span>
+                        </div>
+                    )}
+
+                    {/* Search input */}
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">
+                            Search Workshop
+                        </label>
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={e => handleSearch(e.target.value)}
+                                placeholder="Type workshop name, owner or mobile..."
+                                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none"
+                            />
+                            {searching && (
+                                <div className="flex items-center px-2">
+                                    <svg className="animate-spin h-5 w-5 text-indigo-500" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                    </svg>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Results — single-select (radio style) */}
+                    {workshops.length > 0 && (
+                        <div className="border border-gray-200 rounded-lg max-h-52 overflow-y-auto divide-y divide-gray-100">
+                            {workshops.map(w => {
+                                const selected = selectedId === w.retailerId;
+                                return (
+                                    <div
+                                        key={w.retailerId}
+                                        onClick={() => handleSelect(w.retailerId)}
+                                        className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition ${selected ? "bg-indigo-50" : ""}`}
+                                    >
+                                        {/* Radio circle */}
+                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selected ? "border-indigo-600" : "border-gray-300"}`}>
+                                            {selected && <div className="w-2 h-2 rounded-full bg-indigo-600" />}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-gray-900 truncate">{w.storeName}</p>
+                                            <p className="text-xs text-gray-500 truncate">{w.retailerName} &bull; {w.mobileNumber} &bull; PIN {w.currentPincode ?? "—"}</p>
+                                        </div>
+                                        <span className="text-xs text-gray-400 font-mono shrink-0">#{w.retailerId}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                    {searchTerm && !searching && workshops.length === 0 && (
+                        <p className="text-sm text-gray-400 text-center py-2">No workshops found for "{searchTerm}"</p>
+                    )}
+
+                    {/* Selected summary */}
+                    {selectedId !== null && (
+                        <div className="bg-green-50 rounded-lg px-4 py-2 flex items-center justify-between">
+                            <span className="text-sm text-green-700 font-medium">1 retailer selected</span>
+                            <button onClick={() => setSelectedId(null)} className="text-xs text-red-500 hover:text-red-700 transition">Clear</button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer */}
+                <div className="px-6 py-4 bg-gray-50 border-t flex justify-end gap-3">
+                    <button
+                        onClick={onClose}
+                        disabled={saving}
+                        className="px-5 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition font-medium text-sm disabled:opacity-50"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium text-sm disabled:opacity-50"
+                    >
+                        {saving ? (
+                            <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                            </svg>
+                        ) : null}
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ─── MechanicsScreen ────────────────────────────────────────────────────────────
+
 const MechanicsScreen: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [openKycDropdown, setOpenKycDropdown] = useState<number | null>(null);
@@ -82,6 +260,9 @@ const MechanicsScreen: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [loggedUserDetails, setLoggedUserDetails] = useState<UserDetails | null>(null)
     const userDropdownRef = useRef<HTMLDivElement>(null);
+
+    // ── Preferred Retailer Modal state ────────────────────────────────────────
+    const [preferredRetailerMechanic, setPreferredRetailerMechanic] = useState<Mechanic | null>(null);
 
     const pageSize = 10;
 
@@ -584,6 +765,17 @@ const MechanicsScreen: React.FC = () => {
                                                         )}
                                                     </div>
 
+                                                    {/* Edit Preferred Retailer */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setPreferredRetailerMechanic(mechanic)}
+                                                        className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-sm font-medium text-indigo-700 transition"
+                                                        title="Edit Preferred Retailer"
+                                                    >
+                                                        <EditIcon fontSize="small" />
+                                                        Edit
+                                                    </button>
+
                                                     {/* Block Dropdown */}
                                                     {/* <div className="relative">
                                                         <button
@@ -748,6 +940,15 @@ const MechanicsScreen: React.FC = () => {
                     kycDocuments={selectedMechanic.kycDocuments}
                     preferredRetailerList={selectedMechanic.preferredRetailerList}
                     loggedUser={loggedUserDetails as UserDetails}
+                />
+            )}
+
+            {/* Preferred Retailer Modal */}
+            {preferredRetailerMechanic && (
+                <PreferredRetailerModal
+                    mechanic={preferredRetailerMechanic}
+                    onClose={() => setPreferredRetailerMechanic(null)}
+                    onSuccess={() => { setPreferredRetailerMechanic(null); fetchMechanics(); }}
                 />
             )}
 

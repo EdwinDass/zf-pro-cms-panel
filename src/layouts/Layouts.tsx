@@ -27,6 +27,7 @@ export const navItems: NavItem[] = [
     // { id: 'fraud-detection', label: 'Fraud Detection', icon: 'fas fa-shield-alt', path: '/fraud-detection' },
     { id: 'mis-analytics', label: 'MIS & Analytics', icon: 'fas fa-chart-line', path: '/mis-analytics' },
     { id: 'data-export', label: 'Data Export', icon: 'fas fa-file-export', path: '/data-export' },
+    { id: 'manage-workshop', label: 'Manage Workshop', icon: 'fas fa-store', path: '/manage-workshop' },
     { id: 'role-management', label: 'Role Management', icon: 'fas fa-user-shield', path: '/role-management' },
     // { id: 'integrations', label: 'Integrations', icon: 'fas fa-plug', path: '/integrations' },
     { id: 'process', label: 'Process Redemption', icon: 'fas fa-cogs', path: '/process-management' },
