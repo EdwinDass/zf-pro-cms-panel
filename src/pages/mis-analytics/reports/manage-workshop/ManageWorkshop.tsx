@@ -7,6 +7,7 @@ import {
     bulkCreateWorkshops,
     updateWorkshop,
 } from "../../../../services/ApiService";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -295,6 +296,209 @@ const EditWorkshopModal: React.FC<{
                             <SaveIcon fontSize="small" />
                         )}
                         Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ─── Add Workshop Modal ────────────────────────────────────────────────────────
+
+const AddWorkshopModal: React.FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    onSuccess: () => void;
+}> = ({ isOpen, onClose, onSuccess }) => {
+    const initialForm = {
+        store_name: "",
+        retailer_name: "",
+        mobile_number: "",
+        current_address: "",
+        current_pincode: "",
+    };
+    const [form, setForm] = useState(initialForm);
+    const [saving, setSaving] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const MOBILE_RE = /^[6-9]\d{9}$/;
+
+    const validate = () => {
+        const e: Record<string, string> = {};
+        if (!form.store_name.trim()) e.store_name = "Workshop name is required";
+        if (!form.retailer_name.trim()) e.retailer_name = "Owner name is required";
+        if (!form.mobile_number.trim()) {
+            e.mobile_number = "Mobile number is required";
+        } else if (!MOBILE_RE.test(form.mobile_number.trim())) {
+            e.mobile_number = "Must be a 10-digit Indian mobile number (starts with 6-9)";
+        }
+        if (!form.current_address.trim()) e.current_address = "Address is required";
+        if (!form.current_pincode.trim()) {
+            e.current_pincode = "Pincode is required";
+        } else if (!/^\d{6}$/.test(form.current_pincode.trim())) {
+            e.current_pincode = "Must be a 6-digit pincode";
+        }
+        setErrors(e);
+        return Object.keys(e).length === 0;
+    };
+
+    const handleSave = async () => {
+        if (!validate()) return;
+        setSaving(true);
+        try {
+            const res = await bulkCreateWorkshops([{
+                store_name: form.store_name.trim(),
+                retailer_name: form.retailer_name.trim(),
+                mobile_number: form.mobile_number.trim(),
+                current_address: form.current_address.trim(),
+                current_pincode: form.current_pincode ? Number(form.current_pincode) : undefined,
+            }]);
+            const body = res?.data;
+            // API returns 200 even on failure — check summary
+            if (body?.summary?.failed > 0) {
+                const reason = body.failed?.[0]?.reason || body.message || "Failed to add workshop";
+                toast.error(reason);
+                return;
+            }
+            toast.success("Workshop added successfully");
+            setForm(initialForm);
+            setErrors({});
+            onSuccess();
+            onClose();
+        } catch (err: any) {
+            const body = err?.response?.data;
+            const reason = body?.failed?.[0]?.reason || body?.message || "Failed to add workshop";
+            toast.error(reason);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const inputCls = (field: string) =>
+        `w-full border rounded-lg px-3 py-2 text-sm outline-none transition focus:ring-2 ${
+            errors[field]
+                ? "border-red-400 focus:ring-red-200"
+                : "border-gray-300 focus:ring-blue-200 focus:border-blue-400"
+        }`;
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+                {/* Header */}
+                <div className="bg-green-600 px-6 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <AddCircleOutlineIcon className="text-white" fontSize="small" />
+                        <h2 className="text-white font-bold text-lg">Add Workshop</h2>
+                    </div>
+                    <button onClick={onClose} className="text-white hover:text-green-200 transition">
+                        <CloseIcon />
+                    </button>
+                </div>
+
+                {/* Form */}
+                <div className="p-6 space-y-4">
+                    {/* Workshop Name */}
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                            Workshop Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            className={inputCls("store_name")}
+                            value={form.store_name}
+                            onChange={e => setForm(f => ({ ...f, store_name: e.target.value }))}
+                            placeholder="Enter workshop name"
+                        />
+                        {errors.store_name && <p className="text-red-500 text-xs mt-1">{errors.store_name}</p>}
+                    </div>
+
+                    {/* Owner Name */}
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                            Workshop Owner Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            className={inputCls("retailer_name")}
+                            value={form.retailer_name}
+                            onChange={e => setForm(f => ({ ...f, retailer_name: e.target.value }))}
+                            placeholder="Enter owner name"
+                        />
+                        {errors.retailer_name && <p className="text-red-500 text-xs mt-1">{errors.retailer_name}</p>}
+                    </div>
+
+                    {/* Mobile Number */}
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                            Mobile Number <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            className={inputCls("mobile_number")}
+                            value={form.mobile_number}
+                            onChange={e => setForm(f => ({ ...f, mobile_number: e.target.value }))}
+                            placeholder="10-digit mobile number"
+                            maxLength={10}
+                            inputMode="numeric"
+                        />
+                        {errors.mobile_number && <p className="text-red-500 text-xs mt-1">{errors.mobile_number}</p>}
+                    </div>
+
+                    {/* Current Address */}
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                            Current Address <span className="text-red-500">*</span>
+                        </label>
+                        <textarea
+                            className={inputCls("current_address") + " resize-none"}
+                            value={form.current_address}
+                            onChange={e => setForm(f => ({ ...f, current_address: e.target.value }))}
+                            placeholder="Enter full address"
+                            rows={2}
+                        />
+                        {errors.current_address && <p className="text-red-500 text-xs mt-1">{errors.current_address}</p>}
+                    </div>
+
+                    {/* Current Pincode */}
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                            Current Pincode <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            className={inputCls("current_pincode")}
+                            value={form.current_pincode}
+                            onChange={e => setForm(f => ({ ...f, current_pincode: e.target.value }))}
+                            placeholder="6-digit pincode"
+                            maxLength={6}
+                            inputMode="numeric"
+                        />
+                        {errors.current_pincode && <p className="text-red-500 text-xs mt-1">{errors.current_pincode}</p>}
+                        <p className="text-xs text-gray-400 mt-1">City, District &amp; State will be auto-resolved from pincode</p>
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <div className="px-6 py-4 bg-gray-50 border-t flex justify-end gap-3">
+                    <button
+                        onClick={onClose}
+                        disabled={saving}
+                        className="px-5 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition font-medium text-sm disabled:opacity-50"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="flex items-center gap-2 px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium text-sm disabled:opacity-50"
+                    >
+                        {saving ? (
+                            <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                            </svg>
+                        ) : (
+                            <AddCircleOutlineIcon fontSize="small" />
+                        )}
+                        Add Workshop
                     </button>
                 </div>
             </div>
@@ -713,6 +917,7 @@ const ManageWorkshop: React.FC = () => {
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [loading, setLoading] = useState(false);
     const [uploadOpen, setUploadOpen] = useState(false);
+    const [addOpen, setAddOpen] = useState(false);
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [editWorkshop, setEditWorkshop] = useState<Workshop | null>(null);
     const pageSize = 10;
@@ -769,13 +974,22 @@ const ManageWorkshop: React.FC = () => {
                     </div>
                     <p className="text-sm text-gray-500 mt-0.5">View and manage all registered workshops</p>
                 </div>
-                <button
-                    onClick={() => setUploadOpen(true)}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 active:scale-95 transition font-semibold text-sm shadow"
-                >
-                    <UploadFileIcon fontSize="small" />
-                    Bulk Upload
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setAddOpen(true)}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 active:scale-95 transition font-semibold text-sm shadow"
+                    >
+                        <AddCircleOutlineIcon fontSize="small" />
+                        Add Workshop
+                    </button>
+                    <button
+                        onClick={() => setUploadOpen(true)}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 active:scale-95 transition font-semibold text-sm shadow"
+                    >
+                        <UploadFileIcon fontSize="small" />
+                        Bulk Upload
+                    </button>
+                </div>
             </div>
 
             {/* Search */}
@@ -915,6 +1129,11 @@ const ManageWorkshop: React.FC = () => {
             )}
 
             {/* Modals */}
+            <AddWorkshopModal
+                isOpen={addOpen}
+                onClose={() => setAddOpen(false)}
+                onSuccess={() => fetchWorkshops(1, debouncedSearch)}
+            />
             <BulkUploadModal
                 isOpen={uploadOpen}
                 onClose={() => setUploadOpen(false)}

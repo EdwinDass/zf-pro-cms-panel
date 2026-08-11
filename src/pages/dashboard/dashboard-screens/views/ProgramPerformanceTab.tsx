@@ -9,12 +9,14 @@ import { FaUsers, FaUserPlus, FaUserCheck } from "react-icons/fa";
 // ─────────────────────────────────────────────
 interface PieData { name: string; value: number; color: string; }
 
-const DonutChart: React.FC<{ data: PieData[]; height?: string }> = ({ data, height = "220px" }) => {
+const DonutChart: React.FC<{ data: PieData[]; height?: string }> = ({ data, height = "260px" }) => {
     const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (!ref.current) return;
         const chart = echarts.init(ref.current);
+        // Filter out zero-value slices so they don't render as ghost segments
+        const filteredData = data.filter(d => d.value > 0);
         chart.setOption({
             tooltip: {
                 trigger: "item",
@@ -23,7 +25,7 @@ const DonutChart: React.FC<{ data: PieData[]; height?: string }> = ({ data, heig
             legend: { show: false },
             series: [{
                 type: "pie",
-                radius: "72%",
+                radius: "85%",
                 avoidLabelOverlap: true,
                 itemStyle: { borderColor: "#fff", borderWidth: 2 },
                 label: {
@@ -37,7 +39,7 @@ const DonutChart: React.FC<{ data: PieData[]; height?: string }> = ({ data, heig
                 emphasis: {
                     label: { show: true, fontSize: 14, fontWeight: "bold" }
                 },
-                data: data.map(d => ({
+                data: filteredData.map(d => ({
                     name: d.name,
                     value: d.value,
                     itemStyle: { color: d.color }
@@ -51,6 +53,7 @@ const DonutChart: React.FC<{ data: PieData[]; height?: string }> = ({ data, heig
 
     return <div ref={ref} style={{ width: "100%", height }} />;
 };
+
 
 // ─────────────────────────────────────────────
 // Reusable ECharts Line Graph (only active + MAU)
@@ -184,7 +187,7 @@ const ProgramPerformanceTab: React.FC = () => {
     const [lineLoading, setLineLoading] = useState(true);
 
     // ── User status pie state ──
-    const [userStatus, setUserStatus] = useState({ active: 0, inactive: 0, dormant: 0 });
+    const [userStatus, setUserStatus] = useState({ active: 0, inactive: 0 });
     const [userStatusLoading, setUserStatusLoading] = useState(true);
 
     // ── KYC status pie state ──
@@ -233,10 +236,9 @@ const ProgramPerformanceTab: React.FC = () => {
                 setUserStatus({
                     active: d.active ?? 0,
                     inactive: d.inactive ?? 0,
-                    dormant: d.dormant ?? 0
                 });
             })
-            .catch(() => setUserStatus({ active: 0, inactive: 0, dormant: 0 }))
+            .catch(() => setUserStatus({ active: 0, inactive: 0 }))
             .finally(() => setUserStatusLoading(false));
     }, []);
 
@@ -260,7 +262,7 @@ const ProgramPerformanceTab: React.FC = () => {
     const userStatusPie: PieData[] = [
         { name: "Active", value: userStatus.active, color: "#10B981" },
         { name: "Inactive", value: userStatus.inactive, color: "#F59E0B" },
-        { name: "Dormant", value: userStatus.dormant, color: "#EF4444" },
+        // { name: "Dormant", value: userStatus.dormant, color: "#EF4444" },
     ];
 
     const kycStatusPie: PieData[] = [
@@ -342,20 +344,20 @@ const ProgramPerformanceTab: React.FC = () => {
                 {/* User Status Distribution */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <h2 className="text-lg font-semibold text-gray-800 mb-1">User Status Distribution</h2>
-                    <p className="text-xs text-gray-400 mb-4">Active / Inactive / Dormant members</p>
+                    <p className="text-xs text-gray-400 mb-4">Active / Inactive</p>
                     {userStatusLoading ? (
                         <Spinner />
                     ) : (
                         <div className="flex flex-col sm:flex-row items-center gap-4">
-                            <div className="flex-shrink-0 w-full sm:w-48">
-                                <DonutChart data={userStatusPie} height="200px" />
+                            <div className="w-full sm:w-[70%]">
+                                <DonutChart data={userStatusPie} height="320px" />
                             </div>
-                            <div className="flex-1 w-full">
+                            <div className="w-full sm:w-[30%] shrink-0">
                                 <Legend items={userStatusPie.map(p => ({ label: p.name, color: p.color, value: p.value }))} />
                                 <div className="mt-4 pt-4 border-t border-gray-100">
                                     <p className="text-xs text-gray-400">Total Members</p>
                                     <p className="text-2xl font-bold text-gray-800">
-                                        {(userStatus.active + userStatus.inactive + userStatus.dormant).toLocaleString()}
+                                        {(userStatus.active + userStatus.inactive).toLocaleString()}
                                     </p>
                                 </div>
                             </div>
@@ -371,10 +373,10 @@ const ProgramPerformanceTab: React.FC = () => {
                         <Spinner />
                     ) : (
                         <div className="flex flex-col sm:flex-row items-center gap-4">
-                            <div className="flex-shrink-0 w-full sm:w-48">
-                                <DonutChart data={kycStatusPie} height="200px" />
+                            <div className="w-full sm:w-[70%]">
+                                <DonutChart data={kycStatusPie} height="320px" />
                             </div>
-                            <div className="flex-1 w-full">
+                            <div className="w-full sm:w-[30%] shrink-0">
                                 <Legend items={kycStatusPie.map(p => ({ label: p.name, color: p.color, value: p.value }))} />
                                 <div className="mt-4 pt-4 border-t border-gray-100">
                                     <p className="text-xs text-gray-400">Total KYC Records</p>

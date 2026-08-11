@@ -323,9 +323,9 @@ export const getDensityByState = async () => {
 };
 
 // Get Member 360 list
-export const getMember360List = async (search?: string) => {
+export const getMember360List = async (search?: string, page: number = 1, limit: number = 10) => {
     return api
-        .get("masters/members/360-list", { params: { search } })
+        .get("masters/members/360-list", { params: { search, page, limit } })
         .then((response) => response);
 };
 

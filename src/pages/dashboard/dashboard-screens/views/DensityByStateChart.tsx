@@ -53,7 +53,7 @@ const DensityByStateChart: React.FC = () => {
                 <div className="space-y-3.5 my-auto">
                     {densityList.map((item, idx) => {
                         const score = item.densityScore || 0;
-                        const pct = Math.min(Math.max(score, 5), 100);
+                        const pct = score > 0 ? Math.min(score, 100) : 0;
                         const barColor = getBarColor(score);
 
                         return (

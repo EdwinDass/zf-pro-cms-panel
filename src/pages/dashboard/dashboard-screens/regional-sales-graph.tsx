@@ -62,11 +62,11 @@ const RegionalSalesGraph: React.FC<RegionalSalesGraphProps> = ({
       ) : (
         <div className="space-y-4 my-auto">
           {regions.map((item, idx) => {
-            // Proportional width relative to maximum region amount
-            const pct = Math.min(Math.max((item.amount / maxAmount) * 100, 4), 100);
+            // Proportional width relative to maximum region amount; 0 stays 0 (no bar)
+            const pct = item.amount > 0 ? Math.min((item.amount / maxAmount) * 100, 100) : 0;
 
-            // Color rule: Blue for top 3, Coral Red for East / Central / lower performing
-            const isCoralRed = idx >= 3 || item.zone === "East" || item.zone === "Central";
+            // Color rule: Last zone (East) gets coral, others blue
+            const isCoralRed = idx >= 3 || item.zone === "East";
             const barBgColor = isCoralRed ? "bg-[#F04438]" : "bg-[#1E64E2]";
 
             return (

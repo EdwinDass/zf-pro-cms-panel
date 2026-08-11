@@ -50,7 +50,7 @@ const StateMemberDensityChart: React.FC = () => {
             ) : (
                 <div className="space-y-5 my-auto">
                     {states.map((item, idx) => {
-                        const pct = Math.min(Math.max((item.memberCount / maxCount) * 100, 3), 100);
+                        const pct = item.memberCount > 0 ? Math.min((item.memberCount / maxCount) * 100, 100) : 0;
                         const isRed = idx === 5 || idx === 6; // Matching image sample highlighting
                         const growthText = item.growth || (isRed ? `-${(idx + 2)}%` : `+${(15 - idx * 2)}%`);
                         const isPos = !growthText.startsWith("-");
