@@ -133,6 +133,7 @@ const EditWorkshopModal: React.FC<{
         store_name: workshop.storeName,
         retailer_name: workshop.retailerName,
         mobile_number: workshop.mobileNumber,
+        current_address: workshop.currentAddress || "",
         current_pincode: String(workshop.currentPincode),
     });
     const [saving, setSaving] = useState(false);
@@ -149,6 +150,9 @@ const EditWorkshopModal: React.FC<{
         } else if (!MOBILE_RE.test(form.mobile_number.trim())) {
             e.mobile_number = "Must be a 10-digit Indian mobile number (starts with 6-9)";
         }
+        if (!form.current_address.trim()) {
+            e.current_address = "Address is required";
+        }
         if (!form.current_pincode.trim()) {
             e.current_pincode = "Pincode is required";
         } else if (!/^\d{6}$/.test(form.current_pincode.trim())) {
@@ -162,24 +166,36 @@ const EditWorkshopModal: React.FC<{
         if (!validate()) return;
         setSaving(true);
         try {
-            const payload: any = {};
-            if (form.store_name.trim() !== workshop.storeName) payload.store_name = form.store_name.trim();
-            if (form.retailer_name.trim() !== workshop.retailerName) payload.retailer_name = form.retailer_name.trim();
-            if (form.mobile_number.trim() !== workshop.mobileNumber) payload.mobile_number = form.mobile_number.trim();
-            if (form.current_pincode.trim() !== String(workshop.currentPincode)) payload.current_pincode = form.current_pincode.trim();
+            // Always send all fields so address is never silently dropped
+            const payload: any = {
+                store_name: form.store_name.trim(),
+                retailer_name: form.retailer_name.trim(),
+                mobile_number: form.mobile_number.trim(),
+                current_address: form.current_address.trim(),
+                current_pincode: form.current_pincode.trim(),
+            };
 
-            if (Object.keys(payload).length === 0) {
-                toast.info("No changes detected");
-                onClose();
+            const res = await updateWorkshop(workshop.retailerId, payload);
+
+
+            // Backend may return HTTP 200 but with a non-success code in body
+            // e.g. { code: 400, message: "Pincode X not found or inactive" }
+            const body = res?.data;
+            if (body?.code && body.code !== 200) {
+                const msg: string = body.message || "Failed to update workshop";
+                // Show inline on relevant field too
+                if (/pincode/i.test(msg)) setErrors(prev => ({ ...prev, current_pincode: msg }));
+                else if (/mobile/i.test(msg)) setErrors(prev => ({ ...prev, mobile_number: msg }));
+                toast.error(msg);
                 return;
             }
 
-            const res = await updateWorkshop(workshop.retailerId, payload);
-            const updated = res?.data?.data;
             toast.success("Workshop updated successfully");
-            onSuccess(updated || { ...workshop, ...payload });
+            onSuccess(body?.data || { ...workshop, ...payload });
         } catch (err: any) {
-            const msg = err?.response?.data?.message || "Failed to update workshop";
+            const msg: string = err?.response?.data?.message || "Failed to update workshop";
+            if (/pincode/i.test(msg)) setErrors(prev => ({ ...prev, current_pincode: msg }));
+            else if (/mobile/i.test(msg)) setErrors(prev => ({ ...prev, mobile_number: msg }));
             toast.error(msg);
         } finally {
             setSaving(false);
@@ -210,7 +226,7 @@ const EditWorkshopModal: React.FC<{
                 </div>
 
                 {/* Form */}
-                <div className="p-6 space-y-4">
+                <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                     {/* Workshop Name */}
                     <div>
                         <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
@@ -255,6 +271,21 @@ const EditWorkshopModal: React.FC<{
                         {errors.mobile_number && <p className="text-red-500 text-xs mt-1">{errors.mobile_number}</p>}
                     </div>
 
+                    {/* Address */}
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                            Address
+                        </label>
+                        <textarea
+                            className={`${inputCls("current_address")} resize-none`}
+                            value={form.current_address}
+                            onChange={e => setForm(f => ({ ...f, current_address: e.target.value }))}
+                            placeholder="Enter workshop address"
+                            rows={2}
+                        />
+                        {errors.current_address && <p className="text-red-500 text-xs mt-1">{errors.current_address}</p>}
+                    </div>
+
                     {/* Pincode */}
                     <div>
                         <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
@@ -263,7 +294,11 @@ const EditWorkshopModal: React.FC<{
                         <input
                             className={inputCls("current_pincode")}
                             value={form.current_pincode}
-                            onChange={e => setForm(f => ({ ...f, current_pincode: e.target.value }))}
+                            onChange={e => {
+                                setForm(f => ({ ...f, current_pincode: e.target.value }));
+                                // Clear pincode error when user starts editing
+                                if (errors.current_pincode) setErrors(prev => ({ ...prev, current_pincode: "" }));
+                            }}
                             placeholder="6-digit pincode"
                             maxLength={6}
                             inputMode="numeric"
@@ -304,6 +339,7 @@ const EditWorkshopModal: React.FC<{
 };
 
 // ─── Add Workshop Modal ────────────────────────────────────────────────────────
+
 
 const AddWorkshopModal: React.FC<{
     isOpen: boolean;

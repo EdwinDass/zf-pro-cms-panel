@@ -1072,6 +1072,7 @@ export const updateWorkshop = async (
         retailer_name?: string;
         mobile_number?: string;
         current_pincode?: number | string;
+        current_address?: string;
     }
 ) => {
     return api.put(`masters/workshops/${retailerId}`, payload);
