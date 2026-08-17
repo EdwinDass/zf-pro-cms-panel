@@ -62,12 +62,34 @@ const KycReport = () => {
 
     const formatStatus = (value: any) => {
         if (value === "active_members") return "Active User";
-        if (value === "digilocker") return "Digilocker pending";
-        if (value === "kyc") return "KYC document upload pending";
-        if (value === "incomplete-registration") return "Address and profile";
-        if (value === "tds-consent") return "TDS consent is pending";
+        if (value === "digilocker") return "Digilocker Pending";
+        if (value === "kyc") return "KYC Document Upload Pending";
+        if (value === "incomplete-registration") return "Address and Profile";
+        if (value === "tds-consent") return "TDS Consent Pending";
         if (value === "kyc-admin") return "Admin Approval Pending";
         return formatCell(value);
+    };
+
+    // Validates and formats a DOB value; returns '-' for invalid or implausible dates
+    const formatDob = (value: any): string => {
+        if (!value || value === '-' || value === 'N/A') return '-';
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return '-';
+        const year = d.getFullYear();
+        // Reject clearly invalid years (before 1900 or in the future)
+        if (year < 1900 || year > new Date().getFullYear()) return '-';
+        // DD-MM-YYYY format — avoids Excel auto-parsing as a date serial
+        return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${year}`;
+    };
+
+    // Formats the KYC doc status to a human-readable title-cased string
+    const formatKycDocStatus = (value: any): string => {
+        if (!value || value === '-') return '-';
+        // Already well-formatted values from DB (e.g. "Approved By Market Head")
+        return String(value)
+            .split(' ')
+            .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+            .join(' ');
     };
 
     const columns: Column[] = [
@@ -81,7 +103,9 @@ const KycReport = () => {
         { key: "emailId", label: "Email ID" },
         { key: "status", label: "Status" },
         { key: "kycVerified", label: "KYC Verified" },
+        // { key: "dateOfBirth", label: "Date of Birth", format: (value: any) => formatDob(value) },
         { key: "dateOfBirth", label: "Date of Birth", format: (value: any) => value ? new Date(value).toISOString().split('T')[0] : 'N/A' },
+        // { key: "dateOfBirth", label: "Date of Birth", format: (value: any) => formatDob(value) },
         {
             key: "createdAt",
             label: "Created At",
@@ -156,7 +180,7 @@ const KycReport = () => {
                 )
             )
         },
-        { key: "kycDocStatus", label: "KYC Doc Status" }
+        { key: "kycDocStatus", label: "KYC Doc Status", format: (value: any) => formatKycDocStatus(value) }
     ];
 
     const fetchTableData = async (currentPage: number, isExport = false) => {
@@ -258,14 +282,14 @@ const KycReport = () => {
             emailId: formatCell(item.emailId),
             status: formatStatus(item.status),
             kycVerified: formatCell(item.kycVerified),
-            dob: formatExportDate(item.dateOfBirth ?? item.dob),
+            dob: formatDob(item.dateOfBirth ?? item.dob),
             createdAt: formatExportDate(item.createdAt),
             aadhaarNumber: formatCell(item.aadhaarNumber),
             aadhaarFront: formatCell(item.aadhaarFrontImage ?? item.aadhaarFront),
             aadhaarBack: formatCell(item.aadhaarBackImage ?? item.aadhaarBack),
             panFront: formatCell(item.panFrontImage ?? item.panFront),
             profileImage: formatCell(item.profileImage),
-            kycDocStatus: formatCell(item.kycDocStatus),
+            kycDocStatus: formatKycDocStatus(item.kycDocStatus),
         }));
 
         return exportData;

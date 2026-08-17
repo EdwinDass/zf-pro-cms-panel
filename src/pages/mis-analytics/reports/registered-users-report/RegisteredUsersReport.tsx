@@ -43,14 +43,26 @@ const RegisteredUsersReport = () => {
         return value;
     };
 
+    // Formats a date value as DD-MM-YYYY
+    const formatDoj = (value: any): string => {
+        if (!value) return '-';
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return '-';
+        return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+    };
+
     const formatStatus = (value: any) => {
         if (value === "active_members") return "Active User";
-        if (value === "digilocker") return "Digilocker pending";
-        if (value === "kyc") return "KYC document upload pending";
-        if (value === "incomplete-registration") return "Address and profile";
-        if (value === "tds-consent") return "TDS consent is pending";
+        if (value === "digilocker") return "Digilocker Pending";
+        if (value === "kyc") return "KYC Document Upload Pending";
+        if (value === "incomplete-registration") return "Address and Profile";
+        if (value === "incomplete-profile") return "Address and Profile";
+        if (value === "tds-consent") return "TDS Consent Pending";
         if (value === "kyc-admin") return "Admin Approval Pending";
-        return formatCell(value);
+        if (!value || value === '-') return '-';
+        // Fallback: title-case the raw value
+        return String(value)
+            .split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     };
 
     const columns: Column[] = [
@@ -71,7 +83,13 @@ const RegisteredUsersReport = () => {
         { key: "city", label: "City" },
         { key: "pincode", label: "Pincode" },
         { key: "zone", label: "Zone" },
-        { key: "mappedRetailers", label: "Mapped Retailers" }
+        { key: "mappedRetailers", label: "Mapped Retailers" },
+        { key: "workshopName", label: "Workshop Name" },
+        {
+            key: "dateOfJoining",
+            label: "Date of Joining",
+            format: (value: any) => formatDoj(value)
+        }
     ];
 
     const fetchReport = async () => {
@@ -109,7 +127,9 @@ const RegisteredUsersReport = () => {
                 zone: formatCell(item.zone),
                 mappedRetailers: Array.isArray(item.mappedRetailers)
                     ? formatCell(item.mappedRetailers.join(", "))
-                    : formatCell(item.mappedRetailers)
+                    : formatCell(item.mappedRetailers),
+                workshopName: formatCell(item.workshopName),
+                dateOfJoining: formatDoj(item.dateOfJoining),
             }));
 
             setTableData(mapped);
@@ -196,7 +216,9 @@ const RegisteredUsersReport = () => {
                 zone: formatCell(item.zone),
                 mappedRetailers: Array.isArray(item.mappedRetailers)
                     ? formatCell(item.mappedRetailers.join(", "))
-                    : formatCell(item.mappedRetailers)
+                    : formatCell(item.mappedRetailers),
+                workshopName: formatCell(item.workshopName),
+                dateOfJoining: formatDoj(item.dateOfJoining),
             }));
 
             return mapped;

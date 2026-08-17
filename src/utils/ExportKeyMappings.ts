@@ -31,7 +31,9 @@ export const RegisteredUsersReportKeys: any = {
     city: "City",
     pincode: "Pincode",
     zone: "Zone",
-    mappedRetailers: "Mapped Retailers"
+    mappedRetailers: "Mapped Retailers",
+    workshopName: "Workshop Name",
+    dateOfJoining: "Date of Joining"
 };
 
 export const QRTransactionReportKeys: any = {
@@ -42,13 +44,16 @@ export const QRTransactionReportKeys: any = {
     qrCodeId: "QR Code ID",
     userCode: "User ID",
     userName: "User Name",
+    gender: "Gender",
     email: "Email",
     phone: "Phone",
     latitude: "Latitude",
     longitude: "Longitude",
     address: "Address",
     city: "City",
+    state: "State",
     country: "Country",
+    workshopName: "Workshop Name",
 };
 
 export const RedemptionReportKeys: any = {

@@ -148,7 +148,7 @@ export const DataExport: React.FC = () => {
             subtitle: "QR scan transactions & point allocations",
             icon: <FiGrid />,
             fetcher: async (params) => {
-                const res = await getQrTransactionReport({ limit: 10000, ...params });
+                const res = await getQrTransactionReport({ limit: 10000, status: "Success", ...params });
                 const list = res?.data?.data?.reportList || [];
                 return { data: list, mappings: QRTransactionReportKeys };
             },
@@ -181,9 +181,10 @@ export const DataExport: React.FC = () => {
             subtitle: "OTP requests & verification logs",
             icon: <FiKey />,
             fetcher: async (params) => {
-                const res = await getAdminOtpReport({ limit: 10000, ...params });
-                const list = res?.data?.data?.reportList || res?.data?.reportList || [];
-                return { data: list, mappings: OtpReportKeys };
+                const res = await getAdminOtpReport({ page: 1, limit: 10000, ...params });
+                // OTP API returns a flat array at res.data.data (not .reportList)
+                const raw = Array.isArray(res?.data?.data) ? res.data.data : [];
+                return { data: raw, mappings: OtpReportKeys };
             },
         },
         {
