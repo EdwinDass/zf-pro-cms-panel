@@ -25,6 +25,9 @@ import ShockReplacementSkus from "../pages/sku-management/shock-replacement-skus
 import Assets from "../pages/assets/Assets";
 import ManageWorkshopPage from "../pages/manage-workshop/ManageWorkshopPage";
 import DeleteAccount from "../pages/delete-account/DeleteAccount";
+import AdminDeleteAccountPage from "../pages/delete-account/AdminDeleteAccountPage";
+import ServiceConfig from "../pages/service-config/ServiceConfig";
+
 import { useAppSelector } from "../redux/hooks";
 import { getAllowedRoutes } from "../values/roleModuleRules";
 
@@ -50,7 +53,10 @@ export const appRoutes = [
     { path: "/categories/:categoryId/subcategories", element: <PrivateRoute element={<SubCategories />} />, moduleId: "sku-management" },
     { path: "/subcategories/:subcategoryId/skus", element: <PrivateRoute element={<Skus />} />, moduleId: "sku-management" },
     { path: "/shock-replacement-skus", element: <PrivateRoute element={<ShockReplacementSkus />} />, moduleId: "shock-replacement-skus" },
+    { path: "/admin-delete-account", element: <PrivateRoute element={<AdminDeleteAccountPage />} />, moduleId: "delete-account" },
     { path: "/delete-account", element: <DeleteAccount />, isPublic: true },
+    { path: "/service-config", element: <PrivateRoute element={<ServiceConfig />} />, moduleId: "service-config" },
+
     { path: "*", element: <NotFound />, isPublic: true },
 ];
 

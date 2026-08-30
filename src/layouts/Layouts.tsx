@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../redux/hooks';
 import { getAllowedModules } from '../values/roleModuleRules';
 
+
+
 interface LayoutProps {
     children: React.ReactNode;
     sidebarProps?: any;
@@ -56,7 +58,10 @@ export const navItems: NavItem[] = [
             // { id: 'shock-replacement-skus', label: 'Shock Replacement SKUs', path: '/shock-replacement-skus' }
         ]
     },
+    { id: 'delete-account', label: 'Delete Account', icon: 'fas fa-user-times', path: '/admin-delete-account' },
+    { id: 'service-config', label: 'Service Config', icon: 'fas fa-sliders-h', path: '/service-config' },
 ];
+
 
 export const Layout: React.FC<LayoutProps> = ({
     children,
