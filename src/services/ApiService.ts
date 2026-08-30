@@ -1088,3 +1088,17 @@ export const updateMechanicPreferredRetailer = async (
 export const searchWorkshops = async (search: string) => {
     return api.get('masters/workshops', { params: { page: 1, limit: 10000, search } });
 };
+
+export const deleteUserAccount = async (mobile: string) => {
+    return api.delete('user/delete-account', { data: { mobile } });
+};
+
+// ─── Service Config (Evolve Admin only) ──────────────────────────────────────
+
+export const getDigilockerProviderConfig = async () => {
+    return api.get('masters/digilocker-provider');
+};
+
+export const updateDigilockerProviderConfig = async (activeProvider: 'TENACIO' | 'SUREPASS') => {
+    return api.put('masters/digilocker-provider', { activeProvider });
+};
