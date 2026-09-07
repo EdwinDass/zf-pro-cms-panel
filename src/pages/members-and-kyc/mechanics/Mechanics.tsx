@@ -75,151 +75,259 @@ const PreferredRetailerModal: React.FC<{
     onSuccess: () => void;
 }> = ({ mechanic, onClose, onSuccess }) => {
     const [searchTerm, setSearchTerm] = useState("");
-    const [workshops, setWorkshops] = useState<WorkshopOption[]>([]);
-    const [searching, setSearching] = useState(false);
+    const [allWorkshops, setAllWorkshops] = useState<WorkshopOption[]>([]);
+    const [loadingWorkshops, setLoadingWorkshops] = useState(false);
     const [saving, setSaving] = useState(false);
     const [selectedId, setSelectedId] = useState<number | null>(
         mechanic.preferredRetailerList?.[0]?.retailerId ?? null
     );
-    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
 
-    const handleSearch = (value: string) => {
-        setSearchTerm(value);
-        if (debounceRef.current) clearTimeout(debounceRef.current);
-        if (!value.trim()) { setWorkshops([]); return; }
-        debounceRef.current = setTimeout(async () => {
-            setSearching(true);
-            try {
-                const res = await searchWorkshops(value.trim());
-                setWorkshops(res?.data?.data || []);
-            } catch {
-                toast.error("Failed to search workshops");
-            } finally {
-                setSearching(false);
+    // Fetch all workshops once when dropdown opens for the first time
+    const openDropdown = async () => {
+        setDropdownOpen(true);
+        if (allWorkshops.length > 0) {
+            setTimeout(() => searchInputRef.current?.focus(), 50);
+            return;
+        }
+        setLoadingWorkshops(true);
+        try {
+            const res = await searchWorkshops("");
+            setAllWorkshops(res?.data?.data || []);
+        } catch {
+            toast.error("Failed to load workshops");
+        } finally {
+            setLoadingWorkshops(false);
+            setTimeout(() => searchInputRef.current?.focus(), 50);
+        }
+    };
+
+    // Filter in-memory as the user types
+    const filtered = searchTerm.trim()
+        ? allWorkshops.filter(w =>
+            w.storeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            w.retailerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            w.mobileNumber.includes(searchTerm)
+        )
+        : allWorkshops;
+
+    // Close dropdown on outside click
+    useEffect(() => {
+        const handleOutside = (e: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+                setDropdownOpen(false);
             }
-        }, 400);
-    };
-
-    const handleSelect = (id: number) => {
-        // Click the already-selected one to deselect it
-        setSelectedId(prev => (prev === id ? null : id));
-    };
+        };
+        document.addEventListener("mousedown", handleOutside);
+        return () => document.removeEventListener("mousedown", handleOutside);
+    }, []);
 
     const handleSave = async () => {
         setSaving(true);
         try {
             await updateMechanicPreferredRetailer(mechanic.userId, selectedId);
-            toast.success(selectedId ? "Preferred retailer updated successfully" : "Preferred retailer cleared");
+            toast.success(selectedId ? "Preferred workshop updated successfully" : "Preferred workshop cleared");
             onSuccess();
         } catch (err: any) {
-            toast.error(err?.response?.data?.message || "Failed to update preferred retailer");
+            toast.error(err?.response?.data?.message || "Failed to update preferred workshop");
         } finally {
             setSaving(false);
         }
     };
 
+    const selectedWorkshop =
+        allWorkshops.find(w => w.retailerId === selectedId) ??
+        (mechanic.preferredRetailerList?.[0]?.retailerId === selectedId && selectedId !== null
+            ? { storeName: mechanic.preferredRetailerList![0].name, retailerName: "", mobileNumber: "", currentPincode: null, retailerId: selectedId }
+            : null);
+
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col" style={{ minHeight: "75vh", maxHeight: "95vh" }}>
+
                 {/* Header */}
-                <div className="bg-indigo-600 px-6 py-4 flex items-center justify-between">
-                    <div>
-                        <h2 className="text-white font-bold text-lg">Edit Preferred Retailer</h2>
-                        <p className="text-indigo-200 text-xs mt-0.5">
-                            {mechanic.displayName || mechanic.userName} &bull; ID {mechanic.userId}
-                        </p>
+                <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-5 flex items-center justify-between shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                            <EditIcon className="text-white" fontSize="small" />
+                        </div>
+                        <div>
+                            <h2 className="text-white font-bold text-base leading-tight">Edit Preferred Workshop</h2>
+                            <p className="text-indigo-200 text-xs mt-0.5">
+                                {mechanic.displayName || mechanic.userName} &bull; ID {mechanic.userId}
+                            </p>
+                        </div>
                     </div>
-                    <button onClick={onClose} className="text-white hover:text-indigo-200 transition">
-                        <CloseIcon />
+                    <button onClick={onClose} className="text-indigo-200 hover:text-white transition w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white hover:bg-opacity-10">
+                        <CloseIcon fontSize="small" />
                     </button>
                 </div>
 
-                <div className="p-6 space-y-4">
-                    {/* Current preferred retailer */}
-                    {(mechanic.preferredRetailerList?.length ?? 0) > 0 && (
-                        <div className="bg-indigo-50 rounded-lg px-4 py-3">
-                            <p className="text-xs font-semibold text-indigo-600 uppercase mb-1.5">Current Preferred Retailer</p>
-                            <span className="bg-indigo-100 text-indigo-700 text-xs px-2.5 py-1 rounded-full font-medium">
-                                {mechanic.preferredRetailerList![0].name} (#{mechanic.preferredRetailerList![0].retailerId})
-                            </span>
+                {/* Body */}
+                <div className="p-6 space-y-5 overflow-y-auto flex-1">
+
+                    {/* Selected workshop banner */}
+                    {selectedId !== null && selectedWorkshop && (
+                        <div className="flex items-center gap-3 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3">
+                            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold text-indigo-500 uppercase tracking-wide mb-0.5">
+                                    {mechanic.preferredRetailerList?.[0]?.retailerId === selectedId ? "Current Workshop" : "Selected Workshop"}
+                                </p>
+                                <p className="text-sm font-semibold text-indigo-800 truncate">{selectedWorkshop.storeName}</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedId(null)}
+                                className="text-xs text-red-400 hover:text-red-600 font-medium transition shrink-0 px-2 py-1 rounded-lg hover:bg-red-50"
+                            >
+                                Remove
+                            </button>
                         </div>
                     )}
 
-                    {/* Search input */}
-                    <div>
-                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1.5">
-                            Search Workshop
+                    {/* Searchable dropdown */}
+                    <div ref={dropdownRef}>
+                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                            Search &amp; Select Workshop
                         </label>
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={e => handleSearch(e.target.value)}
-                                placeholder="Type workshop name, owner or mobile..."
-                                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none"
-                            />
-                            {searching && (
-                                <div className="flex items-center px-2">
-                                    <svg className="animate-spin h-5 w-5 text-indigo-500" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                        <div className="relative">
+                            {/* Trigger */}
+                            <div
+                                onClick={openDropdown}
+                                className={`flex items-center gap-2 border rounded-xl px-3.5 py-3 bg-white cursor-pointer transition select-none ${
+                                    dropdownOpen ? "border-indigo-400 ring-2 ring-indigo-100" : "border-gray-200 hover:border-indigo-300"
+                                }`}
+                            >
+                                {dropdownOpen ? (
+                                    <input
+                                        ref={searchInputRef}
+                                        type="text"
+                                        value={searchTerm}
+                                        onChange={e => setSearchTerm(e.target.value)}
+                                        onClick={e => e.stopPropagation()}
+                                        placeholder="Search by name, owner or mobile..."
+                                        className="flex-1 outline-none text-sm text-gray-700 bg-transparent placeholder-gray-400"
+                                    />
+                                ) : (
+                                    <span className="flex-1 text-sm text-gray-400">
+                                        {selectedId === null ? "Click to select a workshop..." : "Click to change workshop..."}
+                                    </span>
+                                )}
+                                <div className="shrink-0 flex items-center gap-1.5 ml-1">
+                                    {loadingWorkshops && (
+                                        <svg className="animate-spin h-4 w-4 text-indigo-500" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                        </svg>
+                                    )}
+                                    <svg
+                                        className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                     </svg>
+                                </div>
+                            </div>
+
+                            {/* Dropdown panel */}
+                            {dropdownOpen && (
+                                <div className="absolute z-30 w-full bg-white border border-gray-200 rounded-xl mt-1.5 shadow-xl overflow-hidden">
+                                    {!loadingWorkshops && (
+                                        <div className="px-4 py-2 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+                                            <span className="text-xs text-gray-400">
+                                                {filtered.length} workshop{filtered.length !== 1 ? "s" : ""}{searchTerm ? " match" : " available"}
+                                            </span>
+                                            {searchTerm && (
+                                                <button
+                                                    type="button"
+                                                    onClick={e => { e.stopPropagation(); setSearchTerm(""); }}
+                                                    className="text-xs text-indigo-500 hover:text-indigo-700 font-medium"
+                                                >
+                                                    Clear filter
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+                                    <div className="max-h-96 overflow-y-auto">
+                                        {loadingWorkshops ? (
+                                            <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                                                <svg className="animate-spin h-6 w-6 text-indigo-400 mb-2" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                                </svg>
+                                                <span className="text-sm">Loading workshops...</span>
+                                            </div>
+                                        ) : filtered.length > 0 ? (
+                                            filtered.map(w => {
+                                                const isSelected = selectedId === w.retailerId;
+                                                return (
+                                                    <div
+                                                        key={w.retailerId}
+                                                        onClick={() => {
+                                                            setSelectedId(isSelected ? null : w.retailerId);
+                                                            setSearchTerm("");
+                                                            setDropdownOpen(false);
+                                                        }}
+                                                        className={`flex items-center gap-3 px-4 py-3.5 cursor-pointer transition border-b border-gray-50 last:border-0 ${
+                                                            isSelected ? "bg-indigo-50 hover:bg-indigo-100" : "hover:bg-gray-50"
+                                                        }`}
+                                                    >
+                                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                                                            isSelected ? "border-indigo-600 bg-indigo-600" : "border-gray-300"
+                                                        }`}>
+                                                            {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className={`text-sm font-semibold truncate leading-snug ${isSelected ? "text-indigo-800" : "text-gray-800"}`}>
+                                                                {w.storeName}
+                                                            </p>
+                                                            <p className="text-xs text-gray-400 truncate mt-0.5">
+                                                                {w.retailerName} &bull; {w.mobileNumber}
+                                                                {w.currentPincode ? ` \u2022 PIN ${w.currentPincode}` : ""}
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5 shrink-0">
+                                                            {isSelected && (
+                                                                <span className="text-xs bg-indigo-600 text-white px-1.5 py-0.5 rounded-md font-semibold">&#10003;</span>
+                                                            )}
+                                                            <span className="text-xs text-gray-300 font-mono">#{w.retailerId}</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        ) : (
+                                            <div className="py-10 text-center text-gray-400">
+                                                <p className="text-sm font-medium">No workshops found</p>
+                                                {searchTerm && <p className="text-xs mt-1">Try a different search term</p>}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>
                     </div>
-
-                    {/* Results — single-select (radio style) */}
-                    {workshops.length > 0 && (
-                        <div className="border border-gray-200 rounded-lg max-h-52 overflow-y-auto divide-y divide-gray-100">
-                            {workshops.map(w => {
-                                const selected = selectedId === w.retailerId;
-                                return (
-                                    <div
-                                        key={w.retailerId}
-                                        onClick={() => handleSelect(w.retailerId)}
-                                        className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition ${selected ? "bg-indigo-50" : ""}`}
-                                    >
-                                        {/* Radio circle */}
-                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selected ? "border-indigo-600" : "border-gray-300"}`}>
-                                            {selected && <div className="w-2 h-2 rounded-full bg-indigo-600" />}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-gray-900 truncate">{w.storeName}</p>
-                                            <p className="text-xs text-gray-500 truncate">{w.retailerName} &bull; {w.mobileNumber} &bull; PIN {w.currentPincode ?? "—"}</p>
-                                        </div>
-                                        <span className="text-xs text-gray-400 font-mono shrink-0">#{w.retailerId}</span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                    {searchTerm && !searching && workshops.length === 0 && (
-                        <p className="text-sm text-gray-400 text-center py-2">No workshops found for "{searchTerm}"</p>
-                    )}
-
-                    {/* Selected summary */}
-                    {selectedId !== null && (
-                        <div className="bg-green-50 rounded-lg px-4 py-2 flex items-center justify-between">
-                            <span className="text-sm text-green-700 font-medium">1 retailer selected</span>
-                            <button onClick={() => setSelectedId(null)} className="text-xs text-red-500 hover:text-red-700 transition">Clear</button>
-                        </div>
-                    )}
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-4 bg-gray-50 border-t flex justify-end gap-3">
+                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3 shrink-0">
                     <button
                         onClick={onClose}
                         disabled={saving}
-                        className="px-5 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition font-medium text-sm disabled:opacity-50"
+                        className="px-5 py-2.5 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-100 transition font-medium text-sm disabled:opacity-50"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium text-sm disabled:opacity-50"
+                        className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition font-semibold text-sm disabled:opacity-50 shadow-sm"
                     >
                         {saving ? (
                             <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
@@ -234,6 +342,7 @@ const PreferredRetailerModal: React.FC<{
         </div>
     );
 };
+
 
 // ─── MechanicsScreen ────────────────────────────────────────────────────────────
 
@@ -765,12 +874,12 @@ const MechanicsScreen: React.FC = () => {
                                                         )}
                                                     </div>
 
-                                                    {/* Edit Preferred Retailer */}
+                                                    {/* Edit Workshop */}
                                                     <button
                                                         type="button"
                                                         onClick={() => setPreferredRetailerMechanic(mechanic)}
                                                         className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-sm font-medium text-indigo-700 transition"
-                                                        title="Edit Preferred Retailer"
+                                                        title="Edit Workshop"
                                                     >
                                                         <EditIcon fontSize="small" />
                                                         Edit
