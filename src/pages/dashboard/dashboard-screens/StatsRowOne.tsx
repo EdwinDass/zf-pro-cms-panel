@@ -34,8 +34,13 @@ const StatsRowOne: React.FC = () => {
 
     const fetchActiveMembers = async () => {
         try {
-            const response = await getMemberCount({ role: 1, status: "none" });
-            setActiveMembers(response?.data?.count?.toString() || "0");
+            const [activeRes, tdsRes] = await Promise.all([
+                getMemberCount({ role: 1, status: "active_members" }),
+                getMemberCount({ role: 1, status: "tds-consent" })
+            ]);
+            const activeCount = parseInt(activeRes?.data?.count) || 0;
+            const tdsCount = parseInt(tdsRes?.data?.count) || 0;
+            setActiveMembers((activeCount + tdsCount).toString());
         } catch (error) {
             console.error("Active members error:", error);
         }
@@ -86,7 +91,7 @@ const StatsRowOne: React.FC = () => {
                 percentageColor="text-green-600"
                 icon={<FaUserCheck />}
                 iconColor='text-green-500'
-                onClick={() => navigate("/reports?report=registered-users&status=none")}
+                onClick={() => navigate("/reports?report=registered-users&status=active_members")}
             />
 
             {/* CARD 3 (static now) */}

@@ -27,13 +27,16 @@ const QRTransactionReport = () => {
         { key: "qrCodeId", label: "QR Code ID" },
         { key: "userCode", label: "User ID" },
         { key: "userName", label: "User Name" },
+        { key: "gender", label: "Gender" },
         { key: "email", label: "Email" },
         { key: "phone", label: "Phone" },
         { key: "latitude", label: "Latitude" },
         { key: "longitude", label: "Longitude" },
         { key: "address", label: "Address" },
         { key: "city", label: "City" },
-        { key: "country", label: "Country" }
+        { key: "state", label: "State" },
+        { key: "country", label: "Country" },
+        { key: "workshopName", label: "Workshop Name" }
     ];
 
     const fetchReport = async () => {
@@ -59,13 +62,16 @@ const QRTransactionReport = () => {
                 qrCodeId: formatCell(item.qrCodeId),
                 userCode: formatCell(item.userCode),
                 userName: formatCell(item.userName),
+                gender: formatCell(item.gender),
                 email: formatCell(item.email),
                 phone: formatCell(item.phone),
                 latitude: formatCell(item.latitude),
                 longitude: formatCell(item.longitude),
                 address: formatCell(item.address),
                 city: formatCell(item.city),
+                state: formatCell(item.state),
                 country: formatCell(item.country),
+                workshopName: formatCell(item.workshopName),
             }));
 
             setTableData(mapped);
@@ -137,13 +143,16 @@ const QRTransactionReport = () => {
                 qrCodeId: formatCell(item.qrCodeId),
                 userCode: formatCell(item.userCode),
                 userName: formatCell(item.userName),
+                gender: formatCell(item.gender),
                 email: formatCell(item.email),
                 phone: formatCell(item.phone),
                 latitude: formatCell(item.latitude),
                 longitude: formatCell(item.longitude),
                 address: formatCell(item.address),
                 city: formatCell(item.city),
+                state: formatCell(item.state),
                 country: formatCell(item.country),
+                workshopName: formatCell(item.workshopName),
             }));
 
             return mapped;

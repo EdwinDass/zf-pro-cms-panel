@@ -12,6 +12,7 @@ export const moduleRoutes: Record<string, string[]> = {
   members: ["/members-management"],
   faqs: ["/faqs"],
   assets: ["/assets-management"],
+  "manage-workshop": ["/manage-workshop"],
   "amazon-marketplace": ["/amazon-marketplace"],
   surveys: ["/survey-questions", "/survey-responses"],
   "survey-questions": ["/survey-questions"],
@@ -19,23 +20,27 @@ export const moduleRoutes: Record<string, string[]> = {
   "sku-management": ["/categories", "/categories/:categoryId/subcategories", "/subcategories/:subcategoryId/skus"],
   "shock-replacement-skus": ["/shock-replacement-skus"],
   integrations: ["/integrations"],
-  "delete-account": ["/delete-account"],
+  "delete-account": ["/admin-delete-account"],
+  "service-config": ["/service-config"],
 };
 
 const allModules = Object.keys(moduleRoutes);
+// service-config is restricted to Evolve Admin only; all other "all-access" roles get everything else.
+const allModulesExceptServiceConfig = allModules.filter(m => m !== 'service-config');
 
 // Define which modules are accessible by each role
 export const roleModuleAccess: Record<number, string[]> = {
   1: [],// mechanic
   2: ["dashboard", "mis-analytics", "process", "members"], // regional_manager
   3: ["dashboard", "communication", "mis-analytics", "tickets", ""], // call_centre_executive
-  4: ["dashboard", "mis-analytics", "process", "members", "qr-management", "communication"], // marketing_manager or client admin are same
-  5: allModules, // operator
-  6: allModules, // viewer
+  4: ["dashboard", "mis-analytics", "process", "members", "qr-management", "communication", "manage-workshop"], // marketing_manager or client admin are same
+  5: allModulesExceptServiceConfig, // operator
+  6: allModulesExceptServiceConfig, // viewer
   7: ["dashboard", "qr-management"], // qr_admin
-  8: allModules, // evolve_admin
-  9: ["dashboard", "qr-management", "communication", "mis-analytics", "process", "members"], // client_admin
+  8: allModules, // evolve_admin — only role that can see Service Config
+  9: ["dashboard", "qr-management", "communication", "mis-analytics", "process", "members", "manage-workshop"], // client_admin
 };
+
 
 // Get allowed routes for a specific roleId
 export const getAllowedRoutes = (roleId: number | string | null | undefined): string[] => {

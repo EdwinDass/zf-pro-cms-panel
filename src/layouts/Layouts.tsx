@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../redux/hooks';
 import { getAllowedModules } from '../values/roleModuleRules';
 
+
+
 interface LayoutProps {
     children: React.ReactNode;
     sidebarProps?: any;
@@ -26,6 +28,7 @@ export const navItems: NavItem[] = [
     // { id: 'finance-compliance', label: 'Finance & Compliance', icon: 'fas fa-coins', path: '/finance-compliance' },
     // { id: 'fraud-detection', label: 'Fraud Detection', icon: 'fas fa-shield-alt', path: '/fraud-detection' },
     { id: 'mis-analytics', label: 'MIS & Analytics', icon: 'fas fa-chart-line', path: '/mis-analytics' },
+    { id: 'manage-workshop', label: 'Manage Workshop', icon: 'fas fa-store', path: '/manage-workshop' },
     { id: 'role-management', label: 'Role Management', icon: 'fas fa-user-shield', path: '/role-management' },
     // { id: 'integrations', label: 'Integrations', icon: 'fas fa-plug', path: '/integrations' },
     { id: 'process', label: 'Process Redemption', icon: 'fas fa-cogs', path: '/process-management' },
@@ -55,7 +58,10 @@ export const navItems: NavItem[] = [
             // { id: 'shock-replacement-skus', label: 'Shock Replacement SKUs', path: '/shock-replacement-skus' }
         ]
     },
+    { id: 'delete-account', label: 'Delete Account', icon: 'fas fa-user-times', path: '/admin-delete-account' },
+    { id: 'service-config', label: 'Service Config', icon: 'fas fa-sliders-h', path: '/service-config' },
 ];
+
 
 export const Layout: React.FC<LayoutProps> = ({
     children,

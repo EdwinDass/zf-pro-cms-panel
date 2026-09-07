@@ -155,9 +155,16 @@ const ExporterButton = ({
                     return Object.keys(mappings).reduce((acc: any, key: any) => {
 
                         if (dateFields.includes(key)) {
-                            acc[mappings[key]] = ele[key]
-                                ? new Date(ele[key]).toLocaleString()
-                                : "";
+                            if (!ele[key]) {
+                                acc[mappings[key]] = "-";
+                            } else {
+                                const parsed = new Date(ele[key]);
+                                // If value is already a pre-formatted string (e.g. DD-MM-YYYY from report formatters),
+                                // new Date() will fail — pass the original value through instead of "Invalid Date"
+                                acc[mappings[key]] = isNaN(parsed.getTime())
+                                    ? String(ele[key])
+                                    : parsed.toLocaleString();
+                            }
                         }
                         else if (numberFields.includes(key)) {
                             acc[mappings[key]] = ele[key] ?? 0;

@@ -44,6 +44,28 @@ const OtpReport = () => {
         return value;
     };
 
+    // Converts slug OTP type values to proper human-readable labels
+    // e.g. 'forgot-password' → 'Forgot Password', 'verify-mobile' → 'Verify Mobile'
+    const formatOtpType = (value: any): string => {
+        if (!value) return '-';
+        const knownMap: Record<string, string> = {
+            'forgot-password': 'Forgot Password',
+            'verify-mobile': 'Verify Mobile',
+            'verify-email': 'Verify Email',
+            'login-otp': 'Login OTP',
+            'registration': 'Registration',
+            'resend-otp': 'Resend OTP',
+            'change-password': 'Change Password',
+            'tds-consent': 'TDS Consent',
+        };
+        if (knownMap[value]) return knownMap[value];
+        // Generic fallback: split on hyphens/underscores and Title Case each word
+        return String(value)
+            .split(/[-_]+/)
+            .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+            .join(' ');
+    };
+
     // =======================================
     //   TABLE COLUMNS
     // =======================================
@@ -53,7 +75,7 @@ const OtpReport = () => {
         { key: "userName", label: "User Name" },
         { key: "userMobile", label: "Mobile" },
         { key: "userEmail", label: "Email" },
-        { key: "otpType", label: "OTP Type" },
+        { key: "otpType", label: "OTP Type", format: (value: any) => formatOtpType(value) },
         { key: "isVerified", label: "Verified" },
         { key: "expiryAt", label: "Expiry Time" },
         { key: "createdAt", label: "Created At" },
@@ -107,7 +129,7 @@ const OtpReport = () => {
                 userName: item.userName,
                 userMobile: item.userMobile,
                 userEmail: item.userEmail,
-                otpType: item.otpType,
+                otpType: formatOtpType(item.otpType),
                 isVerified: item.isVerified ? "Yes" : "No",
                 expiryAt: formatCell(item.expiryAt),
                 createdAt: formatCell(item.createdAt),
@@ -223,6 +245,7 @@ const OtpReport = () => {
 
             return res.data.data.map((item: any) => ({
                 ...item,
+                otpType: formatOtpType(item.otpType),
                 isVerified: item.isVerified ? "Yes" : "No",
             }));
         } catch (err) {
