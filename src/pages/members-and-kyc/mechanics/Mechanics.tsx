@@ -46,6 +46,8 @@ interface Mechanic {
         mobile: string;
         name: string;
         pincode: number;
+        workshopCityName?: string | null;
+        workshopStateName?: string | null;
     }[];
     workshopName?: string | null;
     color: string;
@@ -201,9 +203,8 @@ const PreferredRetailerModal: React.FC<{
                             {/* Trigger */}
                             <div
                                 onClick={openDropdown}
-                                className={`flex items-center gap-2 border rounded-xl px-3.5 py-3 bg-white cursor-pointer transition select-none ${
-                                    dropdownOpen ? "border-indigo-400 ring-2 ring-indigo-100" : "border-gray-200 hover:border-indigo-300"
-                                }`}
+                                className={`flex items-center gap-2 border rounded-xl px-3.5 py-3 bg-white cursor-pointer transition select-none ${dropdownOpen ? "border-indigo-400 ring-2 ring-indigo-100" : "border-gray-200 hover:border-indigo-300"
+                                    }`}
                             >
                                 {dropdownOpen ? (
                                     <input
@@ -275,13 +276,11 @@ const PreferredRetailerModal: React.FC<{
                                                             setSearchTerm("");
                                                             setDropdownOpen(false);
                                                         }}
-                                                        className={`flex items-center gap-3 px-4 py-3.5 cursor-pointer transition border-b border-gray-50 last:border-0 ${
-                                                            isSelected ? "bg-indigo-50 hover:bg-indigo-100" : "hover:bg-gray-50"
-                                                        }`}
+                                                        className={`flex items-center gap-3 px-4 py-3.5 cursor-pointer transition border-b border-gray-50 last:border-0 ${isSelected ? "bg-indigo-50 hover:bg-indigo-100" : "hover:bg-gray-50"
+                                                            }`}
                                                     >
-                                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                                                            isSelected ? "border-indigo-600 bg-indigo-600" : "border-gray-300"
-                                                        }`}>
+                                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${isSelected ? "border-indigo-600 bg-indigo-600" : "border-gray-300"
+                                                            }`}>
                                                             {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                                                         </div>
                                                         <div className="flex-1 min-w-0">
@@ -421,7 +420,6 @@ const MechanicsScreen: React.FC = () => {
                     initials: getInitials(item.userName),
                     color: getColor(index),
                 }));
-
                 setMechanics(mappedData);
                 setTotalRecords(response.data.totalRecords);
             }
@@ -776,6 +774,12 @@ const MechanicsScreen: React.FC = () => {
                                     Joined
                                 </th>
                                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Workshop City
+                                </th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Workshop State
+                                </th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                     Actions
                                 </th>
                             </tr>
@@ -783,13 +787,13 @@ const MechanicsScreen: React.FC = () => {
                         <tbody className="divide-y divide-gray-200">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                    <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
                                         Loading...
                                     </td>
                                 </tr>
                             ) : displayedMechanics.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                    <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
                                         No mechanics found
                                     </td>
                                 </tr>
@@ -846,6 +850,12 @@ const MechanicsScreen: React.FC = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="text-sm text-gray-900">{formatDate(mechanic.userCreatedAt)}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-sm text-gray-900">{mechanic.preferredRetailerList?.[0]?.workshopCityName || "-"}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-sm text-gray-900">{mechanic.preferredRetailerList?.[0]?.workshopStateName || "-"}</div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">

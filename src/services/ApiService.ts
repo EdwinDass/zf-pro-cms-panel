@@ -931,5 +931,5 @@ export const updateMechanicPreferredRetailer = async (
 };
 
 export const searchWorkshops = async (search: string) => {
-    return api.get('masters/workshops', { params: { page: 1, limit: 100, search } });
+    return api.get('masters/workshops', { params: { page: 1, limit: 10000, search } });
 };
