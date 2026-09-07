@@ -77,8 +77,13 @@ const StatsRowTwo: React.FC = () => {
 
     const fetchActiveMembers = async () => {
         try {
-            const response = await getMemberCount({ role: 1, status: "none" });
-            setActiveMembers(response?.data?.count?.toString() || "0");
+            const [activeRes, tdsRes] = await Promise.all([
+                getMemberCount({ role: 1, status: "none" }),
+                getMemberCount({ role: 1, status: "tds-consent" })
+            ]);
+            const activeCount = parseInt(activeRes?.data?.count) || 0;
+            const tdsCount = parseInt(tdsRes?.data?.count) || 0;
+            setActiveMembers((activeCount + tdsCount).toString());
         } catch (error) {
             console.error("Active members error:", error);
         }
