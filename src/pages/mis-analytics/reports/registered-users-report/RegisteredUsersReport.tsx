@@ -44,15 +44,24 @@ const RegisteredUsersReport = () => {
     };
 
     // Formats a date value as DD-MM-YYYY
+    // Handles: "31-08-2026" (DD-MM-YYYY), "1/9/2026, 12:00:00 AM" (locale), ISO strings
     const formatDoj = (value: any): string => {
         if (!value) return '-';
-        const d = new Date(value);
+        const str = String(value).trim();
+        // Already in DD-MM-YYYY format — parse manually to avoid browser inconsistencies
+        const ddmmyyyy = str.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+        if (ddmmyyyy) {
+            const [, dd, mm, yyyy] = ddmmyyyy;
+            return `${dd.padStart(2, '0')}-${mm.padStart(2, '0')}-${yyyy}`;
+        }
+        // Locale datetime / ISO string — parse via Date
+        const d = new Date(str);
         if (isNaN(d.getTime())) return '-';
         return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
     };
 
     const formatStatus = (value: any) => {
-        if (value === "active_members") return "Active User";
+        if (value === "active_members" || value === "none") return "Active User";
         if (value === "digilocker") return "Digilocker Pending";
         if (value === "kyc") return "KYC Document Upload Pending";
         if (value === "incomplete-registration") return "Address and Profile";
@@ -85,11 +94,7 @@ const RegisteredUsersReport = () => {
         { key: "zone", label: "Zone" },
         { key: "mappedRetailers", label: "Mapped Retailers" },
         { key: "workshopName", label: "Workshop Name" },
-        {
-            key: "dateOfJoining",
-            label: "Date of Joining",
-            format: (value: any) => formatDoj(value)
-        }
+        { key: "dateOfJoining", label: "Date of Joining" }
     ];
 
     const fetchReport = async () => {
@@ -305,7 +310,7 @@ const RegisteredUsersReport = () => {
                             onChange={(e) => handleStatusChange(e.target.value)}
                         >
                             <option value="">All</option>
-                            <option value="active_members">Active User</option>
+                            <option value="none">Active User</option>
                             <option value="digilocker">Digilocker pending</option>
                             <option value="kyc">KYC document upload pending</option>
                             <option value="incomplete-profile">Address and profile</option>

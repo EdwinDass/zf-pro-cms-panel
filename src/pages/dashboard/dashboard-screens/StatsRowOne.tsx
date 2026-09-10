@@ -35,7 +35,7 @@ const StatsRowOne: React.FC = () => {
     const fetchActiveMembers = async () => {
         try {
             const [activeRes, tdsRes] = await Promise.all([
-                getMemberCount({ role: 1, status: "active_members" }),
+                getMemberCount({ role: 1, status: "none" }),
                 getMemberCount({ role: 1, status: "tds-consent" })
             ]);
             const activeCount = parseInt(activeRes?.data?.count) || 0;

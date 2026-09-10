@@ -116,7 +116,6 @@ const ExporterButton = ({
                 "dateOfReferral",
                 "createdAt",
                 "redemptionProcessedDate",
-                "dateOfJoining",
                 "scanDate",
                 "deliveredDate",
                 "sentDate",

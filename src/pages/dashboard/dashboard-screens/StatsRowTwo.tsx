@@ -150,8 +150,8 @@ const StatsRowTwo: React.FC = () => {
                     0,
                     100 - ((Number(blockedMembers) || 0) /
                         ((Number(activeMembers) || 0) + (Number(blockedMembers) || 0) || 1) * 100)
-                ).toFixed(2)}% of users are active`}
-                onLeftClick={() => navigate("/reports?report=registered-users&status=none")}
+                ).toFixed(2)}% of users are active (incl. TDS consent pending)`}
+                onLeftClick={() => navigate("/reports?report=registered-users&status=active_members")}
                 onRightClick={() => navigate("/reports?report=registered-users&status=blocked")}
             />
 

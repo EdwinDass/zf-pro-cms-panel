@@ -61,7 +61,7 @@ const KycReport = () => {
     };
 
     const formatStatus = (value: any) => {
-        if (value === "active_members") return "Active User";
+        if (value === "active_members" || value === "none") return "Active User";
         if (value === "digilocker") return "Digilocker Pending";
         if (value === "kyc") return "KYC Document Upload Pending";
         if (value === "incomplete-registration") return "Address and Profile";
@@ -383,7 +383,7 @@ const KycReport = () => {
                             onChange={(e) => setStatus(e.target.value)}
                         >
                             <option value="">All</option>
-                            <option value="active_members">Active User</option>
+                            <option value="none">Active User</option>
                             <option value="digilocker">Digilocker pending</option>
                             <option value="kyc">KYC document upload pending</option>
                             <option value="incomplete-registration">Address and profile</option>
